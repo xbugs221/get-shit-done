@@ -1,20 +1,20 @@
 <purpose>
-Add a new integer phase to the end of the current milestone in the roadmap. Automatically calculates next phase number, creates phase directory, and updates roadmap structure.
+在路线图中为当前里程碑末尾添加一个新的整数阶段。自动计算下一个阶段编号，创建阶段目录，并更新路线图结构。
 </purpose>
 
 <required_reading>
-Read all files referenced by the invoking prompt's execution_context before starting.
+在开始之前，读取调用提示的 execution_context 中引用的所有文件。
 </required_reading>
 
 <process>
 
 <step name="parse_arguments">
-Parse the command arguments:
-- All arguments become the phase description
-- Example: `/gsd:add-phase Add authentication` → description = "Add authentication"
-- Example: `/gsd:add-phase Fix critical performance issues` → description = "Fix critical performance issues"
+解析命令参数：
+- 所有参数作为阶段描述
+- 示例：`/gsd:add-phase Add authentication` → description = "Add authentication"
+- 示例：`/gsd:add-phase Fix critical performance issues` → description = "Fix critical performance issues"
 
-If no arguments provided:
+如果未提供参数：
 
 ```
 ERROR: Phase description required
@@ -22,56 +22,56 @@ Usage: /gsd:add-phase <description>
 Example: /gsd:add-phase Add authentication system
 ```
 
-Exit.
+退出。
 </step>
 
 <step name="init_context">
-Load phase operation context:
+加载阶段操作上下文：
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init phase-op "0")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Check `roadmap_exists` from init JSON. If false:
+从初始化 JSON 中检查 `roadmap_exists`。如果为 false：
 ```
 ERROR: No roadmap found (.planning/ROADMAP.md)
 Run /gsd:new-project to initialize.
 ```
-Exit.
+退出。
 </step>
 
 <step name="add_phase">
-**Delegate the phase addition to gsd-tools:**
+**将阶段添加操作委托给 gsd-tools：**
 
 ```bash
 RESULT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" phase add "${description}")
 ```
 
-The CLI handles:
-- Finding the highest existing integer phase number
-- Calculating next phase number (max + 1)
-- Generating slug from description
-- Creating the phase directory (`.planning/phases/{NN}-{slug}/`)
-- Inserting the phase entry into ROADMAP.md with Goal, Depends on, and Plans sections
+CLI 处理以下事务：
+- 查找最高的现有整数阶段编号
+- 计算下一个阶段编号（max + 1）
+- 从描述生成 slug
+- 创建阶段目录（`.planning/phases/{NN}-{slug}/`）
+- 在 ROADMAP.md 中插入包含 Goal、Depends on 和 Plans 部分的阶段条目
 
-Extract from result: `phase_number`, `padded`, `name`, `slug`, `directory`.
+从结果中提取：`phase_number`、`padded`、`name`、`slug`、`directory`。
 </step>
 
 <step name="update_project_state">
-Update STATE.md to reflect the new phase:
+更新 STATE.md 以反映新阶段：
 
-1. Read `.planning/STATE.md`
-2. Under "## Accumulated Context" → "### Roadmap Evolution" add entry:
+1. 读取 `.planning/STATE.md`
+2. 在 "## Accumulated Context" → "### Roadmap Evolution" 下添加条目：
    ```
    - Phase {N} added: {description}
    ```
 
-If "Roadmap Evolution" section doesn't exist, create it.
+如果 "Roadmap Evolution" 部分不存在，则创建它。
 </step>
 
 <step name="completion">
-Present completion summary:
+展示完成摘要：
 
 ```
 Phase {N} added to current milestone:
@@ -104,9 +104,9 @@ Roadmap updated: .planning/ROADMAP.md
 </process>
 
 <success_criteria>
-- [ ] `gsd-tools phase add` executed successfully
-- [ ] Phase directory created
-- [ ] Roadmap updated with new phase entry
-- [ ] STATE.md updated with roadmap evolution note
-- [ ] User informed of next steps
+- [ ] `gsd-tools phase add` 执行成功
+- [ ] 阶段目录已创建
+- [ ] 路线图已更新新的阶段条目
+- [ ] STATE.md 已更新路线图演进记录
+- [ ] 用户已知晓下一步操作
 </success_criteria>

@@ -1,19 +1,19 @@
 <purpose>
-Verify milestone achieved its definition of done by aggregating phase verifications, checking cross-phase integration, and assessing requirements coverage. Reads existing VERIFICATION.md files (phases already verified during execute-phase), aggregates tech debt and deferred gaps, then spawns integration checker for cross-phase wiring.
+通过汇总阶段验证、检查跨阶段集成和评估需求覆盖率来验证里程碑是否达到了其完成定义。读取已有的 VERIFICATION.md 文件（各阶段在 execute-phase 期间已验证），汇总技术债务和延期差距，然后生成集成检查器进行跨阶段连接检查。
 </purpose>
 
 <required_reading>
-Read all files referenced by the invoking prompt's execution_context before starting.
+在开始之前，请先读取调用提示的 execution_context 中引用的所有文件。
 </required_reading>
 
 <available_agent_types>
-Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
-- gsd-integration-checker — Checks cross-phase integration
+有效的 GSD 子代理类型（使用精确名称 — 不要回退到 'general-purpose'）：
+- gsd-integration-checker — 检查跨阶段集成
 </available_agent_types>
 
 <process>
 
-## 0. Initialize Milestone Context
+## 0. 初始化里程碑上下文
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init milestone-op)
@@ -21,95 +21,95 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 AGENT_SKILLS_CHECKER=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agent-skills gsd-integration-checker 2>/dev/null)
 ```
 
-Extract from init JSON: `milestone_version`, `milestone_name`, `phase_count`, `completed_phases`, `commit_docs`.
+从初始化 JSON 中提取：`milestone_version`、`milestone_name`、`phase_count`、`completed_phases`、`commit_docs`。
 
-Resolve integration checker model:
+解析集成检查器模型：
 ```bash
 integration_checker_model=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" resolve-model gsd-integration-checker --raw)
 ```
 
-## 1. Determine Milestone Scope
+## 1. 确定里程碑范围
 
 ```bash
-# Get phases in milestone (sorted numerically, handles decimals)
+# 获取里程碑中的阶段（按数字排序，处理小数）
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" phases list
 ```
 
-- Parse version from arguments or detect current from ROADMAP.md
-- Identify all phase directories in scope
-- Extract milestone definition of done from ROADMAP.md
-- Extract requirements mapped to this milestone from REQUIREMENTS.md
+- 从参数中解析版本或从 ROADMAP.md 检测当前版本
+- 确定范围内所有阶段目录
+- 从 ROADMAP.md 提取里程碑完成定义
+- 从 REQUIREMENTS.md 提取映射到此里程碑的需求
 
-## 2. Read All Phase Verifications
+## 2. 读取所有阶段验证
 
-For each phase directory, read the VERIFICATION.md:
+对于每个阶段目录，读取 VERIFICATION.md：
 
 ```bash
-# For each phase, use find-phase to resolve the directory (handles archived phases)
+# 对于每个阶段，使用 find-phase 解析目录（处理已归档的阶段）
 PHASE_INFO=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" find-phase 01 --raw)
-# Extract directory from JSON, then read VERIFICATION.md from that directory
-# Repeat for each phase number from ROADMAP.md
+# 从 JSON 中提取目录，然后从该目录读取 VERIFICATION.md
+# 对 ROADMAP.md 中的每个阶段编号重复此操作
 ```
 
-From each VERIFICATION.md, extract:
-- **Status:** passed | gaps_found
-- **Critical gaps:** (if any — these are blockers)
-- **Non-critical gaps:** tech debt, deferred items, warnings
-- **Anti-patterns found:** TODOs, stubs, placeholders
-- **Requirements coverage:** which requirements satisfied/blocked
+从每个 VERIFICATION.md 中提取：
+- **状态：** passed | gaps_found
+- **关键差距：**（如有 — 这些是阻塞项）
+- **非关键差距：** 技术债务、延期项、警告
+- **发现的反模式：** TODO、存根、占位符
+- **需求覆盖：** 哪些需求已满足/被阻塞
 
-If a phase is missing VERIFICATION.md, flag it as "unverified phase" — this is a blocker.
+如果某个阶段缺少 VERIFICATION.md，将其标记为"未验证阶段" — 这是一个阻塞项。
 
-## 3. Spawn Integration Checker
+## 3. 生成集成检查器
 
-With phase context collected:
+收集阶段上下文后：
 
-Extract `MILESTONE_REQ_IDS` from REQUIREMENTS.md traceability table — all REQ-IDs assigned to phases in this milestone.
+从 REQUIREMENTS.md 可追溯性表中提取 `MILESTONE_REQ_IDS` — 分配给此里程碑各阶段的所有 REQ-ID。
 
 ```
 Task(
-  prompt="Check cross-phase integration and E2E flows.
+  prompt="检查跨阶段集成和端到端流程。
 
 Phases: {phase_dirs}
-Phase exports: {from SUMMARYs}
-API routes: {routes created}
+Phase exports: {来自 SUMMARY}
+API routes: {已创建的路由}
 
 Milestone Requirements:
-{MILESTONE_REQ_IDS — list each REQ-ID with description and assigned phase}
+{MILESTONE_REQ_IDS — 列出每个 REQ-ID 及其描述和分配的阶段}
 
-MUST map each integration finding to affected requirement IDs where applicable.
+必须将每个集成发现映射到受影响的需求 ID（如适用）。
 
-Verify cross-phase wiring and E2E user flows.
+验证跨阶段连接和端到端用户流程。
 ${AGENT_SKILLS_CHECKER}",
   subagent_type="gsd-integration-checker",
   model="{integration_checker_model}"
 )
 ```
 
-## 4. Collect Results
+## 4. 收集结果
 
-Combine:
-- Phase-level gaps and tech debt (from step 2)
-- Integration checker's report (wiring gaps, broken flows)
+合并：
+- 阶段级差距和技术债务（来自步骤 2）
+- 集成检查器的报告（连接差距、中断流程）
 
-## 5. Check Requirements Coverage (3-Source Cross-Reference)
+## 5. 检查需求覆盖（3 源交叉引用）
 
-MUST cross-reference three independent sources for each requirement:
+必须为每个需求交叉引用三个独立来源：
 
-### 5a. Parse REQUIREMENTS.md Traceability Table
+### 5a. 解析 REQUIREMENTS.md 可追溯性表
 
-Extract all REQ-IDs mapped to milestone phases from the traceability table:
-- Requirement ID, description, assigned phase, current status, checked-off state (`[x]` vs `[ ]`)
+提取映射到里程碑阶段的所有 REQ-ID：
+- 需求 ID、描述、分配的阶段、当前状态、勾选状态（`[x]` vs `[ ]`）
 
-### 5b. Parse Phase VERIFICATION.md Requirements Tables
+### 5b. 解析阶段 VERIFICATION.md 需求表
 
-For each phase's VERIFICATION.md, extract the expanded requirements table:
-- Requirement | Source Plan | Description | Status | Evidence
-- Map each entry back to its REQ-ID
+对于每个阶段的 VERIFICATION.md，提取展开的需求表：
+- 需求 | 来源计划 | 描述 | 状态 | 证据
+- 将每个条目映射回其 REQ-ID
 
-### 5c. Extract SUMMARY.md Frontmatter Cross-Check
+### 5c. 提取 SUMMARY.md 前置元数据交叉检查
 
-For each phase's SUMMARY.md, extract `requirements-completed` from YAML frontmatter:
+对于每个阶段的 SUMMARY.md，从 YAML 前置元数据中提取 `requirements-completed`：
 ```bash
 for summary in .planning/phases/*-*/*-SUMMARY.md; do
   [ -e "$summary" ] || continue
@@ -117,52 +117,52 @@ for summary in .planning/phases/*-*/*-SUMMARY.md; do
 done
 ```
 
-### 5d. Status Determination Matrix
+### 5d. 状态判定矩阵
 
-For each REQ-ID, determine status using all three sources:
+对于每个 REQ-ID，使用所有三个来源确定状态：
 
-| VERIFICATION.md Status | SUMMARY Frontmatter | REQUIREMENTS.md | → Final Status |
+| VERIFICATION.md 状态 | SUMMARY 前置元数据 | REQUIREMENTS.md | → 最终状态 |
 |------------------------|---------------------|-----------------|----------------|
 | passed                 | listed              | `[x]`           | **satisfied**  |
-| passed                 | listed              | `[ ]`           | **satisfied** (update checkbox) |
-| passed                 | missing             | any             | **partial** (verify manually) |
+| passed                 | listed              | `[ ]`           | **satisfied**（更新勾选框） |
+| passed                 | missing             | any             | **partial**（手动验证） |
 | gaps_found             | any                 | any             | **unsatisfied** |
-| missing                | listed              | any             | **partial** (verification gap) |
+| missing                | listed              | any             | **partial**（验证缺口） |
 | missing                | missing             | any             | **unsatisfied** |
 
-### 5e. FAIL Gate and Orphan Detection
+### 5e. 失败关卡和孤立检测
 
-**REQUIRED:** Any `unsatisfied` requirement MUST force `gaps_found` status on the milestone audit.
+**必需：** 任何 `unsatisfied` 需求必须强制里程碑审计状态为 `gaps_found`。
 
-**Orphan detection:** Requirements present in REQUIREMENTS.md traceability table but absent from ALL phase VERIFICATION.md files MUST be flagged as orphaned. Orphaned requirements are treated as `unsatisfied` — they were assigned but never verified by any phase.
+**孤立检测：** 存在于 REQUIREMENTS.md 可追溯性表中但在所有阶段 VERIFICATION.md 文件中都缺失的需求，必须标记为孤立。孤立需求视为 `unsatisfied` — 它们已分配但从未被任何阶段验证。
 
-## 5.5. Nyquist Compliance Discovery
+## 5.5. Nyquist 合规性发现
 
-Skip if `workflow.nyquist_validation` is explicitly `false` (absent = enabled).
+如果 `workflow.nyquist_validation` 被明确设置为 `false`（缺失 = 启用），则跳过。
 
 ```bash
 NYQUIST_CONFIG=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow.nyquist_validation --raw 2>/dev/null)
 ```
 
-If `false`: skip entirely.
+如果为 `false`：完全跳过。
 
-For each phase directory, check `*-VALIDATION.md`. If exists, parse frontmatter (`nyquist_compliant`, `wave_0_complete`).
+对于每个阶段目录，检查 `*-VALIDATION.md`。如果存在，解析前置元数据（`nyquist_compliant`、`wave_0_complete`）。
 
-Classify per phase:
+按阶段分类：
 
-| Status | Condition |
+| 状态 | 条件 |
 |--------|-----------|
-| COMPLIANT | `nyquist_compliant: true` and all tasks green |
-| PARTIAL | VALIDATION.md exists, `nyquist_compliant: false` or red/pending |
-| MISSING | No VALIDATION.md |
+| COMPLIANT | `nyquist_compliant: true` 且所有任务为绿色 |
+| PARTIAL | VALIDATION.md 存在，`nyquist_compliant: false` 或红色/待处理 |
+| MISSING | 无 VALIDATION.md |
 
-Add to audit YAML: `nyquist: { compliant_phases, partial_phases, missing_phases, overall }`
+添加到审计 YAML：`nyquist: { compliant_phases, partial_phases, missing_phases, overall }`
 
-Discovery only — never auto-calls `/gsd:validate-phase`.
+仅进行发现 — 从不自动调用 `/gsd:validate-phase`。
 
-## 6. Aggregate into v{version}-MILESTONE-AUDIT.md
+## 6. 汇总为 v{version}-MILESTONE-AUDIT.md
 
-Create `.planning/v{version}-v{version}-MILESTONE-AUDIT.md` with:
+创建 `.planning/v{version}-v{version}-MILESTONE-AUDIT.md`，内容如下：
 
 ```yaml
 ---
@@ -174,18 +174,18 @@ scores:
   phases: N/M
   integration: N/M
   flows: N/M
-gaps:  # Critical blockers
+gaps:  # 关键阻塞项
   requirements:
     - id: "{REQ-ID}"
       status: "unsatisfied | partial | orphaned"
-      phase: "{assigned phase}"
-      claimed_by_plans: ["{plan files that reference this requirement}"]
-      completed_by_plans: ["{plan files whose SUMMARY marks it complete}"]
+      phase: "{分配的阶段}"
+      claimed_by_plans: ["{引用此需求的计划文件}"]
+      completed_by_plans: ["{SUMMARY 标记为完成的计划文件}"]
       verification_status: "passed | gaps_found | missing | orphaned"
-      evidence: "{specific evidence or lack thereof}"
+      evidence: "{具体证据或缺乏证据}"
   integration: [...]
   flows: [...]
-tech_debt:  # Non-critical, deferred
+tech_debt:  # 非关键，已延期
   - phase: 01-auth
     items:
       - "TODO: add rate limiting"
@@ -196,145 +196,146 @@ tech_debt:  # Non-critical, deferred
 ---
 ```
 
-Plus full markdown report with tables for requirements, phases, integration, tech debt.
+加上包含需求、阶段、集成、技术债务表格的完整 markdown 报告。
 
-**Status values:**
-- `passed` — all requirements met, no critical gaps, minimal tech debt
-- `gaps_found` — critical blockers exist
-- `tech_debt` — no blockers but accumulated deferred items need review
+**状态值：**
+- `passed` — 所有需求已满足，无关键差距，技术债务最少
+- `gaps_found` — 存在关键阻塞项
+- `tech_debt` — 无阻塞项但累积的延期项需要审查
 
-## 7. Present Results
+## 7. 展示结果
 
-Route by status (see `<offer_next>`).
+根据状态进行路由（参见 `<offer_next>`）。
 
 </process>
 
 <offer_next>
-Output this markdown directly (not as a code block). Route based on status:
+直接输出此 markdown（不作为代码块）。根据状态进行路由：
 
 ---
 
-**If passed:**
+**如果 passed：**
 
-## ✓ Milestone {version} — Audit Passed
+## ✓ 里程碑 {version} — 审计通过
 
-**Score:** {N}/{M} requirements satisfied
-**Report:** .planning/v{version}-MILESTONE-AUDIT.md
+**得分：** {N}/{M} 需求已满足
+**报告：** .planning/v{version}-MILESTONE-AUDIT.md
 
-All requirements covered. Cross-phase integration verified. E2E flows complete.
+所有需求已覆盖。跨阶段集成已验证。端到端流程完成。
 
 ───────────────────────────────────────────────────────────────
 
-## ▶ Next Up
+## ▶ 下一步
 
-**Complete milestone** — archive and tag
+**完成里程碑** — 归档并打标签
 
 /gsd:complete-milestone {version}
 
-<sub>/clear first → fresh context window</sub>
+<sub>/clear 先执行 → 全新上下文窗口</sub>
 
 ───────────────────────────────────────────────────────────────
 
 ---
 
-**If gaps_found:**
+**如果 gaps_found：**
 
-## ⚠ Milestone {version} — Gaps Found
+## ⚠ 里程碑 {version} — 发现差距
 
-**Score:** {N}/{M} requirements satisfied
-**Report:** .planning/v{version}-MILESTONE-AUDIT.md
+**得分：** {N}/{M} 需求已满足
+**报告：** .planning/v{version}-MILESTONE-AUDIT.md
 
-### Unsatisfied Requirements
+### 未满足的需求
 
-{For each unsatisfied requirement:}
-- **{REQ-ID}: {description}** (Phase {X})
-  - {reason}
+{对于每个未满足的需求：}
+- **{REQ-ID}: {描述}** (阶段 {X})
+  - {原因}
 
-### Cross-Phase Issues
+### 跨阶段问题
 
-{For each integration gap:}
-- **{from} → {to}:** {issue}
+{对于每个集成差距：}
+- **{from} → {to}:** {问题}
 
-### Broken Flows
+### 中断的流程
 
-{For each flow gap:}
-- **{flow name}:** breaks at {step}
+{对于每个流程差距：}
+- **{流程名称}:** 在 {步骤} 处中断
 
-### Nyquist Coverage
+### Nyquist 覆盖率
 
-| Phase | VALIDATION.md | Compliant | Action |
+| 阶段 | VALIDATION.md | 合规 | 操作 |
 |-------|---------------|-----------|--------|
 | {phase} | exists/missing | true/false/partial | `/gsd:validate-phase {N}` |
 
-Phases needing validation: run `/gsd:validate-phase {N}` for each flagged phase.
+需要验证的阶段：对每个标记的阶段运行 `/gsd:validate-phase {N}`。
 
 ───────────────────────────────────────────────────────────────
 
-## ▶ Next Up
+## ▶ 下一步
 
-**Plan gap closure** — create phases to complete milestone
+**规划差距关闭** — 创建阶段以完成里程碑
 
 /gsd:plan-milestone-gaps
 
-<sub>/clear first → fresh context window</sub>
+<sub>/clear 先执行 → 全新上下文窗口</sub>
 
 ───────────────────────────────────────────────────────────────
 
-**Also available:**
-- cat .planning/v{version}-MILESTONE-AUDIT.md — see full report
-- /gsd:complete-milestone {version} — proceed anyway (accept tech debt)
+**其他可用操作：**
+- cat .planning/v{version}-MILESTONE-AUDIT.md — 查看完整报告
+- /gsd:complete-milestone {version} — 继续进行（接受技术债务）
 
 ───────────────────────────────────────────────────────────────
 
 ---
 
-**If tech_debt (no blockers but accumulated debt):**
+**如果 tech_debt（无阻塞项但累积了债务）：**
 
-## ⚡ Milestone {version} — Tech Debt Review
+## ⚡ 里程碑 {version} — 技术债务审查
 
-**Score:** {N}/{M} requirements satisfied
-**Report:** .planning/v{version}-MILESTONE-AUDIT.md
+**得分：** {N}/{M} 需求已满足
+**报告：** .planning/v{version}-MILESTONE-AUDIT.md
 
-All requirements met. No critical blockers. Accumulated tech debt needs review.
+所有需求已满足。无关键阻塞项。累积的技术债务需要审查。
 
-### Tech Debt by Phase
+### 按阶段的技术债务
 
-{For each phase with debt:}
-**Phase {X}: {name}**
-- {item 1}
-- {item 2}
+{对于每个有债务的阶段：}
+**阶段 {X}：{name}**
+- {项 1}
+- {项 2}
 
-### Total: {N} items across {M} phases
+### 总计：{N} 项分布在 {M} 个阶段
 
 ───────────────────────────────────────────────────────────────
 
-## ▶ Options
+## ▶ 选项
 
-**A. Complete milestone** — accept debt, track in backlog
+**A. 完成里程碑** — 接受债务，在待办列表中跟踪
 
 /gsd:complete-milestone {version}
 
-**B. Plan cleanup phase** — address debt before completing
+**B. 规划清理阶段** — 在完成前处理债务
 
 /gsd:plan-milestone-gaps
 
-<sub>/clear first → fresh context window</sub>
+<sub>/clear 先执行 → 全新上下文窗口</sub>
 
 ───────────────────────────────────────────────────────────────
 </offer_next>
 
 <success_criteria>
-- [ ] Milestone scope identified
-- [ ] All phase VERIFICATION.md files read
-- [ ] SUMMARY.md `requirements-completed` frontmatter extracted for each phase
-- [ ] REQUIREMENTS.md traceability table parsed for all milestone REQ-IDs
-- [ ] 3-source cross-reference completed (VERIFICATION + SUMMARY + traceability)
-- [ ] Orphaned requirements detected (in traceability but absent from all VERIFICATIONs)
-- [ ] Tech debt and deferred gaps aggregated
-- [ ] Integration checker spawned with milestone requirement IDs
-- [ ] v{version}-MILESTONE-AUDIT.md created with structured requirement gap objects
-- [ ] FAIL gate enforced — any unsatisfied requirement forces gaps_found status
-- [ ] Nyquist compliance scanned for all milestone phases (if enabled)
-- [ ] Missing VALIDATION.md phases flagged with validate-phase suggestion
-- [ ] Results presented with actionable next steps
+- [ ] 已确定里程碑范围
+- [ ] 已读取所有阶段 VERIFICATION.md 文件
+- [ ] 已为每个阶段提取 SUMMARY.md `requirements-completed` 前置元数据
+- [ ] 已解析 REQUIREMENTS.md 可追溯性表中所有里程碑 REQ-ID
+- [ ] 已完成 3 源交叉引用（VERIFICATION + SUMMARY + 可追溯性）
+- [ ] 已检测孤立需求（在可追溯性中但在所有 VERIFICATION 中缺失）
+- [ ] 已汇总技术债务和延期差距
+- [ ] 已生成带里程碑需求 ID 的集成检查器
+- [ ] 已创建带结构化需求差距对象的 v{version}-MILESTONE-AUDIT.md
+- [ ] 已执行失败关卡 — 任何未满足的需求强制 gaps_found 状态
+- [ ] 已扫描所有里程碑阶段的 Nyquist 合规性（如启用）
+- [ ] 已标记缺少 VALIDATION.md 的阶段并建议 validate-phase
+- [ ] 已展示结果并提供可操作的后续步骤
 </success_criteria>
+</output>

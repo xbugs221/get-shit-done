@@ -1,7 +1,7 @@
 ---
 name: gsd:fast
-description: Execute a trivial task inline — no subagents, no planning overhead
-argument-hint: "[task description]"
+description: 内联执行简单任务 — 无子代理、无规划开销
+argument-hint: "[任务描述]"
 allowed-tools:
   - Read
   - Write
@@ -12,13 +12,11 @@ allowed-tools:
 ---
 
 <objective>
-Execute a trivial task directly in the current context without spawning subagents
-or generating PLAN.md files. For tasks too small to justify planning overhead:
-typo fixes, config changes, small refactors, forgotten commits, simple additions.
+在当前上下文中直接执行简单任务，无需子代理或 PLAN.md。
+适用于太小而不值得规划的任务：修正拼写、配置变更、小型重构、简单添加。
 
-This is NOT a replacement for /gsd:quick — use /gsd:quick for anything that
-needs research, multi-step planning, or verification. /gsd:fast is for tasks
-you could describe in one sentence and execute in under 2 minutes.
+不是 /gsd:quick 的替代品 — 需要调研、多步规划或验证的任务请用 /gsd:quick。
+/gsd:fast 适用于一句话描述、2 分钟内完成的任务。
 </objective>
 
 <execution_context>
@@ -26,5 +24,6 @@ you could describe in one sentence and execute in under 2 minutes.
 </execution_context>
 
 <process>
-Execute the fast workflow from @~/.claude/get-shit-done/workflows/fast.md end-to-end.
+端到端执行 @~/.claude/get-shit-done/workflows/fast.md 中的 fast 工作流。
 </process>
+</output>

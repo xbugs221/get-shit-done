@@ -1,64 +1,56 @@
 <purpose>
-Execute all plans in a phase using wave-based parallel execution. Orchestrator stays lean — delegates plan execution to subagents.
+使用基于波次的并行执行方式执行阶段中的所有计划。协调器保持精简 — 将计划执行委托给子代理。
 </purpose>
 
 <core_principle>
-Orchestrator coordinates, not executes. Each subagent loads the full execute-plan context. Orchestrator: discover plans → analyze deps → group waves → spawn agents → handle checkpoints → collect results.
+协调器负责协调，不负责执行。每个子代理加载完整的 execute-plan 上下文。协调器：发现计划 → 分析依赖 → 分组波次 → 生成代理 → 处理检查点 → 收集结果。
 </core_principle>
 
 <runtime_compatibility>
-**Subagent spawning is runtime-specific:**
-- **Claude Code:** Uses `Task(subagent_type="gsd-executor", ...)` — blocks until complete, returns result
-- **Copilot:** Subagent spawning does not reliably return completion signals. **Default to
-  sequential inline execution**: read and follow execute-plan.md directly for each plan
-  instead of spawning parallel agents. Only attempt parallel spawning if the user
-  explicitly requests it — and in that case, rely on the spot-check fallback in step 3
-  to detect completion.
-- **Other runtimes:** If `Task`/`task` tool is unavailable, use sequential inline execution as the
-  fallback. Check for tool availability at runtime rather than assuming based on runtime name.
+**子代理生成是运行时特定的：**
+- **Claude Code：** 使用 `Task(subagent_type="gsd-executor", ...)` — 阻塞直到完成，返回结果
+- **Copilot：** 子代理生成无法可靠地返回完成信号。**默认使用顺序内联执行**：直接读取并遵循 execute-plan.md 来执行每个计划，而不是生成并行代理。仅在用户明确请求时才尝试并行生成 — 在这种情况下，依赖步骤 3 中的抽检回退来检测完成。
+- **其他运行时：** 如果 `Task`/`task` 工具不可用，使用顺序内联执行作为回退。在运行时检查工具可用性，而不是根据运行时名称假设。
 
-**Fallback rule:** If a spawned agent completes its work (commits visible, SUMMARY.md exists) but
-the orchestrator never receives the completion signal, treat it as successful based on spot-checks
-and continue to the next wave/plan. Never block indefinitely waiting for a signal — always verify
-via filesystem and git state.
+**回退规则：** 如果生成的代理完成了工作（提交可见，SUMMARY.md 存在）但协调器从未收到完成信号，则根据抽检将其视为成功并继续下一个波次/计划。永远不要无限期阻塞等待信号 — 始终通过文件系统和 git 状态进行验证。
 </runtime_compatibility>
 
 <required_reading>
-Read STATE.md before any operation to load project context.
+在任何操作之前读取 STATE.md 以加载项目上下文。
 </required_reading>
 
 <available_agent_types>
-These are the valid GSD subagent types registered in .claude/agents/ (or equivalent for your runtime).
-Always use the exact name from this list — do not fall back to 'general-purpose' or other built-in types:
+这些是在 .claude/agents/（或你的运行时的等效位置）中注册的有效 GSD 子代理类型。
+始终使用此列表中的确切名称 — 不要回退到 'general-purpose' 或其他内置类型：
 
-- gsd-executor — Executes plan tasks, commits, creates SUMMARY.md
-- gsd-verifier — Verifies phase completion, checks quality gates
-- gsd-planner — Creates detailed plans from phase scope
-- gsd-phase-researcher — Researches technical approaches for a phase
-- gsd-plan-checker — Reviews plan quality before execution
-- gsd-debugger — Diagnoses and fixes issues
-- gsd-codebase-mapper — Maps project structure and dependencies
-- gsd-integration-checker — Checks cross-phase integration
-- gsd-nyquist-auditor — Validates verification coverage
-- gsd-ui-researcher — Researches UI/UX approaches
-- gsd-ui-checker — Reviews UI implementation quality
-- gsd-ui-auditor — Audits UI against design requirements
+- gsd-executor — 执行计划任务，提交，创建 SUMMARY.md
+- gsd-verifier — 验证阶段完成情况，检查质量门禁
+- gsd-planner — 根据阶段范围创建详细计划
+- gsd-phase-researcher — 为阶段研究技术方案
+- gsd-plan-checker — 在执行前审查计划质量
+- gsd-debugger — 诊断和修复问题
+- gsd-codebase-mapper — 映射项目结构和依赖关系
+- gsd-integration-checker — 检查跨阶段集成
+- gsd-nyquist-auditor — 验证验证覆盖率
+- gsd-ui-researcher — 研究 UI/UX 方案
+- gsd-ui-checker — 审查 UI 实现质量
+- gsd-ui-auditor — 根据设计要求审计 UI
 </available_agent_types>
 
 <process>
 
 <step name="parse_args" priority="first">
-Parse `$ARGUMENTS` before loading any context:
+在加载任何上下文之前解析 `$ARGUMENTS`：
 
-- First positional token → `PHASE_ARG`
-- Optional `--wave N` → `WAVE_FILTER`
-- Optional `--gaps-only` keeps its current meaning
+- 第一个位置参数 → `PHASE_ARG`
+- 可选的 `--wave N` → `WAVE_FILTER`
+- 可选的 `--gaps-only` 保持其当前含义
 
-If `--wave` is absent, preserve the current behavior of executing all incomplete waves in the phase.
+如果 `--wave` 不存在，保留执行阶段中所有未完成波次的当前行为。
 </step>
 
 <step name="initialize" priority="first">
-Load all context in one call:
+在一次调用中加载所有上下文：
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init execute-phase "${PHASE_ARG}")
@@ -66,25 +58,20 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 AGENT_SKILLS=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agent-skills gsd-executor 2>/dev/null)
 ```
 
-Parse JSON for: `executor_model`, `verifier_model`, `commit_docs`, `parallelization`, `branching_strategy`, `branch_name`, `phase_found`, `phase_dir`, `phase_number`, `phase_name`, `phase_slug`, `plans`, `incomplete_plans`, `plan_count`, `incomplete_count`, `state_exists`, `roadmap_exists`, `phase_req_ids`.
+从 JSON 中解析：`executor_model`、`verifier_model`、`commit_docs`、`parallelization`、`branching_strategy`、`branch_name`、`phase_found`、`phase_dir`、`phase_number`、`phase_name`、`phase_slug`、`plans`、`incomplete_plans`、`plan_count`、`incomplete_count`、`state_exists`、`roadmap_exists`、`phase_req_ids`。
 
-**If `phase_found` is false:** Error — phase directory not found.
-**If `plan_count` is 0:** Error — no plans found in phase.
-**If `state_exists` is false but `.planning/` exists:** Offer reconstruct or continue.
+**如果 `phase_found` 为 false：** 错误 — 未找到阶段目录。
+**如果 `plan_count` 为 0：** 错误 — 阶段中未找到计划。
+**如果 `state_exists` 为 false 但 `.planning/` 存在：** 提供重建或继续的选项。
 
-When `parallelization` is false, plans within a wave execute sequentially.
+当 `parallelization` 为 false 时，波次内的计划顺序执行。
 
-**Runtime detection for Copilot:**
-Check if the current runtime is Copilot by testing for the `@gsd-executor` agent pattern
-or absence of the `Task()` subagent API. If running under Copilot, force sequential inline
-execution regardless of the `parallelization` setting — Copilot's subagent completion
-signals are unreliable (see `<runtime_compatibility>`). Set `COPILOT_SEQUENTIAL=true`
-internally and skip the `execute_waves` step in favor of `check_interactive_mode`'s
-inline path for each plan.
+**Copilot 的运行时检测：**
+通过测试 `@gsd-executor` 代理模式或 `Task()` 子代理 API 的缺失来检查当前运行时是否为 Copilot。如果在 Copilot 下运行，无论 `parallelization` 设置如何，都强制顺序内联执行 — Copilot 的子代理完成信号不可靠（参见 `<runtime_compatibility>`）。内部设置 `COPILOT_SEQUENTIAL=true` 并跳过 `execute_waves` 步骤，转而为每个计划使用 `check_interactive_mode` 的内联路径。
 
-**REQUIRED — Sync chain flag with intent.** If user invoked manually (no `--auto`), clear the ephemeral chain flag from any previous interrupted `--auto` chain. This prevents stale `_auto_chain_active: true` from causing unwanted auto-advance. This does NOT touch `workflow.auto_advance` (the user's persistent settings preference). You MUST execute this bash block before any config reads:
+**必须 — 将链标志与意图同步。** 如果用户手动调用（无 `--auto`），从之前中断的 `--auto` 链中清除临时链标志。这可以防止过时的 `_auto_chain_active: true` 导致不需要的自动推进。这不会触及 `workflow.auto_advance`（用户的持久设置偏好）。你必须在任何配置读取之前执行此 bash 代码块：
 ```bash
-# REQUIRED: prevents stale auto-chain from previous --auto runs
+# 必须：防止来自之前 --auto 运行的过时自动链
 if [[ ! "$ARGUMENTS" =~ --auto ]]; then
   node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-set workflow._auto_chain_active false 2>/dev/null
 fi
@@ -92,19 +79,18 @@ fi
 </step>
 
 <step name="check_interactive_mode">
-**Parse `--interactive` flag from $ARGUMENTS.**
+**从 $ARGUMENTS 中解析 `--interactive` 标志。**
 
-**If `--interactive` flag present:** Switch to interactive execution mode.
+**如果存在 `--interactive` 标志：** 切换到交互式执行模式。
 
-Interactive mode executes plans sequentially **inline** (no subagent spawning) with user
-checkpoints between tasks. The user can review, modify, or redirect work at any point.
+交互式模式按顺序**内联**执行计划（不生成子代理），在任务之间设置用户检查点。用户可以在任何时候审查、修改或重定向工作。
 
-**Interactive execution flow:**
+**交互式执行流程：**
 
-1. Load plan inventory as normal (discover_and_group_plans)
-2. For each plan (sequentially, ignoring wave grouping):
+1. 正常加载计划清单（discover_and_group_plans）
+2. 对于每个计划（顺序执行，忽略波次分组）：
 
-   a. **Present the plan to the user:**
+   a. **向用户展示计划：**
       ```
       ## Plan {plan_id}: {plan_name}
 
@@ -118,68 +104,66 @@ checkpoints between tasks. The user can review, modify, or redirect work at any 
       - Stop (end execution, save progress)
       ```
 
-   b. **If "Review first":** Read and display the full plan file. Ask again: Execute, Modify, Skip.
+   b. **如果 "Review first"：** 读取并显示完整的计划文件。再次询问：Execute、Modify、Skip。
 
-   c. **If "Execute":** Read and follow `~/.claude/get-shit-done/workflows/execute-plan.md` **inline**
-      (do NOT spawn a subagent). Execute tasks one at a time.
+   c. **如果 "Execute"：** 读取并遵循 `~/.claude/get-shit-done/workflows/execute-plan.md` **内联执行**（不要生成子代理）。逐个执行任务。
 
-   d. **After each task:** Pause briefly. If the user intervenes (types anything), stop and address
-      their feedback before continuing. Otherwise proceed to next task.
+   d. **每个任务完成后：** 短暂暂停。如果用户介入（输入任何内容），停下来处理他们的反馈再继续。否则继续下一个任务。
 
-   e. **After plan complete:** Show results, commit, create SUMMARY.md, then present next plan.
+   e. **计划完成后：** 显示结果，提交，创建 SUMMARY.md，然后展示下一个计划。
 
-3. After all plans: proceed to verification (same as normal mode).
+3. 所有计划完成后：继续验证（与正常模式相同）。
 
-**Benefits of interactive mode:**
-- No subagent overhead — dramatically lower token usage
-- User catches mistakes early — saves costly verification cycles
-- Maintains GSD's planning/tracking structure
-- Best for: small phases, bug fixes, verification gaps, learning GSD
+**交互式模式的优势：**
+- 无子代理开销 — 显著降低 token 使用量
+- 用户及早发现错误 — 节省昂贵的验证周期
+- 保持 GSD 的规划/跟踪结构
+- 最适合：小型阶段、bug 修复、验证缺口、学习 GSD
 
-**Skip to handle_branching step** (interactive plans execute inline after grouping).
+**跳到 handle_branching 步骤**（交互式计划在分组后内联执行）。
 </step>
 
 <step name="handle_branching">
-Check `branching_strategy` from init:
+从初始化中检查 `branching_strategy`：
 
-**"none":** Skip, continue on current branch.
+**"none"：** 跳过，继续在当前分支上工作。
 
-**"phase" or "milestone":** Use pre-computed `branch_name` from init:
+**"phase" 或 "milestone"：** 使用初始化时预计算的 `branch_name`：
 ```bash
 git checkout -b "$BRANCH_NAME" 2>/dev/null || git checkout "$BRANCH_NAME"
 ```
 
-All subsequent commits go to this branch. User handles merging.
+所有后续提交都进入此分支。用户自行处理合并。
 </step>
 
 <step name="validate_phase">
-From init JSON: `phase_dir`, `plan_count`, `incomplete_count`.
+从初始化 JSON 中获取：`phase_dir`、`plan_count`、`incomplete_count`。
 
-Report: "Found {plan_count} plans in {phase_dir} ({incomplete_count} incomplete)"
+报告："Found {plan_count} plans in {phase_dir} ({incomplete_count} incomplete)"
 
-**Update STATE.md for phase start:**
+**更新 STATE.md 以标记阶段开始：**
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" state begin-phase --phase "${PHASE_NUMBER}" --name "${PHASE_NAME}" --plans "${PLAN_COUNT}"
 ```
-This updates Status, Last Activity, Current focus, Current Position, and plan counts in STATE.md so frontmatter and body text reflect the active phase immediately.
+这将更新 STATE.md 中的 Status、Last Activity、Current focus、Current Position 和计划计数，使 frontmatter 和正文立即反映活动阶段。
 </step>
 
 <step name="discover_and_group_plans">
-Load plan inventory with wave grouping in one call:
+在一次调用中加载带有波次分组的计划清单：
 
 ```bash
 PLAN_INDEX=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" phase-plan-index "${PHASE_NUMBER}")
 ```
 
-Parse JSON for: `phase`, `plans[]` (each with `id`, `wave`, `autonomous`, `objective`, `files_modified`, `task_count`, `has_summary`), `waves` (map of wave number → plan IDs), `incomplete`, `has_checkpoints`.
+从 JSON 中解析：`phase`、`plans[]`（每个包含 `id`、`wave`、`autonomous`、`objective`、`files_modified`、`task_count`、`has_summary`）、`waves`（波次编号到计划 ID 的映射）、`incomplete`、`has_checkpoints`。
 
-**Filtering:** Skip plans where `has_summary: true`. If `--gaps-only`: also skip non-gap_closure plans. If `WAVE_FILTER` is set: also skip plans whose `wave` does not equal `WAVE_FILTER`.
+**过滤：** 跳过 `has_summary: true` 的计划。如果 `--gaps-only`：也跳过非 gap_closure 计划。如果设置了 `WAVE_FILTER`：也跳过 `wave` 不等于 `WAVE_FILTER` 的计划。
 
-**Wave safety check:** If `WAVE_FILTER` is set and there are still incomplete plans in any lower wave that match the current execution mode, STOP and tell the user to finish earlier waves first. Do not let Wave 2+ execute while prerequisite earlier-wave plans remain incomplete.
+**波次安全检查：** 如果设置了 `WAVE_FILTER` 且在任何较低波次中仍有匹配当前执行模式的未完成计划，则停止并告知用户先完成更早的波次。不要让 Wave 2+ 在先决的更早波次计划仍未完成时执行。
 
-If all filtered: "No matching incomplete plans" → exit.
+如果全部已过滤："No matching incomplete plans" → 退出。
 
-Report:
+报告：
 ```
 ## Execution Plan
 
@@ -195,13 +179,13 @@ Report:
 </step>
 
 <step name="execute_waves">
-Execute each selected wave in sequence. Within a wave: parallel if `PARALLELIZATION=true`, sequential if `false`.
+按顺序执行每个选定的波次。波次内：如果 `PARALLELIZATION=true` 则并行，如果 `false` 则顺序。
 
-**For each wave:**
+**对于每个波次：**
 
-1. **Describe what's being built (BEFORE spawning):**
+1. **描述正在构建的内容（在生成之前）：**
 
-   Read each plan's `<objective>`. Extract what's being built and why.
+   读取每个计划的 `<objective>`。提取正在构建什么以及为什么。
 
    ```
    ---
@@ -214,14 +198,14 @@ Execute each selected wave in sequence. Within a wave: parallel if `PARALLELIZAT
    ---
    ```
 
-   - Bad: "Executing terrain generation plan"
-   - Good: "Procedural terrain generator using Perlin noise — creates height maps, biome zones, and collision meshes. Required before vehicle physics can interact with ground."
+   - 差的示例："Executing terrain generation plan"
+   - 好的示例："Procedural terrain generator using Perlin noise — creates height maps, biome zones, and collision meshes. Required before vehicle physics can interact with ground."
 
-2. **Spawn executor agents:**
+2. **生成执行器代理：**
 
-   Pass paths only — executors read files themselves with their fresh context window.
-   For 200k models, this keeps orchestrator context lean (~10-15%).
-   For 1M+ models (Opus 4.6, Sonnet 4.6), richer context can be passed directly.
+   仅传递路径 — 执行器使用其新的上下文窗口自行读取文件。
+   对于 200k 模型，这使协调器上下文保持精简（约 10-15%）。
+   对于 1M+ 模型（Opus 4.6、Sonnet 4.6），可以直接传递更丰富的上下文。
 
    ```
    Task(
@@ -279,50 +263,44 @@ Execute each selected wave in sequence. Within a wave: parallel if `PARALLELIZAT
    )
    ```
 
-3. **Wait for all agents in wave to complete.**
+3. **等待波次中的所有代理完成。**
 
-   **Completion signal fallback (Copilot and runtimes where Task() may not return):**
+   **完成信号回退（Copilot 和 Task() 可能不返回的运行时）：**
 
-   If a spawned agent does not return a completion signal but appears to have finished
-   its work, do NOT block indefinitely. Instead, verify completion via spot-checks:
+   如果生成的代理没有返回完成信号但看起来已经完成了工作，不要无限期阻塞。改为通过抽检验证完成：
 
    ```bash
-   # For each plan in this wave, check if the executor finished:
+   # 对于此波次中的每个计划，检查执行器是否完成：
    SUMMARY_EXISTS=$(test -f "{phase_dir}/{plan_number}-{plan_padded}-SUMMARY.md" && echo "true" || echo "false")
    COMMITS_FOUND=$(git log --oneline --all --grep="{phase_number}-{plan_padded}" --since="1 hour ago" | head -1)
    ```
 
-   **If SUMMARY.md exists AND commits are found:** The agent completed successfully —
-   treat as done and proceed to step 4. Log: `"✓ {Plan ID} completed (verified via spot-check — completion signal not received)"`
+   **如果 SUMMARY.md 存在且找到提交：** 代理成功完成 — 视为完成并继续步骤 4。记录：`"✓ {Plan ID} completed (verified via spot-check — completion signal not received)"`
 
-   **If SUMMARY.md does NOT exist after a reasonable wait:** The agent may still be
-   running or may have failed silently. Check `git log --oneline -5` for recent
-   activity. If commits are still appearing, wait longer. If no activity, report
-   the plan as failed and route to the failure handler in step 5.
+   **如果在合理等待后 SUMMARY.md 不存在：** 代理可能仍在运行或可能已静默失败。检查 `git log --oneline -5` 查看最近活动。如果提交仍在出现，继续等待。如果没有活动，将计划报告为失败并路由到步骤 5 的故障处理程序。
 
-   **This fallback applies automatically to all runtimes.** Claude Code's Task() normally
-   returns synchronously, but the fallback ensures resilience if it doesn't.
+   **此回退自动适用于所有运行时。** Claude Code 的 Task() 通常同步返回，但回退确保了在不返回时的弹性。
 
-4. **Post-wave hook validation (parallel mode only):**
+4. **波次后钩子验证（仅并行模式）：**
 
-   When agents committed with `--no-verify`, run pre-commit hooks once after the wave:
+   当代理使用 `--no-verify` 提交时，在波次完成后运行一次 pre-commit 钩子：
    ```bash
-   # Run project's pre-commit hooks on the current state
-   git diff --cached --quiet || git stash  # stash any unstaged changes
+   # 在当前状态上运行项目的 pre-commit 钩子
+   git diff --cached --quiet || git stash  # 暂存任何未暂存的更改
    git hook run pre-commit 2>&1 || echo "⚠ Pre-commit hooks failed — review before continuing"
    ```
-   If hooks fail: report the failure and ask "Fix hook issues now?" or "Continue to next wave?"
+   如果钩子失败：报告失败并询问 "Fix hook issues now?" 或 "Continue to next wave?"
 
-5. **Report completion — spot-check claims first:**
+5. **报告完成 — 先抽检声明：**
 
-   For each SUMMARY.md:
-   - Verify first 2 files from `key-files.created` exist on disk
-   - Check `git log --oneline --all --grep="{phase}-{plan}"` returns ≥1 commit
-   - Check for `## Self-Check: FAILED` marker
+   对于每个 SUMMARY.md：
+   - 验证 `key-files.created` 中的前 2 个文件是否存在于磁盘上
+   - 检查 `git log --oneline --all --grep="{phase}-{plan}"` 返回 ≥1 个提交
+   - 检查是否存在 `## Self-Check: FAILED` 标记
 
-   If ANY spot-check fails: report which plan failed, route to failure handler — ask "Retry plan?" or "Continue with remaining waves?"
+   如果任何抽检失败：报告哪个计划失败，路由到故障处理程序 — 询问 "Retry plan?" 或 "Continue with remaining waves?"
 
-   If pass:
+   如果通过：
    ```
    ---
    ## Wave {N} Complete
@@ -335,23 +313,23 @@ Execute each selected wave in sequence. Within a wave: parallel if `PARALLELIZAT
    ---
    ```
 
-   - Bad: "Wave 2 complete. Proceeding to Wave 3."
-   - Good: "Terrain system complete — 3 biome types, height-based texturing, physics collision meshes. Vehicle physics (Wave 3) can now reference ground surfaces."
+   - 差的示例："Wave 2 complete. Proceeding to Wave 3."
+   - 好的示例："Terrain system complete — 3 biome types, height-based texturing, physics collision meshes. Vehicle physics (Wave 3) can now reference ground surfaces."
 
-5. **Handle failures:**
+5. **处理失败：**
 
-   **Known Claude Code bug (classifyHandoffIfNeeded):** If an agent reports "failed" with error containing `classifyHandoffIfNeeded is not defined`, this is a Claude Code runtime bug — not a GSD or agent issue. The error fires in the completion handler AFTER all tool calls finish. In this case: run the same spot-checks as step 4 (SUMMARY.md exists, git commits present, no Self-Check: FAILED). If spot-checks PASS → treat as **successful**. If spot-checks FAIL → treat as real failure below.
+   **已知的 Claude Code bug（classifyHandoffIfNeeded）：** 如果代理报告 "failed" 且错误包含 `classifyHandoffIfNeeded is not defined`，这是 Claude Code 运行时 bug — 不是 GSD 或代理的问题。该错误在所有工具调用完成后的完成处理程序中触发。在这种情况下：运行与步骤 4 相同的抽检（SUMMARY.md 存在，git 提交存在，无 Self-Check: FAILED）。如果抽检通过 → 视为**成功**。如果抽检失败 → 视为下面的真正失败。
 
-   For real failures: report which plan failed → ask "Continue?" or "Stop?" → if continue, dependent plans may also fail. If stop, partial completion report.
+   对于真正的失败：报告哪个计划失败 → 询问 "Continue?" 或 "Stop?" → 如果继续，依赖的计划也可能失败。如果停止，输出部分完成报告。
 
-5b. **Pre-wave dependency check (waves 2+ only):**
+5b. **波次前依赖检查（仅 Wave 2+ ）：**
 
-    Before spawning wave N+1, for each plan in the upcoming wave:
+    在生成 Wave N+1 之前，对于即将到来的波次中的每个计划：
     ```bash
     node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" verify key-links {phase_dir}/{plan}-PLAN.md
     ```
 
-    If any key-link from a PRIOR wave's artifact fails verification:
+    如果来自先前波次产物的任何 key-link 验证失败：
 
     ## Cross-Plan Wiring Gap
 
@@ -363,35 +341,35 @@ Execute each selected wave in sequence. Within a wave: parallel if `PARALLELIZAT
     1. Investigate and fix before continuing
     2. Continue (may cause cascading failures in wave {N+1})
 
-    Key-links referencing files in the CURRENT (upcoming) wave are skipped.
+    引用当前（即将到来的）波次中文件的 Key-links 将被跳过。
 
-6. **Execute checkpoint plans between waves** — see `<checkpoint_handling>`.
+6. **在波次之间执行检查点计划** — 参见 `<checkpoint_handling>`。
 
-7. **Proceed to next wave.**
+7. **继续下一个波次。**
 </step>
 
 <step name="checkpoint_handling">
-Plans with `autonomous: false` require user interaction.
+`autonomous: false` 的计划需要用户交互。
 
-**Auto-mode checkpoint handling:**
+**自动模式检查点处理：**
 
-Read auto-advance config (chain flag + user preference):
+读取自动推进配置（链标志 + 用户偏好）：
 ```bash
 AUTO_CHAIN=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow._auto_chain_active 2>/dev/null || echo "false")
 AUTO_CFG=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow.auto_advance 2>/dev/null || echo "false")
 ```
 
-When executor returns a checkpoint AND (`AUTO_CHAIN` is `"true"` OR `AUTO_CFG` is `"true"`):
-- **human-verify** → Auto-spawn continuation agent with `{user_response}` = `"approved"`. Log `⚡ Auto-approved checkpoint`.
-- **decision** → Auto-spawn continuation agent with `{user_response}` = first option from checkpoint details. Log `⚡ Auto-selected: [option]`.
-- **human-action** → Present to user (existing behavior below). Auth gates cannot be automated.
+当执行器返回检查点且（`AUTO_CHAIN` 为 `"true"` 或 `AUTO_CFG` 为 `"true"`）时：
+- **human-verify** → 自动生成带 `{user_response}` = `"approved"` 的继续代理。记录 `⚡ Auto-approved checkpoint`。
+- **decision** → 自动生成带 `{user_response}` = 检查点详情中第一个选项的继续代理。记录 `⚡ Auto-selected: [option]`。
+- **human-action** → 展示给用户（下面的现有行为）。授权门禁不能自动化。
 
-**Standard flow (not auto-mode, or human-action type):**
+**标准流程（非自动模式，或 human-action 类型）：**
 
-1. Spawn agent for checkpoint plan
-2. Agent runs until checkpoint task or auth gate → returns structured state
-3. Agent return includes: completed tasks table, current task + blocker, checkpoint type/details, what's awaited
-4. **Present to user:**
+1. 为检查点计划生成代理
+2. 代理运行直到检查点任务或授权门禁 → 返回结构化状态
+3. 代理返回包括：已完成任务表、当前任务 + 阻塞因素、检查点类型/详情、等待内容
+4. **展示给用户：**
    ```
    ## Checkpoint: [Type]
 
@@ -401,22 +379,22 @@ When executor returns a checkpoint AND (`AUTO_CHAIN` is `"true"` OR `AUTO_CFG` i
    [Checkpoint Details from agent return]
    [Awaiting section from agent return]
    ```
-5. User responds: "approved"/"done" | issue description | decision selection
-6. **Spawn continuation agent (NOT resume)** using continuation-prompt.md template:
-   - `{completed_tasks_table}`: From checkpoint return
-   - `{resume_task_number}` + `{resume_task_name}`: Current task
-   - `{user_response}`: What user provided
-   - `{resume_instructions}`: Based on checkpoint type
-7. Continuation agent verifies previous commits, continues from resume point
-8. Repeat until plan completes or user stops
+5. 用户回复："approved"/"done" | 问题描述 | 决策选择
+6. **生成继续代理（不是恢复）** 使用 continuation-prompt.md 模板：
+   - `{completed_tasks_table}`：来自检查点返回
+   - `{resume_task_number}` + `{resume_task_name}`：当前任务
+   - `{user_response}`：用户提供的内容
+   - `{resume_instructions}`：基于检查点类型
+7. 继续代理验证之前的提交，从恢复点继续
+8. 重复直到计划完成或用户停止
 
-**Why fresh agent, not resume:** Resume relies on internal serialization that breaks with parallel tool calls. Fresh agents with explicit state are more reliable.
+**为什么使用新代理而不是恢复：** 恢复依赖于内部序列化，这在并行工具调用时会中断。带有显式状态的新代理更可靠。
 
-**Checkpoints in parallel waves:** Agent pauses and returns while other parallel agents may complete. Present checkpoint, spawn continuation, wait for all before next wave.
+**并行波次中的检查点：** 代理暂停并返回，而其他并行代理可能已完成。展示检查点，生成继续代理，等待所有代理完成后再进入下一个波次。
 </step>
 
 <step name="aggregate_results">
-After all waves:
+所有波次完成后：
 
 ```markdown
 ## Phase {X}: {Name} Execution Complete
@@ -439,21 +417,21 @@ After all waves:
 </step>
 
 <step name="handle_partial_wave_execution">
-If `WAVE_FILTER` was used, re-run plan discovery after execution:
+如果使用了 `WAVE_FILTER`，在执行后重新运行计划发现：
 
 ```bash
 POST_PLAN_INDEX=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" phase-plan-index "${PHASE_NUMBER}")
 ```
 
-Apply the same "incomplete" filtering rules as earlier:
-- ignore plans with `has_summary: true`
-- if `--gaps-only`, only consider `gap_closure: true` plans
+应用与之前相同的 "incomplete" 过滤规则：
+- 忽略 `has_summary: true` 的计划
+- 如果 `--gaps-only`，仅考虑 `gap_closure: true` 的计划
 
-**If incomplete plans still remain anywhere in the phase:**
-- STOP here
-- Do NOT run phase verification
-- Do NOT mark the phase complete in ROADMAP/STATE
-- Present:
+**如果阶段中任何地方仍有未完成的计划：**
+- 在此停止
+- 不要运行阶段验证
+- 不要在 ROADMAP/STATE 中标记阶段完成
+- 展示：
 
 ```markdown
 ## Wave {WAVE_FILTER} Complete
@@ -464,87 +442,87 @@ Selected wave finished successfully. This phase still has incomplete plans, so p
 /gsd:execute-phase {phase} --wave {next} ${GSD_WS}  # Run the next wave explicitly
 ```
 
-**If no incomplete plans remain after the selected wave finishes:**
-- continue with the normal phase-level verification and completion flow below
-- this means the selected wave happened to be the last remaining work in the phase
+**如果选定波次完成后没有未完成的计划：**
+- 继续下面的正常阶段级验证和完成流程
+- 这意味着选定的波次恰好是阶段中剩余的最后工作
 </step>
 
 <step name="close_parent_artifacts">
-**For decimal/polish phases only (X.Y pattern):** Close the feedback loop by resolving parent UAT and debug artifacts.
+**仅适用于小数/润色阶段（X.Y 模式）：** 通过解决父级 UAT 和调试产物来关闭反馈循环。
 
-**Skip if** phase number has no decimal (e.g., `3`, `04`) — only applies to gap-closure phases like `4.1`, `03.1`.
+**跳过条件：** 阶段编号没有小数点（例如 `3`、`04`）— 仅适用于缺口修复阶段如 `4.1`、`03.1`。
 
-**1. Detect decimal phase and derive parent:**
+**1. 检测小数阶段并推导父级：**
 ```bash
-# Check if phase_number contains a decimal
+# 检查 phase_number 是否包含小数点
 if [[ "$PHASE_NUMBER" == *.* ]]; then
   PARENT_PHASE="${PHASE_NUMBER%%.*}"
 fi
 ```
 
-**2. Find parent UAT file:**
+**2. 查找父级 UAT 文件：**
 ```bash
 PARENT_INFO=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" find-phase "${PARENT_PHASE}" --raw)
-# Extract directory from PARENT_INFO JSON, then find UAT file in that directory
+# 从 PARENT_INFO JSON 中提取目录，然后在该目录中查找 UAT 文件
 ```
 
-**If no parent UAT found:** Skip this step (gap-closure may have been triggered by VERIFICATION.md instead).
+**如果未找到父级 UAT：** 跳过此步骤（缺口修复可能是由 VERIFICATION.md 而非 UAT 触发的）。
 
-**3. Update UAT gap statuses:**
+**3. 更新 UAT 缺口状态：**
 
-Read the parent UAT file's `## Gaps` section. For each gap entry with `status: failed`:
-- Update to `status: resolved`
+读取父级 UAT 文件的 `## Gaps` 部分。对于每个 `status: failed` 的缺口条目：
+- 更新为 `status: resolved`
 
-**4. Update UAT frontmatter:**
+**4. 更新 UAT frontmatter：**
 
-If all gaps now have `status: resolved`:
-- Update frontmatter `status: diagnosed` → `status: resolved`
-- Update frontmatter `updated:` timestamp
+如果所有缺口现在都为 `status: resolved`：
+- 将 frontmatter `status: diagnosed` 更新为 → `status: resolved`
+- 更新 frontmatter `updated:` 时间戳
 
-**5. Resolve referenced debug sessions:**
+**5. 解决引用的调试会话：**
 
-For each gap that has a `debug_session:` field:
-- Read the debug session file
-- Update frontmatter `status:` → `resolved`
-- Update frontmatter `updated:` timestamp
-- Move to resolved directory:
+对于每个有 `debug_session:` 字段的缺口：
+- 读取调试会话文件
+- 将 frontmatter `status:` 更新为 → `resolved`
+- 更新 frontmatter `updated:` 时间戳
+- 移动到已解决目录：
 ```bash
 mkdir -p .planning/debug/resolved
 mv .planning/debug/{slug}.md .planning/debug/resolved/
 ```
 
-**6. Commit updated artifacts:**
+**6. 提交更新的产物：**
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs(phase-${PARENT_PHASE}): resolve UAT gaps and debug sessions after ${PHASE_NUMBER} gap closure" --files .planning/phases/*${PARENT_PHASE}*/*-UAT.md .planning/debug/resolved/*.md
 ```
 </step>
 
 <step name="regression_gate">
-Run prior phases' test suites to catch cross-phase regressions BEFORE verification.
+在验证之前运行先前阶段的测试套件以捕获跨阶段回归。
 
-**Skip if:** This is the first phase (no prior phases), or no prior VERIFICATION.md files exist.
+**跳过条件：** 这是第一个阶段（没有先前阶段），或不存在先前的 VERIFICATION.md 文件。
 
-**Step 1: Discover prior phases' test files**
+**步骤 1：发现先前阶段的测试文件**
 ```bash
-# Find all VERIFICATION.md files from prior phases in current milestone
+# 在当前里程碑中查找来自先前阶段的所有 VERIFICATION.md 文件
 PRIOR_VERIFICATIONS=$(find .planning/phases/ -name "*-VERIFICATION.md" ! -path "*${PHASE_NUMBER}*" 2>/dev/null)
 ```
 
-**Step 2: Extract test file lists from prior verifications**
+**步骤 2：从先前验证中提取测试文件列表**
 
-For each VERIFICATION.md found, look for test file references:
-- Lines containing `test`, `spec`, or `__tests__` paths
-- The "Test Suite" or "Automated Checks" section
-- File patterns from `key-files.created` in corresponding SUMMARY.md files that match `*.test.*` or `*.spec.*`
+对于找到的每个 VERIFICATION.md，查找测试文件引用：
+- 包含 `test`、`spec` 或 `__tests__` 路径的行
+- "Test Suite" 或 "Automated Checks" 部分
+- 来自对应 SUMMARY.md 文件中匹配 `*.test.*` 或 `*.spec.*` 的 `key-files.created` 的文件模式
 
-Collect all unique test file paths into `REGRESSION_FILES`.
+将所有唯一的测试文件路径收集到 `REGRESSION_FILES` 中。
 
-**Step 3: Run regression tests (if any found)**
+**步骤 3：运行回归测试（如果找到任何测试）**
 
 ```bash
-# Detect test runner and run prior phase tests
+# 检测测试运行器并运行先前阶段的测试
 if [ -f "package.json" ]; then
-  # Node.js — use project's test runner
+  # Node.js — 使用项目的测试运行器
   npx jest ${REGRESSION_FILES} --passWithNoTests --no-coverage -q 2>&1 || npx vitest run ${REGRESSION_FILES} 2>&1
 elif [ -f "Cargo.toml" ]; then
   cargo test 2>&1
@@ -553,15 +531,15 @@ elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
 fi
 ```
 
-**Step 4: Report results**
+**步骤 4：报告结果**
 
-If all tests pass:
+如果所有测试通过：
 ```
 ✓ Regression gate: {N} prior-phase test files passed — no regressions detected
 ```
-→ Proceed to verify_phase_goal
+→ 继续到 verify_phase_goal
 
-If any tests fail:
+如果任何测试失败：
 ```
 ## ⚠ Cross-Phase Regression Detected
 
@@ -577,11 +555,11 @@ Options:
 3. Abort phase — roll back and re-plan
 ```
 
-Use AskUserQuestion to present the options.
+使用 AskUserQuestion 展示选项。
 </step>
 
 <step name="verify_phase_goal">
-Verify phase achieved its GOAL, not just completed tasks.
+验证阶段是否达成其目标，而不仅仅是完成了任务。
 
 ```bash
 VERIFIER_SKILLS=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agent-skills gsd-verifier 2>/dev/null)
@@ -602,22 +580,22 @@ ${VERIFIER_SKILLS}",
 )
 ```
 
-Read status:
+读取状态：
 ```bash
 grep "^status:" "$PHASE_DIR"/*-VERIFICATION.md | cut -d: -f2 | tr -d ' '
 ```
 
-| Status | Action |
+| 状态 | 操作 |
 |--------|--------|
 | `passed` | → update_roadmap |
-| `human_needed` | Present items for human testing, get approval or feedback |
-| `gaps_found` | Present gap summary, offer `/gsd:plan-phase {phase} --gaps ${GSD_WS}` |
+| `human_needed` | 展示需要人工测试的项目，获取批准或反馈 |
+| `gaps_found` | 展示缺口摘要，提供 `/gsd:plan-phase {phase} --gaps ${GSD_WS}` |
 
-**If human_needed:**
+**如果 human_needed：**
 
-**Step A: Persist human verification items as UAT file.**
+**步骤 A：将人工验证项目持久化为 UAT 文件。**
 
-Create `{phase_dir}/{phase_num}-HUMAN-UAT.md` using UAT template format:
+使用 UAT 模板格式创建 `{phase_dir}/{phase_num}-HUMAN-UAT.md`：
 
 ```markdown
 ---
@@ -652,12 +630,12 @@ blocked: 0
 ## Gaps
 ```
 
-Commit the file:
+提交文件：
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "test({phase_num}): persist human verification items as UAT" --files "{phase_dir}/{phase_num}-HUMAN-UAT.md"
 ```
 
-**Step B: Present to user:**
+**步骤 B：展示给用户：**
 
 ```
 ## ✓ Phase {X}: {Name} — Human Verification Required
@@ -671,11 +649,11 @@ Items saved to `{phase_num}-HUMAN-UAT.md` — they will appear in `/gsd:progress
 "approved" → continue | Report issues → gap closure
 ```
 
-**If user says "approved":** Proceed to `update_roadmap`. The HUMAN-UAT.md file persists with `status: partial` and will surface in future progress checks until the user runs `/gsd:verify-work` on it.
+**如果用户说 "approved"：** 继续到 `update_roadmap`。HUMAN-UAT.md 文件以 `status: partial` 持久化，并将在未来的进度检查中显示，直到用户对其运行 `/gsd:verify-work`。
 
-**If user reports issues:** Proceed to gap closure as currently implemented.
+**如果用户报告问题：** 按当前实现继续缺口修复。
 
-**If gaps_found:**
+**如果 gaps_found：**
 ```
 ## ⚠ Phase {X}: {Name} — Gaps Found
 
@@ -696,27 +674,27 @@ Also: `cat {phase_dir}/{phase_num}-VERIFICATION.md` — full report
 Also: `/gsd:verify-work {X} ${GSD_WS}` — manual testing first
 ```
 
-Gap closure cycle: `/gsd:plan-phase {X} --gaps ${GSD_WS}` reads VERIFICATION.md → creates gap plans with `gap_closure: true` → user runs `/gsd:execute-phase {X} --gaps-only ${GSD_WS}` → verifier re-runs.
+缺口修复循环：`/gsd:plan-phase {X} --gaps ${GSD_WS}` 读取 VERIFICATION.md → 创建带 `gap_closure: true` 的缺口计划 → 用户运行 `/gsd:execute-phase {X} --gaps-only ${GSD_WS}` → 验证器重新运行。
 </step>
 
 <step name="update_roadmap">
-**Mark phase complete and update all tracking files:**
+**标记阶段完成并更新所有跟踪文件：**
 
 ```bash
 COMPLETION=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" phase complete "${PHASE_NUMBER}")
 ```
 
-The CLI handles:
-- Marking phase checkbox `[x]` with completion date
-- Updating Progress table (Status → Complete, date)
-- Updating plan count to final
-- Advancing STATE.md to next phase
-- Updating REQUIREMENTS.md traceability
-- Scanning for verification debt (returns `warnings` array)
+CLI 处理：
+- 标记阶段复选框 `[x]` 并附上完成日期
+- 更新进度表（Status → Complete，日期）
+- 将计划计数更新为最终值
+- 将 STATE.md 推进到下一个阶段
+- 更新 REQUIREMENTS.md 可追溯性
+- 扫描验证欠债（返回 `warnings` 数组）
 
-Extract from result: `next_phase`, `next_phase_name`, `is_last_phase`, `warnings`, `has_warnings`.
+从结果中提取：`next_phase`、`next_phase_name`、`is_last_phase`、`warnings`、`has_warnings`。
 
-**If has_warnings is true:**
+**如果 has_warnings 为 true：**
 ```
 ## Phase {X} marked complete with {N} warnings:
 
@@ -731,39 +709,38 @@ node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs(phase-{X}): co
 </step>
 
 <step name="update_project_md">
-**Evolve PROJECT.md to reflect phase completion (prevents planning document drift — #956):**
+**演进 PROJECT.md 以反映阶段完成（防止规划文档漂移 — #956）：**
 
-PROJECT.md tracks validated requirements, decisions, and current state. Without this step,
-PROJECT.md falls behind silently over multiple phases.
+PROJECT.md 跟踪已验证的需求、决策和当前状态。没有此步骤，PROJECT.md 会在多个阶段中静默落后。
 
-1. Read `.planning/PROJECT.md`
-2. If the file exists and has a `## Validated Requirements` or `## Requirements` section:
-   - Move any requirements validated by this phase from Active → Validated
-   - Add a brief note: `Validated in Phase {X}: {Name}`
-3. If the file has a `## Current State` or similar section:
-   - Update it to reflect this phase's completion (e.g., "Phase {X} complete — {one-liner}")
-4. Update the `Last updated:` footer to today's date
-5. Commit the change:
+1. 读取 `.planning/PROJECT.md`
+2. 如果文件存在并有 `## Validated Requirements` 或 `## Requirements` 部分：
+   - 将此阶段验证的任何需求从 Active 移到 → Validated
+   - 添加简短说明：`Validated in Phase {X}: {Name}`
+3. 如果文件有 `## Current State` 或类似部分：
+   - 更新以反映此阶段的完成（例如 "Phase {X} complete — {one-liner}"）
+4. 将 `Last updated:` 页脚更新为今天的日期
+5. 提交更改：
 
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs(phase-{X}): evolve PROJECT.md after phase completion" --files .planning/PROJECT.md
 ```
 
-**Skip this step if** `.planning/PROJECT.md` does not exist.
+**跳过条件：** `.planning/PROJECT.md` 不存在。
 </step>
 
 <step name="offer_next">
 
-**Exception:** If `gaps_found`, the `verify_phase_goal` step already presents the gap-closure path (`/gsd:plan-phase {X} --gaps`). No additional routing needed — skip auto-advance.
+**例外：** 如果 `gaps_found`，`verify_phase_goal` 步骤已经展示了缺口修复路径（`/gsd:plan-phase {X} --gaps`）。不需要额外路由 — 跳过自动推进。
 
-**No-transition check (spawned by auto-advance chain):**
+**无过渡检查（由自动推进链生成）：**
 
-Parse `--no-transition` flag from $ARGUMENTS.
+从 $ARGUMENTS 中解析 `--no-transition` 标志。
 
-**If `--no-transition` flag present:**
+**如果存在 `--no-transition` 标志：**
 
-Execute-phase was spawned by plan-phase's auto-advance. Do NOT run transition.md.
-After verification passes and roadmap is updated, return completion status to parent:
+Execute-phase 是由 plan-phase 的自动推进生成的。不要运行 transition.md。
+验证通过且路线图更新后，将完成状态返回给父级：
 
 ```
 ## PHASE COMPLETE
@@ -775,20 +752,20 @@ Verification: {Passed | Gaps Found}
 [Include aggregate_results output]
 ```
 
-STOP. Do not proceed to auto-advance or transition.
+停止。不要继续自动推进或过渡。
 
-**If `--no-transition` flag is NOT present:**
+**如果不存在 `--no-transition` 标志：**
 
-**Auto-advance detection:**
+**自动推进检测：**
 
-1. Parse `--auto` flag from $ARGUMENTS
-2. Read both the chain flag and user preference (chain flag already synced in init step):
+1. 从 $ARGUMENTS 解析 `--auto` 标志
+2. 读取链标志和用户偏好（链标志已在初始化步骤中同步）：
    ```bash
    AUTO_CHAIN=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow._auto_chain_active 2>/dev/null || echo "false")
    AUTO_CFG=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow.auto_advance 2>/dev/null || echo "false")
    ```
 
-**If `--auto` flag present OR `AUTO_CHAIN` is true OR `AUTO_CFG` is true (AND verification passed with no gaps):**
+**如果存在 `--auto` 标志或 `AUTO_CHAIN` 为 true 或 `AUTO_CFG` 为 true（且验证通过无缺口）：**
 
 ```
 ╔══════════════════════════════════════════╗
@@ -797,15 +774,15 @@ STOP. Do not proceed to auto-advance or transition.
 ╚══════════════════════════════════════════╝
 ```
 
-Execute the transition workflow inline (do NOT use Task — orchestrator context is ~10-15%, transition needs phase completion data already in context):
+内联执行过渡工作流（不要使用 Task — 协调器上下文约为 10-15%，过渡需要的阶段完成数据已在上下文中）：
 
-Read and follow `~/.claude/get-shit-done/workflows/transition.md`, passing through the `--auto` flag so it propagates to the next phase invocation.
+读取并遵循 `~/.claude/get-shit-done/workflows/transition.md`，传递 `--auto` 标志使其传播到下一个阶段调用。
 
-**If none of `--auto`, `AUTO_CHAIN`, or `AUTO_CFG` is true:**
+**如果 `--auto`、`AUTO_CHAIN` 或 `AUTO_CFG` 都不为 true：**
 
-**STOP. Do not auto-advance. Do not execute transition. Do not plan next phase. Present options to the user and wait.**
+**停止。不要自动推进。不要执行过渡。不要规划下一个阶段。向用户展示选项并等待。**
 
-**IMPORTANT: There is NO `/gsd:transition` command. Never suggest it. The transition workflow is internal only.**
+**重要：没有 `/gsd:transition` 命令。永远不要建议它。过渡工作流仅供内部使用。**
 
 ```
 ## ✓ Phase {X}: {Name} Complete
@@ -816,31 +793,31 @@ Read and follow `~/.claude/get-shit-done/workflows/transition.md`, passing throu
 /gsd:execute-phase {next} ${GSD_WS} — execute next phase
 ```
 
-Only suggest the commands listed above. Do not invent or hallucinate command names.
+仅建议上面列出的命令。不要编造或臆想命令名称。
 </step>
 
 </process>
 
 <context_efficiency>
-Orchestrator: ~10-15% context for 200k windows, can use more for 1M+ windows.
-Subagents: fresh context each (200k-1M depending on model). No polling (Task blocks). No context bleed.
+协调器：200k 窗口约 10-15% 上下文，1M+ 窗口可以使用更多。
+子代理：每个都是新的上下文（200k-1M 取决于模型）。无轮询（Task 阻塞）。无上下文泄漏。
 
-For 1M+ context models, consider:
-- Passing richer context (code snippets, dependency outputs) directly to executors instead of just file paths
-- Running small phases (≤3 plans, no dependencies) inline without subagent spawning overhead
-- Relaxing /clear recommendations — context rot onset is much further out with 5x window
+对于 1M+ 上下文模型，考虑：
+- 直接向执行器传递更丰富的上下文（代码片段、依赖输出）而不仅仅是文件路径
+- 对小型阶段（≤3 个计划，无依赖）内联运行，不使用子代理生成开销
+- 放宽 /clear 建议 — 5 倍窗口使上下文腐化的起点远得多
 </context_efficiency>
 
 <failure_handling>
-- **classifyHandoffIfNeeded false failure:** Agent reports "failed" but error is `classifyHandoffIfNeeded is not defined` → Claude Code bug, not GSD. Spot-check (SUMMARY exists, commits present) → if pass, treat as success
-- **Agent fails mid-plan:** Missing SUMMARY.md → report, ask user how to proceed
-- **Dependency chain breaks:** Wave 1 fails → Wave 2 dependents likely fail → user chooses attempt or skip
-- **All agents in wave fail:** Systemic issue → stop, report for investigation
-- **Checkpoint unresolvable:** "Skip this plan?" or "Abort phase execution?" → record partial progress in STATE.md
+- **classifyHandoffIfNeeded 误报失败：** 代理报告 "failed" 但错误是 `classifyHandoffIfNeeded is not defined` → Claude Code bug，不是 GSD。抽检（SUMMARY 存在，提交存在）→ 如果通过，视为成功
+- **代理在计划中途失败：** 缺少 SUMMARY.md → 报告，询问用户如何继续
+- **依赖链断裂：** Wave 1 失败 → Wave 2 的依赖项可能失败 → 用户选择尝试或跳过
+- **波次中所有代理都失败：** 系统性问题 → 停止，报告以供调查
+- **检查点无法解决：** "Skip this plan?" 或 "Abort phase execution?" → 在 STATE.md 中记录部分进度
 </failure_handling>
 
 <resumption>
-Re-run `/gsd:execute-phase {phase}` → discover_plans finds completed SUMMARYs → skips them → resumes from first incomplete plan → continues wave execution.
+重新运行 `/gsd:execute-phase {phase}` → discover_plans 找到已完成的 SUMMARY → 跳过它们 → 从第一个未完成的计划恢复 → 继续波次执行。
 
-STATE.md tracks: last completed plan, current wave, pending checkpoints.
+STATE.md 跟踪：最后完成的计划、当前波次、待处理的检查点。
 </resumption>

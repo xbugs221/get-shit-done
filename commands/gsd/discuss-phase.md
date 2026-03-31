@@ -1,6 +1,6 @@
 ---
 name: gsd:discuss-phase
-description: Gather phase context through adaptive questioning before planning. Use --auto to skip interactive questions (Claude picks recommended defaults).
+description: 在规划之前通过自适应提问收集阶段上下文。使用 --auto 跳过交互式提问（Claude 选择推荐默认值）。
 argument-hint: "<phase> [--auto] [--batch] [--analyze] [--text]"
 allowed-tools:
   - Read
@@ -15,17 +15,17 @@ allowed-tools:
 ---
 
 <objective>
-Extract implementation decisions that downstream agents need — researcher and planner will use CONTEXT.md to know what to investigate and what choices are locked.
+提取下游代理所需的实现决策 — 研究员和规划器将使用 CONTEXT.md 来了解需要调查什么以及哪些选择已确定。
 
-**How it works:**
-1. Load prior context (PROJECT.md, REQUIREMENTS.md, STATE.md, prior CONTEXT.md files)
-2. Scout codebase for reusable assets and patterns
-3. Analyze phase — skip gray areas already decided in prior phases
-4. Present remaining gray areas — user selects which to discuss
-5. Deep-dive each selected area until satisfied
-6. Create CONTEXT.md with decisions that guide research and planning
+**工作原理：**
+1. 加载先前上下文（PROJECT.md、REQUIREMENTS.md、STATE.md、之前的 CONTEXT.md）
+2. 扫描代码库中可复用的资产和模式
+3. 分析阶段 — 跳过之前已决定的灰色地带
+4. 展示剩余灰色地带 — 用户选择要讨论哪些
+5. 深入探讨每个选定领域直到满意
+6. 创建 CONTEXT.md，包含指导研究和规划的决策
 
-**Output:** `{phase_num}-CONTEXT.md` — decisions clear enough that downstream agents can act without asking the user again
+**输出：** `{phase_num}-CONTEXT.md` — 决策足够清晰，下游代理无需再询问用户即可执行
 </objective>
 
 <execution_context>
@@ -35,30 +35,31 @@ Extract implementation decisions that downstream agents need — researcher and 
 </execution_context>
 
 <context>
-Phase number: $ARGUMENTS (required)
+阶段编号：$ARGUMENTS（必填）
 
-Context files are resolved in-workflow using `init phase-op` and roadmap/state tool calls.
+上下文文件在工作流中通过 `init phase-op` 和路线图/状态工具调用来解析。
 </context>
 
 <process>
-**Mode routing:**
+**模式路由：**
 ```bash
 DISCUSS_MODE=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow.discuss_mode 2>/dev/null || echo "discuss")
 ```
 
-If `DISCUSS_MODE` is `"assumptions"`: Read and execute @~/.claude/get-shit-done/workflows/discuss-phase-assumptions.md end-to-end.
+如果 `DISCUSS_MODE` 为 `"assumptions"`：读取并执行 @~/.claude/get-shit-done/workflows/discuss-phase-assumptions.md。
 
-If `DISCUSS_MODE` is `"discuss"` (or unset, or any other value): Read and execute @~/.claude/get-shit-done/workflows/discuss-phase.md end-to-end.
+如果 `DISCUSS_MODE` 为 `"discuss"`（或未设置/其他值）：读取并执行 @~/.claude/get-shit-done/workflows/discuss-phase.md。
 
-**MANDATORY:** The execution_context files listed above ARE the instructions. Read the workflow file BEFORE taking any action. The objective and success_criteria sections in this command file are summaries — the workflow file contains the complete step-by-step process with all required behaviors, config checks, and interaction patterns. Do not improvise from the summary.
+**强制要求：** execution_context 中的文件就是指令本身。在执行前先读取工作流文件。本命令文件中的 objective 和 success_criteria 只是摘要 — 工作流文件包含完整的逐步流程。不要根据摘要即兴发挥。
 </process>
 
 <success_criteria>
-- Prior context loaded and applied (no re-asking decided questions)
-- Gray areas identified through intelligent analysis
-- User chose which areas to discuss
-- Each selected area explored until satisfied
-- Scope creep redirected to deferred ideas
-- CONTEXT.md captures decisions, not vague vision
-- User knows next steps
+- 先前上下文已加载（不重复询问已决定的问题）
+- 通过智能分析识别灰色地带
+- 用户选择了要讨论的领域
+- 每个选定领域探讨到满意
+- 范围蔓延被重定向到延期想法
+- CONTEXT.md 记录的是决策，而非模糊愿景
+- 用户知道后续步骤
 </success_criteria>
+</output>

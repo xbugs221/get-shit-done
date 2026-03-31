@@ -1,6 +1,6 @@
 ---
 name: gsd:ui-review
-description: Retroactive 6-pillar visual audit of implemented frontend code
+description: 对已实现的前端代码进行回顾性六支柱视觉审计
 argument-hint: "[phase]"
 allowed-tools:
   - Read
@@ -12,9 +12,7 @@ allowed-tools:
   - AskUserQuestion
 ---
 <objective>
-Conduct a retroactive 6-pillar visual audit. Produces UI-REVIEW.md with
-graded assessment (1-4 per pillar). Works on any project.
-Output: {phase_num}-UI-REVIEW.md
+执行回顾性六支柱视觉审计，生成 {phase_num}-UI-REVIEW.md，包含分级评估（每个支柱 1-4 分）。适用于任何项目。
 </objective>
 
 <execution_context>
@@ -23,10 +21,9 @@ Output: {phase_num}-UI-REVIEW.md
 </execution_context>
 
 <context>
-Phase: $ARGUMENTS — optional, defaults to last completed phase.
+阶段：$ARGUMENTS — 可选，默认为最后完成的阶段。
 </context>
 
 <process>
-Execute @~/.claude/get-shit-done/workflows/ui-review.md end-to-end.
-Preserve all workflow gates.
+端到端执行 @~/.claude/get-shit-done/workflows/ui-review.md，保留所有工作流门禁。
 </process>

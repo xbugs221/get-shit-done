@@ -1,56 +1,56 @@
 <purpose>
-List all GSD workspaces found in ~/gsd-workspaces/ with their status.
+列出 ~/gsd-workspaces/ 中所有 GSD 工作区及其状态。
 </purpose>
 
 <required_reading>
-Read all files referenced by the invoking prompt's execution_context before starting.
+在开始之前，阅读调用提示的 execution_context 中引用的所有文件。
 </required_reading>
 
 <process>
 
-## 1. Setup
+## 1. 初始化
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init list-workspaces)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Parse JSON for: `workspace_base`, `workspaces`, `workspace_count`.
+从 JSON 中解析：`workspace_base`、`workspaces`、`workspace_count`。
 
-## 2. Display
+## 2. 显示
 
-**If `workspace_count` is 0:**
+**如果 `workspace_count` 为 0：**
 
 ```
-No workspaces found in ~/gsd-workspaces/
+在 ~/gsd-workspaces/ 中未找到工作区
 
-Create one with:
+使用以下命令创建一个：
   /gsd:new-workspace --name my-workspace --repos repo1,repo2
 ```
 
-Done.
+完成。
 
-**If workspaces exist:**
+**如果存在工作区：**
 
-Display a table:
+显示表格：
 
 ```
-GSD Workspaces (~/gsd-workspaces/)
+GSD 工作区 (~/gsd-workspaces/)
 
-| Name | Repos | Strategy | GSD Project |
-|------|-------|----------|-------------|
-| feature-a | 3 | worktree | Yes |
-| feature-b | 2 | clone | No |
+| 名称 | 仓库数 | 策略 | GSD 项目 |
+|------|--------|------|----------|
+| feature-a | 3 | worktree | 是 |
+| feature-b | 2 | clone | 否 |
 
-Manage:
-  cd ~/gsd-workspaces/<name>     # Enter a workspace
-  /gsd:remove-workspace <name>   # Remove a workspace
+管理：
+  cd ~/gsd-workspaces/<名称>     # 进入工作区
+  /gsd:remove-workspace <名称>   # 移除工作区
 ```
 
-For each workspace, show:
-- **Name** — directory name
-- **Repos** — count from init data
-- **Strategy** — from WORKSPACE.md
-- **GSD Project** — whether `.planning/PROJECT.md` exists (Yes/No)
+对每个工作区显示：
+- **名称** — 目录名
+- **仓库数** — 来自初始化数据的计数
+- **策略** — 来自 WORKSPACE.md
+- **GSD 项目** — `.planning/PROJECT.md` 是否存在（是/否）
 
 </process>

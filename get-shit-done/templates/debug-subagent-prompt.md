@@ -1,16 +1,16 @@
-# Debug Subagent Prompt Template
+# 调试子 Agent 提示模板
 
-Template for spawning gsd-debugger agent. The agent contains all debugging expertise - this template provides problem context only.
+用于生成 gsd-debugger agent 的模板。Agent 自身包含所有调试专业知识——本模板仅提供问题上下文。
 
 ---
 
-## Template
+## 模板
 
 ```markdown
 <objective>
-Investigate issue: {issue_id}
+调查问题：{issue_id}
 
-**Summary:** {issue_summary}
+**摘要：** {issue_summary}
 </objective>
 
 <symptoms>
@@ -27,62 +27,62 @@ goal: {find_root_cause_only | find_and_fix}
 </mode>
 
 <debug_file>
-Create: .planning/debug/{slug}.md
+创建：.planning/debug/{slug}.md
 </debug_file>
 ```
 
 ---
 
-## Placeholders
+## 占位符
 
-| Placeholder | Source | Example |
-|-------------|--------|---------|
-| `{issue_id}` | Orchestrator-assigned | `auth-screen-dark` |
-| `{issue_summary}` | User description | `Auth screen is too dark` |
-| `{expected}` | From symptoms | `See logo clearly` |
-| `{actual}` | From symptoms | `Screen is dark` |
-| `{errors}` | From symptoms | `None in console` |
-| `{reproduction}` | From symptoms | `Open /auth page` |
-| `{timeline}` | From symptoms | `After recent deploy` |
-| `{goal}` | Orchestrator sets | `find_and_fix` |
-| `{slug}` | Generated | `auth-screen-dark` |
+| 占位符 | 来源 | 示例 |
+|--------|------|------|
+| `{issue_id}` | 编排器分配 | `auth-screen-dark` |
+| `{issue_summary}` | 用户描述 | `认证界面太暗` |
+| `{expected}` | 来自症状 | `清楚地看到 logo` |
+| `{actual}` | 来自症状 | `界面是暗的` |
+| `{errors}` | 来自症状 | `控制台无报错` |
+| `{reproduction}` | 来自症状 | `打开 /auth 页面` |
+| `{timeline}` | 来自症状 | `最近一次部署之后` |
+| `{goal}` | 编排器设置 | `find_and_fix` |
+| `{slug}` | 自动生成 | `auth-screen-dark` |
 
 ---
 
-## Usage
+## 用法
 
-**From /gsd:debug:**
+**从 /gsd:debug 调用：**
 ```python
 Task(
   prompt=filled_template,
   subagent_type="gsd-debugger",
-  description="Debug {slug}"
+  description="调试 {slug}"
 )
 ```
 
-**From diagnose-issues (UAT):**
+**从 diagnose-issues（UAT）调用：**
 ```python
-Task(prompt=template, subagent_type="gsd-debugger", description="Debug UAT-001")
+Task(prompt=template, subagent_type="gsd-debugger", description="调试 UAT-001")
 ```
 
 ---
 
-## Continuation
+## 继续调试
 
-For checkpoints, spawn fresh agent with:
+对于检查点，使用以下内容生成新的 agent：
 
 ```markdown
 <objective>
-Continue debugging {slug}. Evidence is in the debug file.
+继续调试 {slug}。证据在调试文件中。
 </objective>
 
 <prior_state>
-Debug file: @.planning/debug/{slug}.md
+调试文件：@.planning/debug/{slug}.md
 </prior_state>
 
 <checkpoint_response>
-**Type:** {checkpoint_type}
-**Response:** {user_response}
+**类型：** {checkpoint_type}
+**回复：** {user_response}
 </checkpoint_response>
 
 <mode>

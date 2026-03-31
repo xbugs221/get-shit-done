@@ -1,50 +1,50 @@
-# Testing Patterns Template
+# 测试模式模板
 
-Template for `.planning/codebase/TESTING.md` - captures test framework and patterns.
+用于 `.planning/codebase/TESTING.md` 的模板 - 记录测试框架和模式。
 
-**Purpose:** Document how tests are written and run. Guide for adding tests that match existing patterns.
+**目的：** 记录测试如何编写和运行。用于添加与现有模式匹配的测试的指南。
 
 ---
 
-## File Template
+## 文件模板
 
 ```markdown
-# Testing Patterns
+# 测试模式
 
-**Analysis Date:** [YYYY-MM-DD]
+**分析日期：** [YYYY-MM-DD]
 
-## Test Framework
+## 测试框架
 
-**Runner:**
-- [Framework: e.g., "Jest 29.x", "Vitest 1.x"]
-- [Config: e.g., "jest.config.js in project root"]
+**运行器：**
+- [框架：例如 "Jest 29.x"、"Vitest 1.x"]
+- [配置：例如 "项目根目录中的 jest.config.js"]
 
-**Assertion Library:**
-- [Library: e.g., "built-in expect", "chai"]
-- [Matchers: e.g., "toBe, toEqual, toThrow"]
+**断言库：**
+- [库：例如 "内置 expect"、"chai"]
+- [匹配器：例如 "toBe、toEqual、toThrow"]
 
-**Run Commands:**
+**运行命令：**
 ```bash
-[e.g., "npm test" or "npm run test"]              # Run all tests
-[e.g., "npm test -- --watch"]                     # Watch mode
-[e.g., "npm test -- path/to/file.test.ts"]       # Single file
-[e.g., "npm run test:coverage"]                   # Coverage report
+[例如 "npm test" 或 "npm run test"]              # 运行所有测试
+[例如 "npm test -- --watch"]                     # 监视模式
+[例如 "npm test -- path/to/file.test.ts"]       # 单个文件
+[例如 "npm run test:coverage"]                   # 覆盖率报告
 ```
 
-## Test File Organization
+## 测试文件组织
 
-**Location:**
-- [Pattern: e.g., "*.test.ts alongside source files"]
-- [Alternative: e.g., "__tests__/ directory" or "separate tests/ tree"]
+**位置：**
+- [模式：例如 "*.test.ts 与源文件放在一起"]
+- [替代方式：例如 "__tests__/ 目录" 或 "独立的 tests/ 目录树"]
 
-**Naming:**
-- [Unit tests: e.g., "module-name.test.ts"]
-- [Integration: e.g., "feature-name.integration.test.ts"]
-- [E2E: e.g., "user-flow.e2e.test.ts"]
+**命名：**
+- [单元测试：例如 "module-name.test.ts"]
+- [集成测试：例如 "feature-name.integration.test.ts"]
+- [端到端测试：例如 "user-flow.e2e.test.ts"]
 
-**Structure:**
+**结构：**
 ```
-[Show actual directory pattern, e.g.:
+[展示实际目录模式，例如：
 src/
   lib/
     utils.ts
@@ -55,70 +55,70 @@ src/
 ]
 ```
 
-## Test Structure
+## 测试结构
 
-**Suite Organization:**
+**测试套件组织：**
 ```typescript
-[Show actual pattern used, e.g.:
+[展示实际使用的模式，例如：
 
 describe('ModuleName', () => {
   describe('functionName', () => {
     it('should handle success case', () => {
-      // arrange
-      // act
-      // assert
+      // 准备
+      // 执行
+      // 断言
     });
 
     it('should handle error case', () => {
-      // test code
+      // 测试代码
     });
   });
 });
 ]
 ```
 
-**Patterns:**
-- [Setup: e.g., "beforeEach for shared setup, avoid beforeAll"]
-- [Teardown: e.g., "afterEach to clean up, restore mocks"]
-- [Structure: e.g., "arrange/act/assert pattern required"]
+**模式：**
+- [设置：例如 "beforeEach 用于共享设置，避免 beforeAll"]
+- [清理：例如 "afterEach 用于清理，恢复 mock"]
+- [结构：例如 "要求使用准备/执行/断言模式"]
 
-## Mocking
+## Mock
 
-**Framework:**
-- [Tool: e.g., "Jest built-in mocking", "Vitest vi", "Sinon"]
-- [Import mocking: e.g., "vi.mock() at top of file"]
+**框架：**
+- [工具：例如 "Jest 内置 mock"、"Vitest vi"、"Sinon"]
+- [导入 mock：例如 "vi.mock() 在文件顶部"]
 
-**Patterns:**
+**模式：**
 ```typescript
-[Show actual mocking pattern, e.g.:
+[展示实际的 mock 模式，例如：
 
-// Mock external dependency
+// Mock 外部依赖
 vi.mock('./external-service', () => ({
   fetchData: vi.fn()
 }));
 
-// Mock in test
+// 在测试中使用 mock
 const mockFetch = vi.mocked(fetchData);
 mockFetch.mockResolvedValue({ data: 'test' });
 ]
 ```
 
-**What to Mock:**
-- [e.g., "External APIs, file system, database"]
-- [e.g., "Time/dates (use vi.useFakeTimers)"]
-- [e.g., "Network calls (use mock fetch)"]
+**需要 mock 的内容：**
+- [例如 "外部 API、文件系统、数据库"]
+- [例如 "时间/日期（使用 vi.useFakeTimers）"]
+- [例如 "网络调用（使用 mock fetch）"]
 
-**What NOT to Mock:**
-- [e.g., "Pure functions, utilities"]
-- [e.g., "Internal business logic"]
+**不需要 mock 的内容：**
+- [例如 "纯函数、工具函数"]
+- [例如 "内部业务逻辑"]
 
-## Fixtures and Factories
+## 装置和工厂
 
-**Test Data:**
+**测试数据：**
 ```typescript
-[Show pattern for creating test data, e.g.:
+[展示创建测试数据的模式，例如：
 
-// Factory pattern
+// 工厂模式
 function createTestUser(overrides?: Partial<User>): User {
   return {
     id: 'test-id',
@@ -128,54 +128,54 @@ function createTestUser(overrides?: Partial<User>): User {
   };
 }
 
-// Fixture file
+// 装置文件
 // tests/fixtures/users.ts
 export const mockUsers = [/* ... */];
 ]
 ```
 
-**Location:**
-- [e.g., "tests/fixtures/ for shared fixtures"]
-- [e.g., "factory functions in test file or tests/factories/"]
+**位置：**
+- [例如 "tests/fixtures/ 用于共享装置"]
+- [例如 "工厂函数在测试文件中或 tests/factories/"]
 
-## Coverage
+## 覆盖率
 
-**Requirements:**
-- [Target: e.g., "80% line coverage", "no specific target"]
-- [Enforcement: e.g., "CI blocks <80%", "coverage for awareness only"]
+**要求：**
+- [目标：例如 "80% 行覆盖率"、"没有具体目标"]
+- [执行：例如 "CI 在 <80% 时阻塞"、"覆盖率仅供参考"]
 
-**Configuration:**
-- [Tool: e.g., "built-in coverage via --coverage flag"]
-- [Exclusions: e.g., "exclude *.test.ts, config files"]
+**配置：**
+- [工具：例如 "通过 --coverage 标志的内置覆盖率"]
+- [排除：例如 "排除 *.test.ts、配置文件"]
 
-**View Coverage:**
+**查看覆盖率：**
 ```bash
-[e.g., "npm run test:coverage"]
-[e.g., "open coverage/index.html"]
+[例如 "npm run test:coverage"]
+[例如 "open coverage/index.html"]
 ```
 
-## Test Types
+## 测试类型
 
-**Unit Tests:**
-- [Scope: e.g., "test single function/class in isolation"]
-- [Mocking: e.g., "mock all external dependencies"]
-- [Speed: e.g., "must run in <1s per test"]
+**单元测试：**
+- [范围：例如 "隔离测试单个函数/类"]
+- [mock：例如 "mock 所有外部依赖"]
+- [速度：例如 "每个测试必须在 <1s 内运行"]
 
-**Integration Tests:**
-- [Scope: e.g., "test multiple modules together"]
-- [Mocking: e.g., "mock external services, use real internal modules"]
-- [Setup: e.g., "use test database, seed data"]
+**集成测试：**
+- [范围：例如 "一起测试多个模块"]
+- [mock：例如 "mock 外部服务，使用真实的内部模块"]
+- [设置：例如 "使用测试数据库，填充数据"]
 
-**E2E Tests:**
-- [Framework: e.g., "Playwright for E2E"]
-- [Scope: e.g., "test full user flows"]
-- [Location: e.g., "e2e/ directory separate from unit tests"]
+**端到端测试：**
+- [框架：例如 "Playwright 用于端到端测试"]
+- [范围：例如 "测试完整的用户流程"]
+- [位置：例如 "e2e/ 目录与单元测试分开"]
 
-## Common Patterns
+## 常用模式
 
-**Async Testing:**
+**异步测试：**
 ```typescript
-[Show pattern, e.g.:
+[展示模式，例如：
 
 it('should handle async operation', async () => {
   const result = await asyncFunction();
@@ -184,66 +184,66 @@ it('should handle async operation', async () => {
 ]
 ```
 
-**Error Testing:**
+**错误测试：**
 ```typescript
-[Show pattern, e.g.:
+[展示模式，例如：
 
 it('should throw on invalid input', () => {
   expect(() => functionCall()).toThrow('error message');
 });
 
-// Async error
+// 异步错误
 it('should reject on failure', async () => {
   await expect(asyncCall()).rejects.toThrow('error message');
 });
 ]
 ```
 
-**Snapshot Testing:**
-- [Usage: e.g., "for React components only" or "not used"]
-- [Location: e.g., "__snapshots__/ directory"]
+**快照测试：**
+- [用法：例如 "仅用于 React 组件" 或 "未使用"]
+- [位置：例如 "__snapshots__/ 目录"]
 
 ---
 
-*Testing analysis: [date]*
-*Update when test patterns change*
+*测试分析：[日期]*
+*在测试模式变更时更新*
 ```
 
 <good_examples>
 ```markdown
-# Testing Patterns
+# 测试模式
 
-**Analysis Date:** 2025-01-20
+**分析日期：** 2025-01-20
 
-## Test Framework
+## 测试框架
 
-**Runner:**
+**运行器：**
 - Vitest 1.0.4
-- Config: vitest.config.ts in project root
+- 配置：项目根目录中的 vitest.config.ts
 
-**Assertion Library:**
-- Vitest built-in expect
-- Matchers: toBe, toEqual, toThrow, toMatchObject
+**断言库：**
+- Vitest 内置 expect
+- 匹配器：toBe、toEqual、toThrow、toMatchObject
 
-**Run Commands:**
+**运行命令：**
 ```bash
-npm test                              # Run all tests
-npm test -- --watch                   # Watch mode
-npm test -- path/to/file.test.ts     # Single file
-npm run test:coverage                 # Coverage report
+npm test                              # 运行所有测试
+npm test -- --watch                   # 监视模式
+npm test -- path/to/file.test.ts     # 单个文件
+npm run test:coverage                 # 覆盖率报告
 ```
 
-## Test File Organization
+## 测试文件组织
 
-**Location:**
-- *.test.ts alongside source files
-- No separate tests/ directory
+**位置：**
+- *.test.ts 与源文件放在一起
+- 没有独立的 tests/ 目录
 
-**Naming:**
-- unit-name.test.ts for all tests
-- No distinction between unit/integration in filename
+**命名：**
+- unit-name.test.ts 用于所有测试
+- 文件名中不区分单元/集成测试
 
-**Structure:**
+**结构：**
 ```
 src/
   lib/
@@ -254,29 +254,29 @@ src/
     install-service.test.ts
   bin/
     install.ts
-    (no test - integration tested via CLI)
+    （没有测试 - 通过 CLI 进行集成测试）
 ```
 
-## Test Structure
+## 测试结构
 
-**Suite Organization:**
+**测试套件组织：**
 ```typescript
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 describe('ModuleName', () => {
   describe('functionName', () => {
     beforeEach(() => {
-      // reset state
+      // 重置状态
     });
 
     it('should handle valid input', () => {
-      // arrange
+      // 准备
       const input = createTestInput();
 
-      // act
+      // 执行
       const result = functionName(input);
 
-      // assert
+      // 断言
       expect(result).toEqual(expectedOutput);
     });
 
@@ -287,24 +287,24 @@ describe('ModuleName', () => {
 });
 ```
 
-**Patterns:**
-- Use beforeEach for per-test setup, avoid beforeAll
-- Use afterEach to restore mocks: vi.restoreAllMocks()
-- Explicit arrange/act/assert comments in complex tests
-- One assertion focus per test (but multiple expects OK)
+**模式：**
+- 使用 beforeEach 进行每个测试的设置，避免 beforeAll
+- 使用 afterEach 恢复 mock：vi.restoreAllMocks()
+- 在复杂测试中使用显式的准备/执行/断言注释
+- 每个测试聚焦一个断言点（但可以有多个 expect）
 
-## Mocking
+## Mock
 
-**Framework:**
-- Vitest built-in mocking (vi)
-- Module mocking via vi.mock() at top of test file
+**框架：**
+- Vitest 内置 mock（vi）
+- 通过 vi.mock() 在测试文件顶部进行模块 mock
 
-**Patterns:**
+**模式：**
 ```typescript
 import { vi } from 'vitest';
 import { externalFunction } from './external';
 
-// Mock module
+// Mock 模块
 vi.mock('./external', () => ({
   externalFunction: vi.fn()
 }));
@@ -314,29 +314,29 @@ describe('test suite', () => {
     const mockFn = vi.mocked(externalFunction);
     mockFn.mockReturnValue('mocked result');
 
-    // test code using mocked function
+    // 使用 mock 函数的测试代码
 
     expect(mockFn).toHaveBeenCalledWith('expected arg');
   });
 });
 ```
 
-**What to Mock:**
-- File system operations (fs-extra)
-- Child process execution (child_process.exec)
-- External API calls
-- Environment variables (process.env)
+**需要 mock 的内容：**
+- 文件系统操作（fs-extra）
+- 子进程执行（child_process.exec）
+- 外部 API 调用
+- 环境变量（process.env）
 
-**What NOT to Mock:**
-- Internal pure functions
-- Simple utilities (string manipulation, array helpers)
-- TypeScript types
+**不需要 mock 的内容：**
+- 内部纯函数
+- 简单工具函数（字符串操作、数组辅助函数）
+- TypeScript 类型
 
-## Fixtures and Factories
+## 装置和工厂
 
-**Test Data:**
+**测试数据：**
 ```typescript
-// Factory functions in test file
+// 测试文件中的工厂函数
 function createTestConfig(overrides?: Partial<Config>): Config {
   return {
     targetDir: '/tmp/test',
@@ -345,7 +345,7 @@ function createTestConfig(overrides?: Partial<Config>): Config {
   };
 }
 
-// Shared fixtures in tests/fixtures/
+// tests/fixtures/ 中的共享装置
 // tests/fixtures/sample-command.md
 export const sampleCommand = `---
 description: Test command
@@ -353,48 +353,48 @@ description: Test command
 Content here`;
 ```
 
-**Location:**
-- Factory functions: define in test file near usage
-- Shared fixtures: tests/fixtures/ (for multi-file test data)
-- Mock data: inline in test when simple, factory when complex
+**位置：**
+- 工厂函数：在测试文件中靠近使用处定义
+- 共享装置：tests/fixtures/（用于多文件测试数据）
+- Mock 数据：简单时内联在测试中，复杂时使用工厂
 
-## Coverage
+## 覆盖率
 
-**Requirements:**
-- No enforced coverage target
-- Coverage tracked for awareness
-- Focus on critical paths (parsers, service logic)
+**要求：**
+- 没有强制的覆盖率目标
+- 覆盖率仅供参考
+- 聚焦于关键路径（解析器、服务逻辑）
 
-**Configuration:**
-- Vitest coverage via c8 (built-in)
-- Excludes: *.test.ts, bin/install.ts, config files
+**配置：**
+- Vitest 通过 c8 提供覆盖率（内置）
+- 排除：*.test.ts、bin/install.ts、配置文件
 
-**View Coverage:**
+**查看覆盖率：**
 ```bash
 npm run test:coverage
 open coverage/index.html
 ```
 
-## Test Types
+## 测试类型
 
-**Unit Tests:**
-- Test single function in isolation
-- Mock all external dependencies (fs, child_process)
-- Fast: each test <100ms
-- Examples: parser.test.ts, validator.test.ts
+**单元测试：**
+- 隔离测试单个函数
+- Mock 所有外部依赖（fs、child_process）
+- 快速：每个测试 <100ms
+- 示例：parser.test.ts、validator.test.ts
 
-**Integration Tests:**
-- Test multiple modules together
-- Mock only external boundaries (file system, process)
-- Examples: install-service.test.ts (tests service + parser)
+**集成测试：**
+- 一起测试多个模块
+- 仅 mock 外部边界（文件系统、进程）
+- 示例：install-service.test.ts（测试 service + parser）
 
-**E2E Tests:**
-- Not currently used
-- CLI integration tested manually
+**端到端测试：**
+- 目前未使用
+- CLI 集成通过手动测试
 
-## Common Patterns
+## 常用模式
 
-**Async Testing:**
+**异步测试：**
 ```typescript
 it('should handle async operation', async () => {
   const result = await asyncFunction();
@@ -402,19 +402,19 @@ it('should handle async operation', async () => {
 });
 ```
 
-**Error Testing:**
+**错误测试：**
 ```typescript
 it('should throw on invalid input', () => {
   expect(() => parse(null)).toThrow('Cannot parse null');
 });
 
-// Async error
+// 异步错误
 it('should reject on file not found', async () => {
   await expect(readConfig('invalid.txt')).rejects.toThrow('ENOENT');
 });
 ```
 
-**File System Mocking:**
+**文件系统 mock：**
 ```typescript
 import { vi } from 'vitest';
 import * as fs from 'fs-extra';
@@ -423,58 +423,58 @@ vi.mock('fs-extra');
 
 it('mocks file system', () => {
   vi.mocked(fs.readFile).mockResolvedValue('file content');
-  // test code
+  // 测试代码
 });
 ```
 
-**Snapshot Testing:**
-- Not used in this codebase
-- Prefer explicit assertions for clarity
+**快照测试：**
+- 本代码库中未使用
+- 优先使用显式断言以保持清晰
 
 ---
 
-*Testing analysis: 2025-01-20*
-*Update when test patterns change*
+*测试分析：2025-01-20*
+*在测试模式变更时更新*
 ```
 </good_examples>
 
 <guidelines>
-**What belongs in TESTING.md:**
-- Test framework and runner configuration
-- Test file location and naming patterns
-- Test structure (describe/it, beforeEach patterns)
-- Mocking approach and examples
-- Fixture/factory patterns
-- Coverage requirements
-- How to run tests (commands)
-- Common testing patterns in actual code
+**TESTING.md 中应包含的内容：**
+- 测试框架和运行器配置
+- 测试文件位置和命名模式
+- 测试结构（describe/it、beforeEach 模式）
+- Mock 方法和示例
+- 装置/工厂模式
+- 覆盖率要求
+- 如何运行测试（命令）
+- 实际代码中的常见测试模式
 
-**What does NOT belong here:**
-- Specific test cases (defer to actual test files)
-- Technology choices (that's STACK.md)
-- CI/CD setup (that's deployment docs)
+**不应包含在此处的内容：**
+- 具体测试用例（留给实际测试文件）
+- 技术选型（那是 STACK.md 的内容）
+- CI/CD 设置（那是部署文档的内容）
 
-**When filling this template:**
-- Check package.json scripts for test commands
-- Find test config file (jest.config.js, vitest.config.ts)
-- Read 3-5 existing test files to identify patterns
-- Look for test utilities in tests/ or test-utils/
-- Check for coverage configuration
-- Document actual patterns used, not ideal patterns
+**填写此模板时：**
+- 检查 package.json scripts 中的测试命令
+- 找到测试配置文件（jest.config.js、vitest.config.ts）
+- 阅读 3-5 个现有测试文件以识别模式
+- 查找 tests/ 或 test-utils/ 中的测试工具
+- 检查覆盖率配置
+- 记录实际使用的模式，而非理想模式
 
-**Useful for phase planning when:**
-- Adding new features (write matching tests)
-- Refactoring (maintain test patterns)
-- Fixing bugs (add regression tests)
-- Understanding verification approach
-- Setting up test infrastructure
+**在以下情况下对阶段规划有用：**
+- 添加新功能（编写匹配的测试）
+- 重构（保持测试模式）
+- 修复缺陷（添加回归测试）
+- 了解验证方法
+- 搭建测试基础设施
 
-**Analysis approach:**
-- Check package.json for test framework and scripts
-- Read test config file for coverage, setup
-- Examine test file organization (collocated vs separate)
-- Review 5 test files for patterns (mocking, structure, assertions)
-- Look for test utilities, fixtures, factories
-- Note any test types (unit, integration, e2e)
-- Document commands for running tests
+**分析方法：**
+- 检查 package.json 中的测试框架和脚本
+- 阅读测试配置文件了解覆盖率、设置
+- 检查测试文件组织（共存式 vs 分离式）
+- 审查 5 个测试文件了解模式（mock、结构、断言）
+- 查找测试工具、装置、工厂
+- 记录所有测试类型（单元、集成、端到端）
+- 记录运行测试的命令
 </guidelines>

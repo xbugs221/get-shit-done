@@ -1,54 +1,55 @@
-# Project Retrospective
+# 项目回顾
 
-*A living document updated after each milestone. Lessons feed forward into future planning.*
+*每个里程碑后更新的持续文档。经验教训向前反馈到未来的规划中。*
 
-## Milestone: v{version} — {name}
+## 里程碑：v{version} — {name}
 
-**Shipped:** {date}
-**Phases:** {count} | **Plans:** {count} | **Sessions:** {count}
+**发布日期：** {date}
+**阶段数：** {count} | **计划数：** {count} | **会话数：** {count}
 
-### What Was Built
-- {Key deliverable 1}
-- {Key deliverable 2}
-- {Key deliverable 3}
+### 构建了什么
+- {关键交付物 1}
+- {关键交付物 2}
+- {关键交付物 3}
 
-### What Worked
-- {Efficiency win or successful pattern}
-- {What went smoothly}
+### 什么有效
+- {效率提升或成功的模式}
+- {什么进展顺利}
 
-### What Was Inefficient
-- {Missed opportunity}
-- {What took longer than expected}
+### 什么低效
+- {错失的机会}
+- {什么花费了比预期更长的时间}
 
-### Patterns Established
-- {New pattern or convention that should persist}
+### 建立的模式
+- {应该持续使用的新模式或约定}
 
-### Key Lessons
-1. {Specific, actionable lesson}
-2. {Another lesson}
+### 关键教训
+1. {具体的、可操作的教训}
+2. {另一个教训}
 
-### Cost Observations
-- Model mix: {X}% opus, {Y}% sonnet, {Z}% haiku
-- Sessions: {count}
-- Notable: {efficiency observation}
+### 成本观察
+- 模型混合：{X}% opus, {Y}% sonnet, {Z}% haiku
+- 会话数：{count}
+- 值得注意的：{效率观察}
 
 ---
 
-## Cross-Milestone Trends
+## 跨里程碑趋势
 
-### Process Evolution
+### 流程演进
 
-| Milestone | Sessions | Phases | Key Change |
-|-----------|----------|--------|------------|
-| v{X} | {N} | {M} | {What changed in process} |
+| 里程碑 | 会话数 | 阶段数 | 关键变化 |
+|--------|--------|--------|----------|
+| v{X} | {N} | {M} | {流程中发生了什么变化} |
 
-### Cumulative Quality
+### 累积质量
 
-| Milestone | Tests | Coverage | Zero-Dep Additions |
-|-----------|-------|----------|-------------------|
+| 里程碑 | 测试数 | 覆盖率 | 零依赖添加 |
+|--------|--------|--------|------------|
 | v{X} | {N} | {Y}% | {count} |
 
-### Top Lessons (Verified Across Milestones)
+### 顶级教训（跨里程碑验证）
 
-1. {Lesson verified by multiple milestones}
-2. {Another cross-validated lesson}
+1. {被多个里程碑验证的教训}
+2. {另一个交叉验证的教训}
+</output>

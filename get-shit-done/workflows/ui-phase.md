@@ -1,7 +1,7 @@
 <purpose>
-Generate a UI design contract (UI-SPEC.md) for frontend phases. Orchestrates gsd-ui-researcher and gsd-ui-checker with a revision loop. Inserts between discuss-phase and plan-phase in the lifecycle.
+为前端阶段生成 UI 设计合约（UI-SPEC.md）。编排 gsd-ui-researcher 和 gsd-ui-checker，包含修订循环。在生命周期中插入 discuss-phase 和 plan-phase 之间。
 
-UI-SPEC.md locks spacing, typography, color, copywriting, and design system decisions before the planner creates tasks. This prevents design debt caused by ad-hoc styling decisions during execution.
+UI-SPEC.md 在规划器创建任务之前锁定间距、排版、色彩、文案和设计系统决策。这防止了执行过程中临时样式决策导致的设计债务。
 </purpose>
 
 <required_reading>
@@ -9,14 +9,14 @@ UI-SPEC.md locks spacing, typography, color, copywriting, and design system deci
 </required_reading>
 
 <available_agent_types>
-Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
-- gsd-ui-researcher — Researches UI/UX approaches
-- gsd-ui-checker — Reviews UI implementation quality
+有效的 GSD 子代理类型（使用确切名称——不要回退到 'general-purpose'）：
+- gsd-ui-researcher — 研究 UI/UX 方案
+- gsd-ui-checker — 审查 UI 实现质量
 </available_agent_types>
 
 <process>
 
-## 1. Initialize
+## 1. 初始化
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init plan-phase "$PHASE")
@@ -25,110 +25,110 @@ AGENT_SKILLS_UI=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agent-ski
 AGENT_SKILLS_UI_CHECKER=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agent-skills gsd-ui-checker 2>/dev/null)
 ```
 
-Parse JSON for: `phase_dir`, `phase_number`, `phase_name`, `phase_slug`, `padded_phase`, `has_context`, `has_research`, `commit_docs`.
+解析 JSON 获取：`phase_dir`、`phase_number`、`phase_name`、`phase_slug`、`padded_phase`、`has_context`、`has_research`、`commit_docs`。
 
-**File paths:** `state_path`, `roadmap_path`, `requirements_path`, `context_path`, `research_path`.
+**文件路径：** `state_path`、`roadmap_path`、`requirements_path`、`context_path`、`research_path`。
 
-Resolve UI agent models:
+解析 UI 代理模型：
 
 ```bash
 UI_RESEARCHER_MODEL=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" resolve-model gsd-ui-researcher --raw)
 UI_CHECKER_MODEL=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" resolve-model gsd-ui-checker --raw)
 ```
 
-Check config:
+检查配置：
 
 ```bash
 UI_ENABLED=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow.ui_phase 2>/dev/null || echo "true")
 ```
 
-**If `UI_ENABLED` is `false`:**
+**如果 `UI_ENABLED` 为 `false`：**
 ```
-UI phase is disabled in config. Enable via /gsd:settings.
+UI 阶段在配置中已禁用。通过 /gsd:settings 启用。
 ```
-Exit workflow.
+退出工作流。
 
-**If `planning_exists` is false:** Error — run `/gsd:new-project` first.
+**如果 `planning_exists` 为 false：** 错误——请先运行 `/gsd:new-project`。
 
-## 2. Parse and Validate Phase
+## 2. 解析和验证阶段
 
-Extract phase number from $ARGUMENTS. If not provided, detect next unplanned phase.
+从 $ARGUMENTS 中提取阶段编号。如果未提供，检测下一个未规划的阶段。
 
 ```bash
 PHASE_INFO=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" roadmap get-phase "${PHASE}")
 ```
 
-**If `found` is false:** Error with available phases.
+**如果 `found` 为 false：** 错误，附带可用阶段列表。
 
-## 3. Check Prerequisites
+## 3. 检查前置条件
 
-**If `has_context` is false:**
+**如果 `has_context` 为 false：**
 ```
-No CONTEXT.md found for Phase {N}.
-Recommended: run /gsd:discuss-phase {N} first to capture design preferences.
-Continuing without user decisions — UI researcher will ask all questions.
+未找到阶段 {N} 的 CONTEXT.md。
+建议：先运行 /gsd:discuss-phase {N} 以捕获设计偏好。
+在没有用户决策的情况下继续——UI 研究者将询问所有问题。
 ```
-Continue (non-blocking).
+继续（非阻塞）。
 
-**If `has_research` is false:**
+**如果 `has_research` 为 false：**
 ```
-No RESEARCH.md found for Phase {N}.
-Note: stack decisions (component library, styling approach) will be asked during UI research.
+未找到阶段 {N} 的 RESEARCH.md。
+注意：技术栈决策（组件库、样式方案）将在 UI 研究中询问。
 ```
-Continue (non-blocking).
+继续（非阻塞）。
 
-## 4. Check Existing UI-SPEC
+## 4. 检查现有 UI-SPEC
 
 ```bash
 UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
 ```
 
-**If exists:** Use AskUserQuestion:
-- header: "Existing UI-SPEC"
-- question: "UI-SPEC.md already exists for Phase {N}. What would you like to do?"
+**如果存在：** 使用 AskUserQuestion：
+- header: "现有 UI-SPEC"
+- question: "阶段 {N} 的 UI-SPEC.md 已存在。你想怎么做？"
 - options:
-  - "Update — re-run researcher with existing as baseline"
-  - "View — display current UI-SPEC and exit"
-  - "Skip — keep current UI-SPEC, proceed to verification"
+  - "更新 — 以现有内容为基准重新运行研究者"
+  - "查看 — 显示当前 UI-SPEC 并退出"
+  - "跳过 — 保留当前 UI-SPEC，继续验证"
 
-If "View": display file contents, exit.
-If "Skip": proceed to step 7 (checker).
-If "Update": continue to step 5.
+如果选择"查看"：显示文件内容，退出。
+如果选择"跳过"：继续到步骤 7（检查器）。
+如果选择"更新"：继续到步骤 5。
 
-## 5. Spawn gsd-ui-researcher
+## 5. 生成 gsd-ui-researcher
 
-Display:
+显示：
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► UI DESIGN CONTRACT — PHASE {N}
+ GSD ► UI 设计合约 — 阶段 {N}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-◆ Spawning UI researcher...
+◆ 正在生成 UI 研究者...
 ```
 
-Build prompt:
+构建提示：
 
 ```markdown
 Read ~/.claude/agents/gsd-ui-researcher.md for instructions.
 
 <objective>
-Create UI design contract for Phase {phase_number}: {phase_name}
-Answer: "What visual and interaction contracts does this phase need?"
+为阶段 {phase_number}: {phase_name} 创建 UI 设计合约
+回答："此阶段需要哪些视觉和交互合约？"
 </objective>
 
 <files_to_read>
-- {state_path} (Project State)
-- {roadmap_path} (Roadmap)
-- {requirements_path} (Requirements)
-- {context_path} (USER DECISIONS from /gsd:discuss-phase)
-- {research_path} (Technical Research — stack decisions)
+- {state_path}（项目状态）
+- {roadmap_path}（路线图）
+- {requirements_path}（需求）
+- {context_path}（来自 /gsd:discuss-phase 的用户决策）
+- {research_path}（技术研究——技术栈决策）
 </files_to_read>
 
 ${AGENT_SKILLS_UI}
 
 <output>
-Write to: {phase_dir}/{padded_phase}-UI-SPEC.md
-Template: ~/.claude/get-shit-done/templates/UI-SPEC.md
+写入到：{phase_dir}/{padded_phase}-UI-SPEC.md
+模板：~/.claude/get-shit-done/templates/UI-SPEC.md
 </output>
 
 <config>
@@ -138,56 +138,56 @@ padded_phase: {padded_phase}
 </config>
 ```
 
-Omit null file paths from `<files_to_read>`.
+从 `<files_to_read>` 中省略空的文件路径。
 
 ```
 Task(
   prompt=ui_research_prompt,
   subagent_type="gsd-ui-researcher",
   model="{UI_RESEARCHER_MODEL}",
-  description="UI Design Contract Phase {N}"
+  description="UI 设计合约阶段 {N}"
 )
 ```
 
-## 6. Handle Researcher Return
+## 6. 处理研究者返回
 
-**If `## UI-SPEC COMPLETE`:**
-Display confirmation. Continue to step 7.
+**如果包含 `## UI-SPEC COMPLETE`：**
+显示确认。继续到步骤 7。
 
-**If `## UI-SPEC BLOCKED`:**
-Display blocker details and options. Exit workflow.
+**如果包含 `## UI-SPEC BLOCKED`：**
+显示阻塞详情和选项。退出工作流。
 
-## 7. Spawn gsd-ui-checker
+## 7. 生成 gsd-ui-checker
 
-Display:
+显示：
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► VERIFYING UI-SPEC
+ GSD ► 验证 UI-SPEC
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-◆ Spawning UI checker...
+◆ 正在生成 UI 检查器...
 ```
 
-Build prompt:
+构建提示：
 
 ```markdown
 Read ~/.claude/agents/gsd-ui-checker.md for instructions.
 
 <objective>
-Validate UI design contract for Phase {phase_number}: {phase_name}
-Check all 6 dimensions. Return APPROVED or BLOCKED.
+验证阶段 {phase_number}: {phase_name} 的 UI 设计合约
+检查全部 6 个维度。返回 APPROVED 或 BLOCKED。
 </objective>
 
 <files_to_read>
-- {phase_dir}/{padded_phase}-UI-SPEC.md (UI Design Contract — PRIMARY INPUT)
-- {context_path} (USER DECISIONS — check compliance)
-- {research_path} (Technical Research — check stack alignment)
+- {phase_dir}/{padded_phase}-UI-SPEC.md（UI 设计合约——主要输入）
+- {context_path}（用户决策——检查合规性）
+- {research_path}（技术研究——检查技术栈对齐）
 </files_to_read>
 
 ${AGENT_SKILLS_UI_CHECKER}
 
 <config>
-ui_safety_gate: {ui_safety_gate config value}
+ui_safety_gate: {ui_safety_gate 配置值}
 </config>
 ```
 
@@ -196,87 +196,87 @@ Task(
   prompt=ui_checker_prompt,
   subagent_type="gsd-ui-checker",
   model="{UI_CHECKER_MODEL}",
-  description="Verify UI-SPEC Phase {N}"
+  description="验证 UI-SPEC 阶段 {N}"
 )
 ```
 
-## 8. Handle Checker Return
+## 8. 处理检查器返回
 
-**If `## UI-SPEC VERIFIED`:**
-Display dimension results. Proceed to step 10.
+**如果包含 `## UI-SPEC VERIFIED`：**
+显示维度结果。继续到步骤 10。
 
-**If `## ISSUES FOUND`:**
-Display blocking issues. Proceed to step 9.
+**如果包含 `## ISSUES FOUND`：**
+显示阻塞问题。继续到步骤 9。
 
-## 9. Revision Loop (Max 2 Iterations)
+## 9. 修订循环（最多 2 次迭代）
 
-Track `revision_count` (starts at 0).
+跟踪 `revision_count`（从 0 开始）。
 
-**If `revision_count` < 2:**
-- Increment `revision_count`
-- Re-spawn gsd-ui-researcher with revision context:
+**如果 `revision_count` < 2：**
+- 递增 `revision_count`
+- 使用修订上下文重新生成 gsd-ui-researcher：
 
 ```markdown
 <revision>
-The UI checker found issues with the current UI-SPEC.md.
+UI 检查器发现当前 UI-SPEC.md 存在问题。
 
-### Issues to Fix
-{paste blocking issues from checker return}
+### 需要修复的问题
+{粘贴检查器返回的阻塞问题}
 
-Read the existing UI-SPEC.md, fix ONLY the listed issues, re-write the file.
-Do NOT re-ask the user questions that are already answered.
+读取现有 UI-SPEC.md，仅修复列出的问题，重新写入文件。
+不要重新询问用户已经回答的问题。
 </revision>
 ```
 
-- After researcher returns → re-spawn checker (step 7)
+- 研究者返回后 → 重新生成检查器（步骤 7）
 
-**If `revision_count` >= 2:**
+**如果 `revision_count` >= 2：**
 ```
-Max revision iterations reached. Remaining issues:
+已达最大修订迭代次数。剩余问题：
 
-{list remaining issues}
+{列出剩余问题}
 
-Options:
-1. Force approve — proceed with current UI-SPEC (FLAGs become accepted)
-2. Edit manually — open UI-SPEC.md in editor, re-run /gsd:ui-phase
-3. Abandon — exit without approving
+选项：
+1. 强制批准 — 使用当前 UI-SPEC 继续（FLAG 变为已接受）
+2. 手动编辑 — 在编辑器中打开 UI-SPEC.md，重新运行 /gsd:ui-phase
+3. 放弃 — 不批准直接退出
 ```
 
-Use AskUserQuestion for the choice.
+使用 AskUserQuestion 进行选择。
 
-## 10. Present Final Status
+## 10. 展示最终状态
 
-Display:
+显示：
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► UI-SPEC READY ✓
+ GSD ► UI-SPEC 就绪 ✓
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**Phase {N}: {Name}** — UI design contract approved
+**阶段 {N}: {Name}** — UI 设计合约已批准
 
-Dimensions: 6/6 passed
-{If any FLAGs: "Recommendations: {N} (non-blocking)"}
+维度：6/6 通过
+{如果有 FLAG："建议：{N}（非阻塞）"}
 
 ───────────────────────────────────────────────────────────────
 
-## ▶ Next Up
+## ▶ 下一步
 
-**Plan Phase {N}** — planner will use UI-SPEC.md as design context
+**规划阶段 {N}** — 规划器将使用 UI-SPEC.md 作为设计上下文
 
 `/gsd:plan-phase {N}`
 
-<sub>/clear first → fresh context window</sub>
+<sub>先执行 /clear → 刷新上下文窗口</sub>
 
 ───────────────────────────────────────────────────────────────
 ```
 
-## 11. Commit (if configured)
+## 11. 提交（如果已配置）
 
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs(${padded_phase}): UI design contract" --files "${PHASE_DIR}/${PADDED_PHASE}-UI-SPEC.md"
 ```
 
-## 12. Update State
+## 12. 更新状态
 
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" state record-session \
@@ -287,16 +287,17 @@ node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" state record-session \
 </process>
 
 <success_criteria>
-- [ ] Config checked (exit if ui_phase disabled)
-- [ ] Phase validated against roadmap
-- [ ] Prerequisites checked (CONTEXT.md, RESEARCH.md — non-blocking warnings)
-- [ ] Existing UI-SPEC handled (update/view/skip)
-- [ ] gsd-ui-researcher spawned with correct context and file paths
-- [ ] UI-SPEC.md created in correct location
-- [ ] gsd-ui-checker spawned with UI-SPEC.md
-- [ ] All 6 dimensions evaluated
-- [ ] Revision loop if BLOCKED (max 2 iterations)
-- [ ] Final status displayed with next steps
-- [ ] UI-SPEC.md committed (if commit_docs enabled)
-- [ ] State updated
+- [ ] 已检查配置（如果 ui_phase 禁用则退出）
+- [ ] 阶段已根据路线图验证
+- [ ] 前置条件已检查（CONTEXT.md、RESEARCH.md——非阻塞警告）
+- [ ] 已处理现有 UI-SPEC（更新/查看/跳过）
+- [ ] 使用正确的上下文和文件路径生成了 gsd-ui-researcher
+- [ ] 在正确位置创建了 UI-SPEC.md
+- [ ] 使用 UI-SPEC.md 生成了 gsd-ui-checker
+- [ ] 全部 6 个维度已评估
+- [ ] 如果 BLOCKED 则进入修订循环（最多 2 次迭代）
+- [ ] 展示了最终状态和下一步
+- [ ] UI-SPEC.md 已提交（如果 commit_docs 启用）
+- [ ] 状态已更新
 </success_criteria>
+</output>

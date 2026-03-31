@@ -1,6 +1,6 @@
 ---
 name: gsd:thread
-description: Manage persistent context threads for cross-session work
+description: 管理持久化上下文线程，用于跨会话工作
 argument-hint: [name | description]
 allowed-tools:
   - Read
@@ -9,119 +9,107 @@ allowed-tools:
 ---
 
 <objective>
-Create, list, or resume persistent context threads. Threads are lightweight
-cross-session knowledge stores for work that spans multiple sessions but
-doesn't belong to any specific phase.
+创建、列出或恢复持久化上下文线程。线程是轻量级的跨会话知识存储，
+用于跨越多个会话但不属于任何特定阶段的工作。
 </objective>
 
 <process>
 
-**Parse $ARGUMENTS to determine mode:**
+**解析 $ARGUMENTS 以确定模式：**
 
 <mode_list>
-**If no arguments or $ARGUMENTS is empty:**
+**如果没有参数或 $ARGUMENTS 为空：**
 
-List all threads:
+列出所有线程：
 ```bash
 ls .planning/threads/*.md 2>/dev/null
 ```
 
-For each thread, read the first few lines to show title and status:
+对每个线程，读取前几行以显示标题和状态：
 ```
-## Active Threads
+## 活跃线程
 
-| Thread | Status | Last Updated |
+| 线程 | 状态 | 最后更新 |
 |--------|--------|-------------|
 | fix-deploy-key-auth | OPEN | 2026-03-15 |
 | pasta-tcp-timeout | RESOLVED | 2026-03-12 |
 | perf-investigation | IN PROGRESS | 2026-03-17 |
 ```
 
-If no threads exist, show:
-```
-No threads found. Create one with: /gsd:thread <description>
-```
+如果不存在线程：`未找到线程。使用 /gsd:thread <description> 创建。`
 </mode_list>
 
 <mode_resume>
-**If $ARGUMENTS matches an existing thread name (file exists):**
+**如果 $ARGUMENTS 匹配已有线程名（文件存在）：**
 
-Resume the thread — load its context into the current session:
+恢复线程 — 将其上下文加载到当前会话：
 ```bash
 cat ".planning/threads/${THREAD_NAME}.md"
 ```
 
-Display the thread content and ask what the user wants to work on next.
-Update the thread's status to `IN PROGRESS` if it was `OPEN`.
+显示线程内容并询问用户下一步想做什么。
+如果线程状态为 `OPEN`，将其更新为 `IN PROGRESS`。
 </mode_resume>
 
 <mode_create>
-**If $ARGUMENTS is a new description (no matching thread file):**
+**如果 $ARGUMENTS 是新描述（没有匹配的线程文件）：**
 
-Create a new thread:
-
-1. Generate slug from description:
+1. 从描述生成 slug：
    ```bash
    SLUG=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" generate-slug "$ARGUMENTS")
    ```
 
-2. Create the threads directory if needed:
+2. 创建线程目录和文件：
    ```bash
    mkdir -p .planning/threads
-   ```
-
-3. Write the thread file:
-   ```bash
    cat > ".planning/threads/${SLUG}.md" << 'EOF'
-   # Thread: {description}
+   # 线程：{description}
 
-   ## Status: OPEN
+   ## 状态：OPEN
 
-   ## Goal
+   ## 目标
 
    {description}
 
-   ## Context
+   ## 上下文
 
-   *Created from conversation on {today's date}.*
+   *创建于 {today's date} 的对话中。*
 
-   ## References
+   ## 参考资料
 
-   - *(add links, file paths, or issue numbers)*
+   - *（添加链接、文件路径或 issue 编号）*
 
-   ## Next Steps
+   ## 下一步
 
-   - *(what the next session should do first)*
+   - *（下一个会话应首先做什么）*
    EOF
    ```
 
-4. If there's relevant context in the current conversation (code snippets,
-   error messages, investigation results), extract and add it to the Context
-   section.
+3. 如果当前对话中有相关上下文（代码片段、错误信息、调查结果），
+   提取并添加到上下文部分。
 
-5. Commit:
+4. 提交：
    ```bash
    node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: create thread — ${ARGUMENTS}" --files ".planning/threads/${SLUG}.md"
    ```
 
-6. Report:
+5. 报告：
    ```
-   ## 🧵 Thread Created
+   ## 🧵 线程已创建
 
-   Thread: {slug}
-   File: .planning/threads/{slug}.md
+   线程：{slug}
+   文件：.planning/threads/{slug}.md
 
-   Resume anytime with: /gsd:thread {slug}
+   恢复命令：/gsd:thread {slug}
    ```
 </mode_create>
 
 </process>
 
 <notes>
-- Threads are NOT phase-scoped — they exist independently of the roadmap
-- Lighter weight than /gsd:pause-work — no phase state, no plan context
-- The value is in Context and Next Steps — a cold-start session can pick up immediately
-- Threads can be promoted to phases or backlog items when they mature:
-  /gsd:add-phase or /gsd:add-backlog with context from the thread
-- Thread files live in .planning/threads/ — no collision with phases or other GSD structures
+- 线程独立于路线图存在，不属于任何阶段
+- 比 /gsd:pause-work 更轻量 — 没有阶段状态和计划上下文
+- 核心价值在于上下文和下一步 — 冷启动的会话可以立即接续工作
+- 成熟的线程可通过 /gsd:add-phase 或 /gsd:add-backlog 提升为阶段或待办
+- 线程文件存放在 .planning/threads/ — 不与阶段或其他 GSD 结构冲突
 </notes>

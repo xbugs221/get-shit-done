@@ -1,6 +1,6 @@
 ---
 name: gsd:manager
-description: Interactive command center for managing multiple phases from one terminal
+description: 用于在单个终端管理多个阶段的交互式命令中心
 allowed-tools:
   - Read
   - Write
@@ -11,15 +11,15 @@ allowed-tools:
   - Task
 ---
 <objective>
-Single-terminal command center for managing a milestone. Shows a dashboard of all phases with visual status indicators, recommends optimal next actions, and dispatches work — discuss runs inline, plan/execute run as background agents.
+单终端里程碑管理命令中心。显示所有阶段的仪表盘及状态指示器，推荐最优下一步，并分派工作——讨论内联运行，规划/执行作为后台 agent 运行。
 
-Designed for power users who want to parallelize work across phases from one terminal: discuss a phase while another plans or executes in the background.
+专为希望从单终端并行处理多阶段的高级用户设计。
 
-**Creates/Updates:**
-- No files created directly — dispatches to existing GSD commands via Skill() and background Task agents.
-- Reads `.planning/STATE.md`, `.planning/ROADMAP.md`, phase directories for status.
+**创建/更新：**
+- 不直接创建文件——通过 Skill() 和后台 Task agent 分派到现有 GSD 命令
+- 读取 `.planning/STATE.md`、`.planning/ROADMAP.md` 和阶段目录获取状态
 
-**After:** User exits when done managing, or all phases complete and milestone lifecycle is suggested.
+**之后：** 用户退出管理，或所有阶段完成时建议进行里程碑生命周期操作。
 </objective>
 
 <execution_context>
@@ -28,12 +28,12 @@ Designed for power users who want to parallelize work across phases from one ter
 </execution_context>
 
 <context>
-No arguments required. Requires an active milestone with ROADMAP.md and STATE.md.
+无需参数。需要包含 ROADMAP.md 和 STATE.md 的活跃里程碑。
 
-Project context, phase list, dependencies, and recommendations are resolved inside the workflow using `gsd-tools.cjs init manager`. No upfront context loading needed.
+项目上下文、阶段列表、依赖关系和建议通过 `gsd-tools.cjs init manager` 在工作流内部解析，无需预先加载。
 </context>
 
 <process>
-Execute the manager workflow from @~/.claude/get-shit-done/workflows/manager.md end-to-end.
-Maintain the dashboard refresh loop until the user exits or all phases complete.
+端到端执行 @~/.claude/get-shit-done/workflows/manager.md 管理器工作流。
+维持仪表盘刷新循环，直到用户退出或所有阶段完成。
 </process>

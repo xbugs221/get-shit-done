@@ -1,13 +1,13 @@
 <trigger>
-Use this workflow when:
-- Starting a new session on an existing project
-- User says "continue", "what's next", "where were we", "resume"
-- Any planning operation when .planning/ already exists
-- User returns after time away from project
+在以下情况使用此工作流：
+- 在现有项目上开始新会话
+- 用户说 "continue"、"what's next"、"where were we"、"resume"
+- .planning/ 已存在时的任何规划操作
+- 用户离开项目一段时间后返回
 </trigger>
 
 <purpose>
-Instantly restore full project context so "Where were we?" has an immediate, complete answer.
+立即恢复完整的项目上下文，使"我们进行到哪了？"能得到即时、完整的回答。
 </purpose>
 
 <required_reading>
@@ -17,310 +17,310 @@ Instantly restore full project context so "Where were we?" has an immediate, com
 <process>
 
 <step name="initialize">
-Load all context in one call:
+一次调用加载所有上下文：
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init resume)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Parse JSON for: `state_exists`, `roadmap_exists`, `project_exists`, `planning_exists`, `has_interrupted_agent`, `interrupted_agent_id`, `commit_docs`.
+从 JSON 中解析：`state_exists`、`roadmap_exists`、`project_exists`、`planning_exists`、`has_interrupted_agent`、`interrupted_agent_id`、`commit_docs`。
 
-**If `state_exists` is true:** Proceed to load_state
-**If `state_exists` is false but `roadmap_exists` or `project_exists` is true:** Offer to reconstruct STATE.md
-**If `planning_exists` is false:** This is a new project - route to /gsd:new-project
+**如果 `state_exists` 为 true：** 继续到 load_state
+**如果 `state_exists` 为 false 但 `roadmap_exists` 或 `project_exists` 为 true：** 提议重建 STATE.md
+**如果 `planning_exists` 为 false：** 这是一个新项目 - 路由到 /gsd:new-project
 </step>
 
 <step name="load_state">
 
-Read and parse STATE.md, then PROJECT.md:
+读取并解析 STATE.md，然后读取 PROJECT.md：
 
 ```bash
 cat .planning/STATE.md
 cat .planning/PROJECT.md
 ```
 
-**From STATE.md extract:**
+**从 STATE.md 提取：**
 
-- **Project Reference**: Core value and current focus
-- **Current Position**: Phase X of Y, Plan A of B, Status
-- **Progress**: Visual progress bar
-- **Recent Decisions**: Key decisions affecting current work
-- **Pending Todos**: Ideas captured during sessions
-- **Blockers/Concerns**: Issues carried forward
-- **Session Continuity**: Where we left off, any resume files
+- **项目引用**：核心价值和当前焦点
+- **当前位置**：阶段 X / Y，计划 A / B，状态
+- **进度**：可视化进度条
+- **近期决策**：影响当前工作的关键决策
+- **待办事项**：会话中捕获的想法
+- **阻塞项/关注点**：延续的问题
+- **会话连续性**：上次停止的位置，任何恢复文件
 
-**From PROJECT.md extract:**
+**从 PROJECT.md 提取：**
 
-- **What This Is**: Current accurate description
-- **Requirements**: Validated, Active, Out of Scope
-- **Key Decisions**: Full decision log with outcomes
-- **Constraints**: Hard limits on implementation
+- **这是什么**：当前准确的描述
+- **需求**：已验证的、活跃的、范围外的
+- **关键决策**：包含结果的完整决策日志
+- **约束**：实现的硬性限制
 
 </step>
 
 <step name="check_incomplete_work">
-Look for incomplete work that needs attention:
+查找需要关注的未完成工作：
 
 ```bash
-# Check for structured handoff (preferred — machine-readable)
+# 检查结构化交接（首选 — 机器可读）
 cat .planning/HANDOFF.json 2>/dev/null || true
 
-# Check for continue-here files (mid-plan resumption)
+# 检查 continue-here 文件（计划中途恢复）
 ls .planning/phases/*/.continue-here*.md 2>/dev/null || true
 
-# Check for plans without summaries (incomplete execution)
+# 检查有计划但无总结的情况（未完成的执行）
 for plan in .planning/phases/*/*-PLAN.md; do
   [ -e "$plan" ] || continue
   summary="${plan/PLAN/SUMMARY}"
   [ ! -f "$summary" ] && echo "Incomplete: $plan"
 done 2>/dev/null || true
 
-# Check for interrupted agents (use has_interrupted_agent and interrupted_agent_id from init)
+# 检查中断的 agent（使用来自 init 的 has_interrupted_agent 和 interrupted_agent_id）
 if [ "$has_interrupted_agent" = "true" ]; then
   echo "Interrupted agent: $interrupted_agent_id"
 fi
 ```
 
-**If HANDOFF.json exists:**
+**如果 HANDOFF.json 存在：**
 
-- This is the primary resumption source — structured data from `/gsd:pause-work`
-- Parse `status`, `phase`, `plan`, `task`, `total_tasks`, `next_action`
-- Check `blockers` and `human_actions_pending` — surface these immediately
-- Check `completed_tasks` for `in_progress` items — these need attention first
-- Validate `uncommitted_files` against `git status` — flag divergence
-- Use `context_notes` to restore mental model
-- Flag: "Found structured handoff — resuming from task {task}/{total_tasks}"
-- **After successful resumption, delete HANDOFF.json** (it's a one-shot artifact)
+- 这是主要的恢复来源 — 来自 `/gsd:pause-work` 的结构化数据
+- 解析 `status`、`phase`、`plan`、`task`、`total_tasks`、`next_action`
+- 检查 `blockers` 和 `human_actions_pending` — 立即呈现这些
+- 检查 `completed_tasks` 中的 `in_progress` 项 — 这些需要优先处理
+- 将 `uncommitted_files` 与 `git status` 进行比对 — 标记差异
+- 使用 `context_notes` 恢复思维模型
+- 标记："找到结构化交接 — 从任务 {task}/{total_tasks} 恢复"
+- **成功恢复后，删除 HANDOFF.json**（这是一次性工件）
 
-**If .continue-here file exists (fallback):**
+**如果存在 .continue-here 文件（备选方案）：**
 
-- This is a mid-plan resumption point
-- Read the file for specific resumption context
-- Flag: "Found mid-plan checkpoint"
+- 这是计划中途的恢复点
+- 读取文件以获取具体的恢复上下文
+- 标记："找到计划中途检查点"
 
-**If PLAN without SUMMARY exists:**
+**如果存在有 PLAN 但无 SUMMARY 的情况：**
 
-- Execution was started but not completed
-- Flag: "Found incomplete plan execution"
+- 执行已开始但未完成
+- 标记："找到未完成的计划执行"
 
-**If interrupted agent found:**
+**如果发现中断的 agent：**
 
-- Subagent was spawned but session ended before completion
-- Read agent-history.json for task details
-- Flag: "Found interrupted agent"
+- 子 agent 已启动但会话在完成前结束
+- 读取 agent-history.json 获取任务详情
+- 标记："找到中断的 agent"
   </step>
 
 <step name="present_status">
-Present complete project status to user:
+向用户展示完整的项目状态：
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║  PROJECT STATUS                                               ║
+║  项目状态                                                      ║
 ╠══════════════════════════════════════════════════════════════╣
-║  Building: [one-liner from PROJECT.md "What This Is"]         ║
+║  正在构建: [来自 PROJECT.md "这是什么" 的一句话描述]            ║
 ║                                                               ║
-║  Phase: [X] of [Y] - [Phase name]                            ║
-║  Plan:  [A] of [B] - [Status]                                ║
-║  Progress: [██████░░░░] XX%                                  ║
+║  阶段: [X] / [Y] - [阶段名称]                                ║
+║  计划: [A] / [B] - [状态]                                     ║
+║  进度: [██████░░░░] XX%                                       ║
 ║                                                               ║
-║  Last activity: [date] - [what happened]                     ║
+║  最近活动: [日期] - [发生了什么]                               ║
 ╚══════════════════════════════════════════════════════════════╝
 
-[If incomplete work found:]
-⚠️  Incomplete work detected:
-    - [.continue-here file or incomplete plan]
+[如果发现未完成的工作:]
+⚠️  检测到未完成的工作：
+    - [.continue-here 文件或未完成的计划]
 
-[If interrupted agent found:]
-⚠️  Interrupted agent detected:
+[如果发现中断的 agent:]
+⚠️  检测到中断的 agent：
     Agent ID: [id]
-    Task: [task description from agent-history.json]
-    Interrupted: [timestamp]
+    任务: [来自 agent-history.json 的任务描述]
+    中断时间: [时间戳]
 
-    Resume with: Task tool (resume parameter with agent ID)
+    恢复方式: Task 工具（使用 agent ID 的 resume 参数）
 
-[If pending todos exist:]
-📋 [N] pending todos — /gsd:check-todos to review
+[如果存在待办事项:]
+📋 [N] 个待办事项 — /gsd:check-todos 查看
 
-[If blockers exist:]
-⚠️  Carried concerns:
-    - [blocker 1]
-    - [blocker 2]
+[如果存在阻塞项:]
+⚠️  遗留的关注点：
+    - [阻塞项 1]
+    - [阻塞项 2]
 
-[If alignment is not ✓:]
-⚠️  Brief alignment: [status] - [assessment]
+[如果对齐状态不是 ✓:]
+⚠️  简要对齐: [状态] - [评估]
 ```
 
 </step>
 
 <step name="determine_next_action">
-Based on project state, determine the most logical next action:
+根据项目状态，确定最合逻辑的下一步操作：
 
-**If interrupted agent exists:**
-→ Primary: Resume interrupted agent (Task tool with resume parameter)
-→ Option: Start fresh (abandon agent work)
+**如果存在中断的 agent：**
+→ 首选：恢复中断的 agent（使用 resume 参数的 Task 工具）
+→ 选项：重新开始（放弃 agent 工作）
 
-**If HANDOFF.json exists:**
-→ Primary: Resume from structured handoff (highest priority — specific task/blocker context)
-→ Option: Discard handoff and reassess from files
+**如果 HANDOFF.json 存在：**
+→ 首选：从结构化交接恢复（最高优先级 — 具体的任务/阻塞项上下文）
+→ 选项：丢弃交接并从文件重新评估
 
-**If .continue-here file exists:**
-→ Fallback: Resume from checkpoint
-→ Option: Start fresh on current plan
+**如果存在 .continue-here 文件：**
+→ 备选：从检查点恢复
+→ 选项：在当前计划上重新开始
 
-**If incomplete plan (PLAN without SUMMARY):**
-→ Primary: Complete the incomplete plan
-→ Option: Abandon and move on
+**如果有未完成的计划（有 PLAN 无 SUMMARY）：**
+→ 首选：完成未完成的计划
+→ 选项：放弃并继续前进
 
-**If phase in progress, all plans complete:**
-→ Primary: Advance to next phase (via internal transition workflow)
-→ Option: Review completed work
+**如果阶段进行中，所有计划已完成：**
+→ 首选：推进到下一阶段（通过内部过渡工作流）
+→ 选项：审查已完成的工作
 
-**If phase ready to plan:**
-→ Check if CONTEXT.md exists for this phase:
+**如果阶段准备好进行规划：**
+→ 检查该阶段是否存在 CONTEXT.md：
 
-- If CONTEXT.md missing:
-  → Primary: Discuss phase vision (how user imagines it working)
-  → Secondary: Plan directly (skip context gathering)
-- If CONTEXT.md exists:
-  → Primary: Plan the phase
-  → Option: Review roadmap
+- 如果 CONTEXT.md 缺失：
+  → 首选：讨论阶段愿景（用户想象它如何运作）
+  → 备选：直接规划（跳过上下文收集）
+- 如果 CONTEXT.md 存在：
+  → 首选：规划该阶段
+  → 选项：审查路线图
 
-**If phase ready to execute:**
-→ Primary: Execute next plan
-→ Option: Review the plan first
+**如果阶段准备好执行：**
+→ 首选：执行下一个计划
+→ 选项：先审查计划
 </step>
 
 <step name="offer_options">
-Present contextual options based on project state:
+根据项目状态展示上下文相关的选项：
 
 ```
-What would you like to do?
+你想做什么？
 
-[Primary action based on state - e.g.:]
-1. Resume interrupted agent [if interrupted agent found]
-   OR
-1. Execute phase (/gsd:execute-phase {phase} ${GSD_WS})
-   OR
-1. Discuss Phase 3 context (/gsd:discuss-phase 3 ${GSD_WS}) [if CONTEXT.md missing]
-   OR
-1. Plan Phase 3 (/gsd:plan-phase 3 ${GSD_WS}) [if CONTEXT.md exists or discuss option declined]
+[基于状态的首选操作 - 例如:]
+1. 恢复中断的 agent [如果发现中断的 agent]
+   或
+1. 执行阶段 (/gsd:execute-phase {phase} ${GSD_WS})
+   或
+1. 讨论阶段 3 的上下文 (/gsd:discuss-phase 3 ${GSD_WS}) [如果 CONTEXT.md 缺失]
+   或
+1. 规划阶段 3 (/gsd:plan-phase 3 ${GSD_WS}) [如果 CONTEXT.md 存在或跳过了讨论选项]
 
-[Secondary options:]
-2. Review current phase status
-3. Check pending todos ([N] pending)
-4. Review brief alignment
-5. Something else
+[次要选项:]
+2. 审查当前阶段状态
+3. 检查待办事项（[N] 个待处理）
+4. 审查简要对齐
+5. 其他
 ```
 
-**Note:** When offering phase planning, check for CONTEXT.md existence first:
+**注意：** 在提供阶段规划选项时，先检查 CONTEXT.md 是否存在：
 
 ```bash
 ls .planning/phases/XX-name/*-CONTEXT.md 2>/dev/null || true
 ```
 
-If missing, suggest discuss-phase before plan. If exists, offer plan directly.
+如果缺失，建议在规划前先进行 discuss-phase。如果存在，直接提供规划选项。
 
-Wait for user selection.
+等待用户选择。
 </step>
 
 <step name="route_to_workflow">
-Based on user selection, route to appropriate workflow:
+根据用户的选择，路由到相应的工作流：
 
-- **Execute plan** → Show command for user to run after clearing:
+- **执行计划** → 显示命令供用户在清除后运行：
   ```
   ---
 
-  ## ▶ Next Up
+  ## ▶ 下一步
 
-  **{phase}-{plan}: [Plan Name]** — [objective from PLAN.md]
+  **{phase}-{plan}: [计划名称]** — [来自 PLAN.md 的目标]
 
   `/gsd:execute-phase {phase} ${GSD_WS}`
 
-  <sub>`/clear` first → fresh context window</sub>
+  <sub>`/clear` 先执行 → 全新的上下文窗口</sub>
 
   ---
   ```
-- **Plan phase** → Show command for user to run after clearing:
+- **规划阶段** → 显示命令供用户在清除后运行：
   ```
   ---
 
-  ## ▶ Next Up
+  ## ▶ 下一步
 
-  **Phase [N]: [Name]** — [Goal from ROADMAP.md]
+  **阶段 [N]: [名称]** — [来自 ROADMAP.md 的目标]
 
   `/gsd:plan-phase [phase-number] ${GSD_WS}`
 
-  <sub>`/clear` first → fresh context window</sub>
+  <sub>`/clear` 先执行 → 全新的上下文窗口</sub>
 
   ---
 
-  **Also available:**
-  - `/gsd:discuss-phase [N] ${GSD_WS}` — gather context first
-  - `/gsd:research-phase [N] ${GSD_WS}` — investigate unknowns
+  **也可以使用：**
+  - `/gsd:discuss-phase [N] ${GSD_WS}` — 先收集上下文
+  - `/gsd:research-phase [N] ${GSD_WS}` — 调查未知事项
 
   ---
   ```
-- **Advance to next phase** → ./transition.md (internal workflow, invoked inline — NOT a user command)
-- **Check todos** → Read .planning/todos/pending/, present summary
-- **Review alignment** → Read PROJECT.md, compare to current state
-- **Something else** → Ask what they need
+- **推进到下一阶段** → ./transition.md（内部工作流，内联调用 — 不是用户命令）
+- **检查待办** → 读取 .planning/todos/pending/，展示摘要
+- **审查对齐** → 读取 PROJECT.md，与当前状态比较
+- **其他** → 询问需要什么
 </step>
 
 <step name="update_session">
-Before proceeding to routed workflow, update session continuity:
+在执行路由的工作流之前，更新会话连续性：
 
-Update STATE.md:
+更新 STATE.md：
 
 ```markdown
-## Session Continuity
+## 会话连续性
 
-Last session: [now]
-Stopped at: Session resumed, proceeding to [action]
-Resume file: [updated if applicable]
+上次会话: [现在]
+停止于: 会话已恢复，继续执行 [操作]
+恢复文件: [如有更新]
 ```
 
-This ensures if session ends unexpectedly, next resume knows the state.
+这确保了如果会话意外结束，下次恢复时能知道状态。
 </step>
 
 </process>
 
 <reconstruction>
-If STATE.md is missing but other artifacts exist:
+如果 STATE.md 缺失但其他工件存在：
 
-"STATE.md missing. Reconstructing from artifacts..."
+"STATE.md 缺失。正在从工件中重建..."
 
-1. Read PROJECT.md → Extract "What This Is" and Core Value
-2. Read ROADMAP.md → Determine phases, find current position
-3. Scan \*-SUMMARY.md files → Extract decisions, concerns
-4. Count pending todos in .planning/todos/pending/
-5. Check for .continue-here files → Session continuity
+1. 读取 PROJECT.md → 提取"这是什么"和核心价值
+2. 读取 ROADMAP.md → 确定阶段，找到当前位置
+3. 扫描 \*-SUMMARY.md 文件 → 提取决策、关注点
+4. 计算 .planning/todos/pending/ 中的待办事项
+5. 检查 .continue-here 文件 → 会话连续性
 
-Reconstruct and write STATE.md, then proceed normally.
+重建并写入 STATE.md，然后正常继续。
 
-This handles cases where:
+这处理以下情况：
 
-- Project predates STATE.md introduction
-- File was accidentally deleted
-- Cloning repo without full .planning/ state
+- 项目创建于 STATE.md 引入之前
+- 文件被意外删除
+- 克隆仓库时没有完整的 .planning/ 状态
   </reconstruction>
 
 <quick_resume>
-If user says "continue" or "go":
-- Load state silently
-- Determine primary action
-- Execute immediately without presenting options
+如果用户说 "continue" 或 "go"：
+- 静默加载状态
+- 确定首选操作
+- 立即执行，不展示选项
 
-"Continuing from [state]... [action]"
+"从 [状态] 继续... [操作]"
 </quick_resume>
 
 <success_criteria>
-Resume is complete when:
+恢复完成的标志：
 
-- [ ] STATE.md loaded (or reconstructed)
-- [ ] Incomplete work detected and flagged
-- [ ] Clear status presented to user
-- [ ] Contextual next actions offered
-- [ ] User knows exactly where project stands
-- [ ] Session continuity updated
+- [ ] STATE.md 已加载（或重建）
+- [ ] 未完成的工作已检测并标记
+- [ ] 向用户展示了清晰的状态
+- [ ] 提供了上下文相关的后续操作
+- [ ] 用户确切了解项目的当前状态
+- [ ] 会话连续性已更新
       </success_criteria>

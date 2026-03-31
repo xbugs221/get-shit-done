@@ -1,104 +1,105 @@
 <purpose>
-Analyze freeform text from the user and route to the most appropriate GSD command. This is a dispatcher — it never does the work itself. Match user intent to the best command, confirm the routing, and hand off.
+分析用户的自由文本并路由到最合适的 GSD 命令。这是一个调度器 — 它自身从不执行工作。将用户意图匹配到最佳命令，确认路由，然后移交。
 </purpose>
 
 <required_reading>
-Read all files referenced by the invoking prompt's execution_context before starting.
+在开始之前，请先读取调用提示的 execution_context 中引用的所有文件。
 </required_reading>
 
 <process>
 
 <step name="validate">
-**Check for input.**
+**检查输入。**
 
-If `$ARGUMENTS` is empty, ask via AskUserQuestion:
+如果 `$ARGUMENTS` 为空，使用 AskUserQuestion 询问：
 
 ```
-What would you like to do? Describe the task, bug, or idea and I'll route it to the right GSD command.
+你想做什么？描述任务、bug 或想法，我会将其路由到正确的 GSD 命令。
 ```
 
-Wait for response before continuing.
+等待回复后再继续。
 </step>
 
 <step name="check_project">
-**Check if project exists.**
+**检查项目是否存在。**
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" state load 2>/dev/null)
 ```
 
-Track whether `.planning/` exists — some routes require it, others don't.
+跟踪 `.planning/` 是否存在 — 某些路由需要它，某些不需要。
 </step>
 
 <step name="route">
-**Match intent to command.**
+**将意图匹配到命令。**
 
-Evaluate `$ARGUMENTS` against these routing rules. Apply the **first matching** rule:
+根据以下路由规则评估 `$ARGUMENTS`。应用**第一个匹配的**规则：
 
-| If the text describes... | Route to | Why |
+| 如果文本描述的是... | 路由到 | 原因 |
 |--------------------------|----------|-----|
-| Starting a new project, "set up", "initialize" | `/gsd:new-project` | Needs full project initialization |
-| Mapping or analyzing an existing codebase | `/gsd:map-codebase` | Codebase discovery |
-| A bug, error, crash, failure, or something broken | `/gsd:debug` | Needs systematic investigation |
-| Exploring, researching, comparing, or "how does X work" | `/gsd:research-phase` | Domain research before planning |
-| Discussing vision, "how should X look", brainstorming | `/gsd:discuss-phase` | Needs context gathering |
-| A complex task: refactoring, migration, multi-file architecture, system redesign | `/gsd:add-phase` | Needs a full phase with plan/build cycle |
-| Planning a specific phase or "plan phase N" | `/gsd:plan-phase` | Direct planning request |
-| Executing a phase or "build phase N", "run phase N" | `/gsd:execute-phase` | Direct execution request |
-| Running all remaining phases automatically | `/gsd:autonomous` | Full autonomous execution |
-| A review or quality concern about existing work | `/gsd:verify-work` | Needs verification |
-| Checking progress, status, "where am I" | `/gsd:progress` | Status check |
-| Resuming work, "pick up where I left off" | `/gsd:resume-work` | Session restoration |
-| A note, idea, or "remember to..." | `/gsd:add-todo` | Capture for later |
-| Adding tests, "write tests", "test coverage" | `/gsd:add-tests` | Test generation |
-| Completing a milestone, shipping, releasing | `/gsd:complete-milestone` | Milestone lifecycle |
-| A specific, actionable, small task (add feature, fix typo, update config) | `/gsd:quick` | Self-contained, single executor |
+| 启动新项目、"set up"、"initialize" | `/gsd:new-project` | 需要完整的项目初始化 |
+| 映射或分析现有代码库 | `/gsd:map-codebase` | 代码库发现 |
+| bug、错误、崩溃、失败或某些损坏 | `/gsd:debug` | 需要系统性调查 |
+| 探索、研究、比较或"X 是怎么工作的" | `/gsd:research-phase` | 规划前的领域研究 |
+| 讨论愿景、"X 应该怎么做"、头脑风暴 | `/gsd:discuss-phase` | 需要上下文收集 |
+| 复杂任务：重构、迁移、多文件架构、系统重新设计 | `/gsd:add-phase` | 需要完整的阶段与规划/构建周期 |
+| 规划特定阶段或"plan phase N" | `/gsd:plan-phase` | 直接规划请求 |
+| 执行阶段或"build phase N"、"run phase N" | `/gsd:execute-phase` | 直接执行请求 |
+| 自动运行所有剩余阶段 | `/gsd:autonomous` | 完全自主执行 |
+| 对已有工作的审查或质量关注 | `/gsd:verify-work` | 需要验证 |
+| 查看进度、状态、"我在哪里" | `/gsd:progress` | 状态检查 |
+| 恢复工作、"接着上次继续" | `/gsd:resume-work` | 会话恢复 |
+| 笔记、想法或"记得要..." | `/gsd:add-todo` | 记录以备后用 |
+| 添加测试、"写测试"、"测试覆盖" | `/gsd:add-tests` | 测试生成 |
+| 完成里程碑、发布、上线 | `/gsd:complete-milestone` | 里程碑生命周期 |
+| 具体的、可操作的小任务（添加功能、修复错别字、更新配置） | `/gsd:quick` | 自包含的单次执行 |
 
-**Requires `.planning/` directory:** All routes except `/gsd:new-project`, `/gsd:map-codebase`, `/gsd:help`, and `/gsd:join-discord`. If the project doesn't exist and the route requires it, suggest `/gsd:new-project` first.
+**需要 `.planning/` 目录：** 除 `/gsd:new-project`、`/gsd:map-codebase`、`/gsd:help` 和 `/gsd:join-discord` 外的所有路由。如果项目不存在且路由需要它，建议先运行 `/gsd:new-project`。
 
-**Ambiguity handling:** If the text could reasonably match multiple routes, ask the user via AskUserQuestion with the top 2-3 options. For example:
+**歧义处理：** 如果文本可以合理匹配多个路由，使用 AskUserQuestion 向用户展示前 2-3 个选项。例如：
 
 ```
-"Refactor the authentication system" could be:
-1. /gsd:add-phase — Full planning cycle (recommended for multi-file refactors)
-2. /gsd:quick — Quick execution (if scope is small and clear)
+"重构认证系统" 可以是：
+1. /gsd:add-phase — 完整规划周期（推荐用于多文件重构）
+2. /gsd:quick — 快速执行（如果范围小且明确）
 
-Which approach fits better?
+哪种方式更合适？
 ```
 </step>
 
 <step name="display">
-**Show the routing decision.**
+**显示路由决策。**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► ROUTING
+ GSD ► 路由中
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**Input:** {first 80 chars of $ARGUMENTS}
-**Routing to:** {chosen command}
-**Reason:** {one-line explanation}
+**输入：** {$ARGUMENTS 的前 80 个字符}
+**路由到：** {选择的命令}
+**原因：** {一行解释}
 ```
 </step>
 
 <step name="dispatch">
-**Invoke the chosen command.**
+**调用选择的命令。**
 
-Run the selected `/gsd:*` command, passing `$ARGUMENTS` as args.
+运行选定的 `/gsd:*` 命令，将 `$ARGUMENTS` 作为参数传递。
 
-If the chosen command expects a phase number and one wasn't provided in the text, extract it from context or ask via AskUserQuestion.
+如果选择的命令需要阶段编号但文本中未提供，从上下文中提取或使用 AskUserQuestion 询问。
 
-After invoking the command, stop. The dispatched command handles everything from here.
+调用命令后停止。被调度的命令从此处接管所有工作。
 </step>
 
 </process>
 
 <success_criteria>
-- [ ] Input validated (not empty)
-- [ ] Intent matched to exactly one GSD command
-- [ ] Ambiguity resolved via user question (if needed)
-- [ ] Project existence checked for routes that require it
-- [ ] Routing decision displayed before dispatch
-- [ ] Command invoked with appropriate arguments
-- [ ] No work done directly — dispatcher only
+- [ ] 输入已验证（非空）
+- [ ] 意图匹配到恰好一个 GSD 命令
+- [ ] 歧义已通过用户问题解决（如需要）
+- [ ] 对需要项目的路由检查了项目是否存在
+- [ ] 调度前显示路由决策
+- [ ] 使用适当参数调用命令
+- [ ] 未直接执行任何工作 — 仅作为调度器
 </success_criteria>
+</output>

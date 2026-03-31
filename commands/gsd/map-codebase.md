@@ -1,7 +1,7 @@
 ---
 name: gsd:map-codebase
-description: Analyze codebase with parallel mapper agents to produce .planning/codebase/ documents
-argument-hint: "[optional: specific area to map, e.g., 'api' or 'auth']"
+description: 使用并行映射 agent 分析代码库，生成 .planning/codebase/ 文档
+argument-hint: "[可选：要映射的特定区域，例如 'api' 或 'auth']"
 allowed-tools:
   - Read
   - Bash
@@ -12,11 +12,11 @@ allowed-tools:
 ---
 
 <objective>
-Analyze existing codebase using parallel gsd-codebase-mapper agents to produce structured codebase documents.
+使用并行的 gsd-codebase-mapper agent 分析现有代码库，生成结构化文档。
 
-Each mapper agent explores a focus area and **writes documents directly** to `.planning/codebase/`. The orchestrator only receives confirmations, keeping context usage minimal.
+每个映射 agent 探索一个关注领域并**直接写入** `.planning/codebase/`。编排器仅接收确认信息，保持上下文最小化。
 
-Output: .planning/codebase/ folder with 7 structured documents about the codebase state.
+输出：`.planning/codebase/` 文件夹，包含 7 个代码库状态文档。
 </objective>
 
 <execution_context>
@@ -24,48 +24,37 @@ Output: .planning/codebase/ folder with 7 structured documents about the codebas
 </execution_context>
 
 <context>
-Focus area: $ARGUMENTS (optional - if provided, tells agents to focus on specific subsystem)
+关注领域：$ARGUMENTS（可选——指示 agent 关注特定子系统）
 
-**Load project state if exists:**
-Check for .planning/STATE.md - loads context if project already initialized
+**如果存在则加载项目状态：** 检查 .planning/STATE.md，已初始化则加载上下文。
 
-**This command can run:**
-- Before /gsd:new-project (brownfield codebases) - creates codebase map first
-- After /gsd:new-project (greenfield codebases) - updates codebase map as code evolves
-- Anytime to refresh codebase understanding
+**适用时机：**
+- 初始化前的棕地项目（先理解现有代码）
+- 重大变更后刷新代码库映射
+- 熟悉陌生的代码库
+- 重大重构前理解当前状态
+
+**可跳过：** 无代码的绿地项目、简单代码库（少于 5 个文件）
 </context>
 
-<when_to_use>
-**Use map-codebase for:**
-- Brownfield projects before initialization (understand existing code first)
-- Refreshing codebase map after significant changes
-- Onboarding to an unfamiliar codebase
-- Before major refactoring (understand current state)
-- When STATE.md references outdated codebase info
-
-**Skip map-codebase for:**
-- Greenfield projects with no code yet (nothing to map)
-- Trivial codebases (<5 files)
-</when_to_use>
-
 <process>
-1. Check if .planning/codebase/ already exists (offer to refresh or skip)
-2. Create .planning/codebase/ directory structure
-3. Spawn 4 parallel gsd-codebase-mapper agents:
-   - Agent 1: tech focus → writes STACK.md, INTEGRATIONS.md
-   - Agent 2: arch focus → writes ARCHITECTURE.md, STRUCTURE.md
-   - Agent 3: quality focus → writes CONVENTIONS.md, TESTING.md
-   - Agent 4: concerns focus → writes CONCERNS.md
-4. Wait for agents to complete, collect confirmations (NOT document contents)
-5. Verify all 7 documents exist with line counts
-6. Commit codebase map
-7. Offer next steps (typically: /gsd:new-project or /gsd:plan-phase)
+1. 检查 .planning/codebase/ 是否已存在（提供刷新或跳过选项）
+2. 创建 .planning/codebase/ 目录结构
+3. 生成 4 个并行 gsd-codebase-mapper agent：
+   - Agent 1：技术关注 → STACK.md、INTEGRATIONS.md
+   - Agent 2：架构关注 → ARCHITECTURE.md、STRUCTURE.md
+   - Agent 3：质量关注 → CONVENTIONS.md、TESTING.md
+   - Agent 4：关切关注 → CONCERNS.md
+4. 等待完成，收集确认信息
+5. 验证所有 7 个文档存在且有行数统计
+6. 提交代码库映射
+7. 提供后续步骤（通常：/gsd:new-project 或 /gsd:plan-phase）
 </process>
 
 <success_criteria>
-- [ ] .planning/codebase/ directory created
-- [ ] All 7 codebase documents written by mapper agents
-- [ ] Documents follow template structure
-- [ ] Parallel agents completed without errors
-- [ ] User knows next steps
+- [ ] .planning/codebase/ 目录已创建
+- [ ] 所有 7 个文档已由映射 agent 写入
+- [ ] 文档遵循模板结构
+- [ ] 并行 agent 无错误完成
+- [ ] 用户知道后续步骤
 </success_criteria>

@@ -1,15 +1,11 @@
 ---
 name: gsd:help
-description: Show available GSD commands and usage guide
+description: 显示可用的 GSD 命令和使用指南
 ---
 <objective>
-Display the complete GSD command reference.
+显示完整的 GSD 命令参考。
 
-Output ONLY the reference content below. Do NOT add:
-- Project-specific analysis
-- Git status or file context
-- Next-step suggestions
-- Any commentary beyond the reference
+仅输出参考内容，不添加项目分析、Git 状态、后续建议或任何额外评论。
 </objective>
 
 <execution_context>
@@ -17,6 +13,6 @@ Output ONLY the reference content below. Do NOT add:
 </execution_context>
 
 <process>
-Output the complete GSD command reference from @~/.claude/get-shit-done/workflows/help.md.
-Display the reference content directly — no additions or modifications.
+直接输出 @~/.claude/get-shit-done/workflows/help.md 中的完整 GSD 命令参考，不做修改。
 </process>
+</output>

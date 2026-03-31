@@ -1,11 +1,11 @@
 ---
 name: gsd:cleanup
-description: Archive accumulated phase directories from completed milestones
+description: 归档已完成里程碑中累积的阶段目录
 ---
 <objective>
-Archive phase directories from completed milestones into `.planning/milestones/v{X.Y}-phases/`.
+将已完成里程碑的阶段目录归档到 `.planning/milestones/v{X.Y}-phases/`。
 
-Use when `.planning/phases/` has accumulated directories from past milestones.
+当 `.planning/phases/` 中积累了过去里程碑的目录时使用此命令。
 </objective>
 
 <execution_context>
@@ -13,6 +13,6 @@ Use when `.planning/phases/` has accumulated directories from past milestones.
 </execution_context>
 
 <process>
-Follow the cleanup workflow at @~/.claude/get-shit-done/workflows/cleanup.md.
-Identify completed milestones, show a dry-run summary, and archive on confirmation.
+按照 @~/.claude/get-shit-done/workflows/cleanup.md 中的清理工作流执行。
+识别已完成的里程碑，显示试运行摘要，确认后进行归档。
 </process>

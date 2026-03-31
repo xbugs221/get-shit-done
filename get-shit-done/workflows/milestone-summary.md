@@ -1,220 +1,220 @@
-# Milestone Summary Workflow
+# 里程碑总结工作流
 
-Generate a comprehensive, human-friendly project summary from completed milestone artifacts.
-Designed for team onboarding — a new contributor can read the output and understand the entire project.
+从已完成的里程碑产物生成全面、易读的项目总结。
+专为团队入职设计——新成员可以阅读输出并理解整个项目。
 
 ---
 
-## Step 1: Resolve Version
+## 步骤 1：解析版本
 
 ```bash
 VERSION="$ARGUMENTS"
 ```
 
-If `$ARGUMENTS` is empty:
-1. Check `.planning/STATE.md` for current milestone version
-2. Check `.planning/milestones/` for the latest archived version
-3. If neither found, check if `.planning/ROADMAP.md` exists (project may be mid-milestone)
-4. If nothing found: error "No milestone found. Run /gsd:new-project or /gsd:new-milestone first."
+如果 `$ARGUMENTS` 为空：
+1. 检查 `.planning/STATE.md` 获取当前里程碑版本
+2. 检查 `.planning/milestones/` 获取最新归档版本
+3. 如果两者都未找到，检查 `.planning/ROADMAP.md` 是否存在（项目可能处于里程碑进行中）
+4. 如果什么都没找到：报错 "未找到里程碑。请先运行 /gsd:new-project 或 /gsd:new-milestone。"
 
-Set `VERSION` to the resolved version (e.g., "1.0").
+将 `VERSION` 设置为解析后的版本（如 "1.0"）。
 
-## Step 2: Locate Artifacts
+## 步骤 2：定位产物
 
-Determine whether the milestone is **archived** or **current**:
+确定里程碑是**已归档**还是**当前**的：
 
-**Archived milestone** (`.planning/milestones/v{VERSION}-ROADMAP.md` exists):
+**已归档的里程碑**（`.planning/milestones/v{VERSION}-ROADMAP.md` 存在）：
 ```
 ROADMAP_PATH=".planning/milestones/v${VERSION}-ROADMAP.md"
 REQUIREMENTS_PATH=".planning/milestones/v${VERSION}-REQUIREMENTS.md"
 AUDIT_PATH=".planning/milestones/v${VERSION}-MILESTONE-AUDIT.md"
 ```
 
-**Current/in-progress milestone** (no archive yet):
+**当前/进行中的里程碑**（尚无归档）：
 ```
 ROADMAP_PATH=".planning/ROADMAP.md"
 REQUIREMENTS_PATH=".planning/REQUIREMENTS.md"
 AUDIT_PATH=".planning/v${VERSION}-MILESTONE-AUDIT.md"
 ```
 
-Note: The audit file moves to `.planning/milestones/` on archive (per `complete-milestone` workflow). Check both locations as a fallback.
+注意：审计文件在归档时会移至 `.planning/milestones/`（按 `complete-milestone` 工作流）。作为后备方案，两个位置都要检查。
 
-**Always available:**
+**始终可用：**
 ```
 PROJECT_PATH=".planning/PROJECT.md"
 RETRO_PATH=".planning/RETROSPECTIVE.md"
 STATE_PATH=".planning/STATE.md"
 ```
 
-Read all files that exist. Missing files are fine — the summary adapts to what's available.
+读取所有存在的文件。缺失的文件没关系——总结会根据可用内容进行调整。
 
-## Step 3: Discover Phase Artifacts
+## 步骤 3：发现阶段产物
 
-Find all phase directories:
+查找所有阶段目录：
 
 ```bash
 gsd-tools.cjs init progress
 ```
 
-This returns phase metadata. For each phase in the milestone scope:
+这将返回阶段元数据。对于里程碑范围内的每个阶段：
 
-- Read `{phase_dir}/{padded}-SUMMARY.md` if it exists — extract `one_liner`, `accomplishments`, `decisions`
-- Read `{phase_dir}/{padded}-VERIFICATION.md` if it exists — extract status, gaps, deferred items
-- Read `{phase_dir}/{padded}-CONTEXT.md` if it exists — extract key decisions from `<decisions>` section
-- Read `{phase_dir}/{padded}-RESEARCH.md` if it exists — note what was researched
+- 如果存在 `{phase_dir}/{padded}-SUMMARY.md`，读取并提取 `one_liner`、`accomplishments`、`decisions`
+- 如果存在 `{phase_dir}/{padded}-VERIFICATION.md`，读取并提取状态、差距、推迟项
+- 如果存在 `{phase_dir}/{padded}-CONTEXT.md`，读取并从 `<decisions>` 部分提取关键决策
+- 如果存在 `{phase_dir}/{padded}-RESEARCH.md`，记录研究内容
 
-Track which phases have which artifacts.
+跟踪哪些阶段有哪些产物。
 
-**If no phase directories exist** (empty milestone or pre-build state): skip to Step 5 and generate a minimal summary noting "No phases have been executed yet." Do not error — the summary should still capture PROJECT.md and ROADMAP.md content.
+**如果不存在阶段目录**（空里程碑或预构建状态）：跳至步骤 5 并生成最小总结，注明"尚未执行任何阶段。"不要报错——总结仍应包含 PROJECT.md 和 ROADMAP.md 的内容。
 
-## Step 4: Gather Git Statistics
+## 步骤 4：收集 Git 统计
 
-Try each method in order until one succeeds:
+按顺序尝试每种方法，直到一种成功：
 
-**Method 1 — Tagged milestone** (check first):
+**方法 1 — 已标签的里程碑**（优先检查）：
 ```bash
 git tag -l "v${VERSION}" | head -1
 ```
-If the tag exists:
+如果标签存在：
 ```bash
 git log v${VERSION} --oneline | wc -l
 git diff --stat $(git log --format=%H --reverse v${VERSION} | head -1)..v${VERSION}
 ```
 
-**Method 2 — STATE.md date range** (if no tag):
-Read STATE.md and extract the `started_at` or earliest session date. Use it as the `--since` boundary:
+**方法 2 — STATE.md 日期范围**（如果没有标签）：
+读取 STATE.md 并提取 `started_at` 或最早的会话日期。将其用作 `--since` 边界：
 ```bash
 git log --oneline --since="<started_at_date>" | wc -l
 ```
 
-**Method 3 — Earliest phase commit** (if STATE.md has no date):
-Find the earliest `.planning/phases/` commit:
+**方法 3 — 最早的阶段提交**（如果 STATE.md 没有日期）：
+找到最早的 `.planning/phases/` 提交：
 ```bash
 git log --oneline --diff-filter=A -- ".planning/phases/" | tail -1
 ```
-Use that commit's date as the start boundary.
+使用该提交的日期作为起始边界。
 
-**Method 4 — Skip stats** (if none of the above work):
-Report "Git statistics unavailable — no tag or date range could be determined." This is not an error — the summary continues without the Stats section.
+**方法 4 — 跳过统计**（如果以上都不可行）：
+报告"Git 统计不可用——无法确定标签或日期范围。"这不是错误——总结将继续生成，只是不包含统计部分。
 
-Extract (when available):
-- Total commits in milestone
-- Files changed, insertions, deletions
-- Timeline (start date → end date)
-- Contributors (from git log authors)
+提取（可用时）：
+- 里程碑内的总提交数
+- 更改的文件数、新增行数、删除行数
+- 时间线（开始日期 → 结束日期）
+- 贡献者（来自 git log 作者）
 
-## Step 5: Generate Summary Document
+## 步骤 5：生成总结文档
 
-Write to `.planning/reports/MILESTONE_SUMMARY-v${VERSION}.md`:
+写入 `.planning/reports/MILESTONE_SUMMARY-v${VERSION}.md`：
 
 ```markdown
-# Milestone v{VERSION} — Project Summary
+# 里程碑 v{VERSION} — 项目总结
 
-**Generated:** {date}
-**Purpose:** Team onboarding and project review
-
----
-
-## 1. Project Overview
-
-{From PROJECT.md: "What This Is", core value proposition, target users}
-{If mid-milestone: note which phases are complete vs in-progress}
-
-## 2. Architecture & Technical Decisions
-
-{From CONTEXT.md files across phases: key technical choices}
-{From SUMMARY.md decisions: patterns, libraries, frameworks chosen}
-{From PROJECT.md: tech stack if documented}
-
-Present as a bulleted list of decisions with brief rationale:
-- **Decision:** {what was chosen}
-  - **Why:** {rationale from CONTEXT.md}
-  - **Phase:** {which phase made this decision}
-
-## 3. Phases Delivered
-
-| Phase | Name | Status | One-Liner |
-|-------|------|--------|-----------|
-{For each phase: number, name, status (complete/in-progress/planned), one_liner from SUMMARY.md}
-
-## 4. Requirements Coverage
-
-{From REQUIREMENTS.md: list each requirement with status}
-- ✅ {Requirement met}
-- ⚠️ {Requirement partially met — note gap}
-- ❌ {Requirement not met — note reason}
-
-{If MILESTONE-AUDIT.md exists: include audit verdict}
-
-## 5. Key Decisions Log
-
-{Aggregate from all CONTEXT.md <decisions> sections}
-{Each decision with: ID, description, phase, rationale}
-
-## 6. Tech Debt & Deferred Items
-
-{From VERIFICATION.md files: gaps found, anti-patterns noted}
-{From RETROSPECTIVE.md: lessons learned, what to improve}
-{From CONTEXT.md <deferred> sections: ideas parked for later}
-
-## 7. Getting Started
-
-{Entry points for new contributors:}
-- **Run the project:** {from PROJECT.md or SUMMARY.md}
-- **Key directories:** {from codebase structure}
-- **Tests:** {test command from PROJECT.md or CLAUDE.md}
-- **Where to look first:** {main entry points, core modules}
+**生成日期：**{date}
+**用途：**团队入职和项目回顾
 
 ---
 
-## Stats
+## 1. 项目概览
 
-- **Timeline:** {start} → {end} ({duration})
-- **Phases:** {count complete} / {count total}
-- **Commits:** {count}
-- **Files changed:** {count} (+{insertions} / -{deletions})
-- **Contributors:** {list}
+{来自 PROJECT.md："这是什么"、核心价值主张、目标用户}
+{如果处于里程碑进行中：注明哪些阶段已完成、哪些正在进行}
+
+## 2. 架构与技术决策
+
+{来自各阶段 CONTEXT.md 文件：关键技术选择}
+{来自 SUMMARY.md 的决策：选择的模式、库、框架}
+{来自 PROJECT.md：记录的技术栈}
+
+以带简要理由的列表形式呈现决策：
+- **决策：**{选择了什么}
+  - **原因：**{来自 CONTEXT.md 的理由}
+  - **阶段：**{做出此决策的阶段}
+
+## 3. 已交付的阶段
+
+| 阶段 | 名称 | 状态 | 一句话总结 |
+|------|------|------|-----------|
+{对每个阶段：编号、名称、状态（完成/进行中/已规划）、来自 SUMMARY.md 的 one_liner}
+
+## 4. 需求覆盖
+
+{来自 REQUIREMENTS.md：列出每个需求及其状态}
+- ✅ {已满足的需求}
+- ⚠️ {部分满足的需求——注明差距}
+- ❌ {未满足的需求——注明原因}
+
+{如果存在 MILESTONE-AUDIT.md：包含审计结论}
+
+## 5. 关键决策日志
+
+{汇总所有 CONTEXT.md 的 <decisions> 部分}
+{每个决策包含：ID、描述、阶段、理由}
+
+## 6. 技术债务与推迟项
+
+{来自 VERIFICATION.md 文件：发现的差距、标注的反模式}
+{来自 RETROSPECTIVE.md：经验教训、需要改进的方面}
+{来自 CONTEXT.md 的 <deferred> 部分：暂时搁置的想法}
+
+## 7. 入门指南
+
+{新贡献者的入口点：}
+- **运行项目：**{来自 PROJECT.md 或 SUMMARY.md}
+- **关键目录：**{来自代码库结构}
+- **测试：**{来自 PROJECT.md 或 CLAUDE.md 的测试命令}
+- **首先查看：**{主入口点、核心模块}
+
+---
+
+## 统计
+
+- **时间线：**{开始} → {结束}（{持续时间}）
+- **阶段：**{已完成数} / {总数}
+- **提交数：**{数量}
+- **更改的文件：**{数量}（+{新增} / -{删除}）
+- **贡献者：**{列表}
 ```
 
-## Step 6: Write and Commit
+## 步骤 6：写入并提交
 
-**Overwrite guard:** If `.planning/reports/MILESTONE_SUMMARY-v${VERSION}.md` already exists, ask the user:
-> "A milestone summary for v{VERSION} already exists. Overwrite it, or view the existing one?"
-If "view": display existing file and skip to Step 8 (interactive mode). If "overwrite": proceed.
+**覆盖保护：**如果 `.planning/reports/MILESTONE_SUMMARY-v${VERSION}.md` 已存在，询问用户：
+> "v{VERSION} 的里程碑总结已存在。要覆盖它还是查看现有的？"
+如果选择"查看"：显示现有文件并跳至步骤 8（交互模式）。如果选择"覆盖"：继续。
 
-Create the reports directory if needed:
+如果需要，创建 reports 目录：
 ```bash
 mkdir -p .planning/reports
 ```
 
-Write the summary, then commit:
+写入总结，然后提交：
 ```bash
 gsd-tools.cjs commit "docs(v${VERSION}): generate milestone summary for onboarding" \
   --files ".planning/reports/MILESTONE_SUMMARY-v${VERSION}.md"
 ```
 
-## Step 7: Present Summary
+## 步骤 7：展示总结
 
-Display the full summary document inline.
+内联显示完整的总结文档。
 
-## Step 8: Offer Interactive Mode
+## 步骤 8：提供交互模式
 
-After presenting the summary:
+展示总结后：
 
-> "Summary written to `.planning/reports/MILESTONE_SUMMARY-v{VERSION}.md`.
+> "总结已写入 `.planning/reports/MILESTONE_SUMMARY-v{VERSION}.md`。
 >
-> I have full context from the build artifacts. Want to ask anything about the project?
-> Architecture decisions, specific phases, requirements, tech debt — ask away."
+> 我已加载了构建产物的完整上下文。想问任何关于项目的问题吗？
+> 架构决策、特定阶段、需求、技术债务——尽管问。"
 
-If the user asks questions:
-- Answer from the artifacts already loaded (CONTEXT.md, SUMMARY.md, VERIFICATION.md, etc.)
-- Reference specific files and decisions
-- Stay grounded in what was actually built (not speculation)
+如果用户提问：
+- 根据已加载的产物（CONTEXT.md、SUMMARY.md、VERIFICATION.md 等）回答
+- 引用具体文件和决策
+- 基于实际构建的内容回答（而非推测）
 
-If the user is done:
-- Suggest next steps: `/gsd:new-milestone`, `/gsd:progress`, or sharing the summary with the team
+如果用户完成了提问：
+- 建议后续步骤：`/gsd:new-milestone`、`/gsd:progress`，或将总结分享给团队
 
-## Step 9: Update STATE.md
+## 步骤 9：更新 STATE.md
 
 ```bash
 gsd-tools.cjs state record-session \

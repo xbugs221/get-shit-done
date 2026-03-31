@@ -1,18 +1,16 @@
 ---
 name: gsd:do
-description: Route freeform text to the right GSD command automatically
-argument-hint: "<description of what you want to do>"
+description: 自动将自由文本路由到正确的 GSD 命令
+argument-hint: "<描述你想做什么>"
 allowed-tools:
   - Read
   - Bash
   - AskUserQuestion
 ---
 <objective>
-Analyze freeform natural language input and dispatch to the most appropriate GSD command.
+分析自然语言输入，分派到最合适的 GSD 命令。
 
-Acts as a smart dispatcher — never does the work itself. Matches intent to the best GSD command using routing rules, confirms the match, then hands off.
-
-Use when you know what you want but don't know which `/gsd:*` command to run.
+作为智能调度器 — 自身不执行工作。将意图匹配到最佳 GSD 命令，确认后交接。
 </objective>
 
 <execution_context>
@@ -25,6 +23,7 @@ $ARGUMENTS
 </context>
 
 <process>
-Execute the do workflow from @~/.claude/get-shit-done/workflows/do.md end-to-end.
-Route user intent to the best GSD command and invoke it.
+端到端执行 @~/.claude/get-shit-done/workflows/do.md 中的 do 工作流。
+将用户意图路由到最佳 GSD 命令并调用它。
 </process>
+</output>

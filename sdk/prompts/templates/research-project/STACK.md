@@ -1,120 +1,120 @@
-# Stack Research Template
+# 技术栈调研模板
 
-Template for `.planning/research/STACK.md` — recommended technologies for the project domain.
+`.planning/research/STACK.md` 的模板 — 项目领域的推荐技术。
 
 <template>
 
 ```markdown
-# Stack Research
+# 技术栈调研
 
-**Domain:** [domain type]
-**Researched:** [date]
-**Confidence:** [HIGH/MEDIUM/LOW]
+**领域：**[领域类型]
+**调研日期：**[日期]
+**置信度：**[高/中/低]
 
-## Recommended Stack
+## 推荐技术栈
 
-### Core Technologies
+### 核心技术
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| [name] | [version] | [what it does] | [why experts use it for this domain] |
-| [name] | [version] | [what it does] | [why experts use it for this domain] |
-| [name] | [version] | [what it does] | [why experts use it for this domain] |
+| 技术 | 版本 | 用途 | 推荐理由 |
+|------|------|------|---------|
+| [名称] | [版本] | [做什么] | [为什么专家在该领域使用它] |
+| [名称] | [版本] | [做什么] | [为什么专家在该领域使用它] |
+| [名称] | [版本] | [做什么] | [为什么专家在该领域使用它] |
 
-### Supporting Libraries
+### 辅助库
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| [name] | [version] | [what it does] | [specific use case] |
-| [name] | [version] | [what it does] | [specific use case] |
-| [name] | [version] | [what it does] | [specific use case] |
+| 库 | 版本 | 用途 | 何时使用 |
+|----|------|------|---------|
+| [名称] | [版本] | [做什么] | [具体使用场景] |
+| [名称] | [版本] | [做什么] | [具体使用场景] |
+| [名称] | [版本] | [做什么] | [具体使用场景] |
 
-### Development Tools
+### 开发工具
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| [name] | [what it does] | [configuration tips] |
-| [name] | [what it does] | [configuration tips] |
+| 工具 | 用途 | 备注 |
+|------|------|------|
+| [名称] | [做什么] | [配置提示] |
+| [名称] | [做什么] | [配置提示] |
 
-## Installation
+## 安装
 
 ```bash
-# Core
-npm install [packages]
+# 核心依赖
+npm install [包名]
 
-# Supporting
-npm install [packages]
+# 辅助依赖
+npm install [包名]
 
-# Dev dependencies
-npm install -D [packages]
+# 开发依赖
+npm install -D [包名]
 ```
 
-## Alternatives Considered
+## 考虑过的替代方案
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| [our choice] | [other option] | [conditions where alternative is better] |
-| [our choice] | [other option] | [conditions where alternative is better] |
+| 推荐方案 | 替代方案 | 何时使用替代方案 |
+|---------|---------|----------------|
+| [我们的选择] | [其他选项] | [替代方案更好的条件] |
+| [我们的选择] | [其他选项] | [替代方案更好的条件] |
 
-## What NOT to Use
+## 不要使用的技术
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| [technology] | [specific problem] | [recommended alternative] |
-| [technology] | [specific problem] | [recommended alternative] |
+| 避免使用 | 原因 | 应该用 |
+|---------|------|--------|
+| [技术] | [具体问题] | [推荐替代方案] |
+| [技术] | [具体问题] | [推荐替代方案] |
 
-## Stack Patterns by Variant
+## 不同场景下的技术栈模式
 
-**If [condition]:**
-- Use [variation]
-- Because [reason]
+**如果 [条件]：**
+- 使用 [变体]
+- 因为 [原因]
 
-**If [condition]:**
-- Use [variation]
-- Because [reason]
+**如果 [条件]：**
+- 使用 [变体]
+- 因为 [原因]
 
-## Version Compatibility
+## 版本兼容性
 
-| Package A | Compatible With | Notes |
-|-----------|-----------------|-------|
-| [package@version] | [package@version] | [compatibility notes] |
+| 包 A | 兼容版本 | 备注 |
+|------|---------|------|
+| [包@版本] | [包@版本] | [兼容性说明] |
 
-## Sources
+## 参考来源
 
-- [Context7 library ID] — [topics fetched]
-- [Official docs URL] — [what was verified]
-- [Other source] — [confidence level]
+- [Context7 库 ID] — [获取的主题]
+- [官方文档 URL] — [验证了什么]
+- [其他来源] — [置信度]
 
 ---
-*Stack research for: [domain]*
-*Researched: [date]*
+*技术栈调研领域：[领域]*
+*调研日期：[日期]*
 ```
 
 </template>
 
 <guidelines>
 
-**Core Technologies:**
-- Include specific version numbers
-- Explain why this is the standard choice, not just what it does
-- Focus on technologies that affect architecture decisions
+**核心技术：**
+- 包含具体版本号
+- 解释为什么这是标准选择，而不仅仅是它做什么
+- 聚焦于影响架构决策的技术
 
-**Supporting Libraries:**
-- Include libraries commonly needed for this domain
-- Note when each is needed (not all projects need all libraries)
+**辅助库：**
+- 包含该领域常用的库
+- 注明每个库何时需要（不是所有项目都需要所有库）
 
-**Alternatives:**
-- Don't just dismiss alternatives
-- Explain when alternatives make sense
-- Helps user make informed decisions if they disagree
+**替代方案：**
+- 不要简单否定替代方案
+- 解释替代方案在什么情况下有意义
+- 帮助用户在不同意时做出明智的决策
 
-**What NOT to Use:**
-- Actively warn against outdated or problematic choices
-- Explain the specific problem, not just "it's old"
-- Provide the recommended alternative
+**不要使用的技术：**
+- 主动警告过时或有问题的选择
+- 解释具体的问题，而不只是"太旧了"
+- 提供推荐的替代方案
 
-**Version Compatibility:**
-- Note any known compatibility issues
-- Critical for avoiding debugging time later
+**版本兼容性：**
+- 记录已知的兼容性问题
+- 对于避免后续调试时间至关重要
 
 </guidelines>

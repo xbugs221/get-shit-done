@@ -1,255 +1,255 @@
-# Architecture Template
+# 架构模板
 
-Template for `.planning/codebase/ARCHITECTURE.md` - captures conceptual code organization.
+用于 `.planning/codebase/ARCHITECTURE.md` 的模板 - 记录概念层面的代码组织。
 
-**Purpose:** Document how the code is organized at a conceptual level. Complements STRUCTURE.md (which shows physical file locations).
+**目的：** 记录代码在概念层面如何组织。与 STRUCTURE.md（展示物理文件位置）互为补充。
 
 ---
 
-## File Template
+## 文件模板
 
 ```markdown
-# Architecture
+# 架构
 
-**Analysis Date:** [YYYY-MM-DD]
+**分析日期：** [YYYY-MM-DD]
 
-## Pattern Overview
+## 模式概览
 
-**Overall:** [Pattern name: e.g., "Monolithic CLI", "Serverless API", "Full-stack MVC"]
+**总体：** [模式名称：例如 "单体 CLI"、"Serverless API"、"全栈 MVC"]
 
-**Key Characteristics:**
-- [Characteristic 1: e.g., "Single executable"]
-- [Characteristic 2: e.g., "Stateless request handling"]
-- [Characteristic 3: e.g., "Event-driven"]
+**关键特征：**
+- [特征 1：例如 "单一可执行文件"]
+- [特征 2：例如 "无状态请求处理"]
+- [特征 3：例如 "事件驱动"]
 
-## Layers
+## 层次
 
-[Describe the conceptual layers and their responsibilities]
+[描述概念层次及其职责]
 
-**[Layer Name]:**
-- Purpose: [What this layer does]
-- Contains: [Types of code: e.g., "route handlers", "business logic"]
-- Depends on: [What it uses: e.g., "data layer only"]
-- Used by: [What uses it: e.g., "API routes"]
+**[层次名称]：**
+- 用途：[此层做什么]
+- 包含：[代码类型：例如 "路由处理器"、"业务逻辑"]
+- 依赖：[它使用什么：例如 "仅数据层"]
+- 被使用：[什么使用它：例如 "API 路由"]
 
-**[Layer Name]:**
-- Purpose: [What this layer does]
-- Contains: [Types of code]
-- Depends on: [What it uses]
-- Used by: [What uses it]
+**[层次名称]：**
+- 用途：[此层做什么]
+- 包含：[代码类型]
+- 依赖：[它使用什么]
+- 被使用：[什么使用它]
 
-## Data Flow
+## 数据流
 
-[Describe the typical request/execution lifecycle]
+[描述典型的请求/执行生命周期]
 
-**[Flow Name] (e.g., "HTTP Request", "CLI Command", "Event Processing"):**
+**[流程名称]（例如 "HTTP 请求"、"CLI 命令"、"事件处理"）：**
 
-1. [Entry point: e.g., "User runs command"]
-2. [Processing step: e.g., "Router matches path"]
-3. [Processing step: e.g., "Controller validates input"]
-4. [Processing step: e.g., "Service executes logic"]
-5. [Output: e.g., "Response returned"]
+1. [入口点：例如 "用户运行命令"]
+2. [处理步骤：例如 "路由器匹配路径"]
+3. [处理步骤：例如 "控制器验证输入"]
+4. [处理步骤：例如 "服务执行逻辑"]
+5. [输出：例如 "返回响应"]
 
-**State Management:**
-- [How state is handled: e.g., "Stateless - no persistent state", "Database per request", "In-memory cache"]
+**状态管理：**
+- [状态如何处理：例如 "无状态 - 不持久化状态"、"每请求一次数据库"、"内存缓存"]
 
-## Key Abstractions
+## 关键抽象
 
-[Core concepts/patterns used throughout the codebase]
+[整个代码库使用的核心概念/模式]
 
-**[Abstraction Name]:**
-- Purpose: [What it represents]
-- Examples: [e.g., "UserService, ProjectService"]
-- Pattern: [e.g., "Singleton", "Factory", "Repository"]
+**[抽象名称]：**
+- 用途：[它代表什么]
+- 示例：[例如 "UserService、ProjectService"]
+- 模式：[例如 "单例"、"工厂"、"仓储"]
 
-**[Abstraction Name]:**
-- Purpose: [What it represents]
-- Examples: [Concrete examples]
-- Pattern: [Pattern used]
+**[抽象名称]：**
+- 用途：[它代表什么]
+- 示例：[具体示例]
+- 模式：[使用的模式]
 
-## Entry Points
+## 入口点
 
-[Where execution begins]
+[执行从哪里开始]
 
-**[Entry Point]:**
-- Location: [Brief: e.g., "src/index.ts", "API Gateway triggers"]
-- Triggers: [What invokes it: e.g., "CLI invocation", "HTTP request"]
-- Responsibilities: [What it does: e.g., "Parse args, route to command"]
+**[入口点]：**
+- 位置：[简述：例如 "src/index.ts"、"API Gateway 触发"]
+- 触发方式：[什么调用它：例如 "CLI 调用"、"HTTP 请求"]
+- 职责：[它做什么：例如 "解析参数，路由到命令"]
 
-## Error Handling
+## 错误处理
 
-**Strategy:** [How errors are handled: e.g., "Exception bubbling to top-level handler", "Per-route error middleware"]
+**策略：** [错误如何处理：例如 "异常冒泡到顶层处理器"、"每路由错误中间件"]
 
-**Patterns:**
-- [Pattern: e.g., "try/catch at controller level"]
-- [Pattern: e.g., "Error codes returned to user"]
+**模式：**
+- [模式：例如 "在控制器层进行 try/catch"]
+- [模式：例如 "向用户返回错误码"]
 
-## Cross-Cutting Concerns
+## 横切关注点
 
-[Aspects that affect multiple layers]
+[影响多个层次的方面]
 
-**Logging:**
-- [Approach: e.g., "Winston logger, injected per-request"]
+**日志记录：**
+- [方法：例如 "Winston 日志器，每请求注入"]
 
-**Validation:**
-- [Approach: e.g., "Zod schemas at API boundary"]
+**验证：**
+- [方法：例如 "在 API 边界使用 Zod schema"]
 
-**Authentication:**
-- [Approach: e.g., "JWT middleware on protected routes"]
+**认证：**
+- [方法：例如 "受保护路由上的 JWT 中间件"]
 
 ---
 
-*Architecture analysis: [date]*
-*Update when major patterns change*
+*架构分析：[日期]*
+*在主要模式变更时更新*
 ```
 
 <good_examples>
 ```markdown
-# Architecture
+# 架构
 
-**Analysis Date:** 2025-01-20
+**分析日期：** 2025-01-20
 
-## Pattern Overview
+## 模式概览
 
-**Overall:** CLI Application with Plugin System
+**总体：** 带插件系统的 CLI 应用
 
-**Key Characteristics:**
-- Single executable with subcommands
-- Plugin-based extensibility
-- File-based state (no database)
-- Synchronous execution model
+**关键特征：**
+- 带子命令的单一可执行文件
+- 基于插件的可扩展性
+- 基于文件的状态（无数据库）
+- 同步执行模型
 
-## Layers
+## 层次
 
-**Command Layer:**
-- Purpose: Parse user input and route to appropriate handler
-- Contains: Command definitions, argument parsing, help text
-- Location: `src/commands/*.ts`
-- Depends on: Service layer for business logic
-- Used by: CLI entry point (`src/index.ts`)
+**命令层：**
+- 用途：解析用户输入并路由到相应处理器
+- 包含：命令定义、参数解析、帮助文本
+- 位置：`src/commands/*.ts`
+- 依赖：服务层的业务逻辑
+- 被使用：CLI 入口点（`src/index.ts`）
 
-**Service Layer:**
-- Purpose: Core business logic
-- Contains: FileService, TemplateService, InstallService
-- Location: `src/services/*.ts`
-- Depends on: File system utilities, external tools
-- Used by: Command handlers
+**服务层：**
+- 用途：核心业务逻辑
+- 包含：FileService、TemplateService、InstallService
+- 位置：`src/services/*.ts`
+- 依赖：文件系统工具、外部工具
+- 被使用：命令处理器
 
-**Utility Layer:**
-- Purpose: Shared helpers and abstractions
-- Contains: File I/O wrappers, path resolution, string formatting
-- Location: `src/utils/*.ts`
-- Depends on: Node.js built-ins only
-- Used by: Service layer
+**工具层：**
+- 用途：共享辅助函数和抽象
+- 包含：文件 I/O 封装、路径解析、字符串格式化
+- 位置：`src/utils/*.ts`
+- 依赖：仅 Node.js 内置模块
+- 被使用：服务层
 
-## Data Flow
+## 数据流
 
-**CLI Command Execution:**
+**CLI 命令执行：**
 
-1. User runs: `gsd new-project`
-2. Commander parses args and flags
-3. Command handler invoked (`src/commands/new-project.ts`)
-4. Handler calls service methods (`src/services/project.ts` → `create()`)
-5. Service reads templates, processes files, writes output
-6. Results logged to console
-7. Process exits with status code
+1. 用户运行：`gsd new-project`
+2. Commander 解析参数和标志
+3. 调用命令处理器（`src/commands/new-project.ts`）
+4. 处理器调用服务方法（`src/services/project.ts` → `create()`）
+5. 服务读取模板、处理文件、写入输出
+6. 结果输出到控制台
+7. 进程以状态码退出
 
-**State Management:**
-- File-based: All state lives in `.planning/` directory
-- No persistent in-memory state
-- Each command execution is independent
+**状态管理：**
+- 基于文件：所有状态存储在 `.planning/` 目录中
+- 无持久化内存状态
+- 每次命令执行都是独立的
 
-## Key Abstractions
+## 关键抽象
 
-**Service:**
-- Purpose: Encapsulate business logic for a domain
-- Examples: `src/services/file.ts`, `src/services/template.ts`, `src/services/project.ts`
-- Pattern: Singleton-like (imported as modules, not instantiated)
+**服务：**
+- 用途：封装某个领域的业务逻辑
+- 示例：`src/services/file.ts`、`src/services/template.ts`、`src/services/project.ts`
+- 模式：类似单例（作为模块导入，不进行实例化）
 
-**Command:**
-- Purpose: CLI command definition
-- Examples: `src/commands/new-project.ts`, `src/commands/plan-phase.ts`
-- Pattern: Commander.js command registration
+**命令：**
+- 用途：CLI 命令定义
+- 示例：`src/commands/new-project.ts`、`src/commands/plan-phase.ts`
+- 模式：Commander.js 命令注册
 
-**Template:**
-- Purpose: Reusable document structures
-- Examples: PROJECT.md, PLAN.md templates
-- Pattern: Markdown files with substitution variables
+**模板：**
+- 用途：可复用的文档结构
+- 示例：PROJECT.md、PLAN.md 模板
+- 模式：带替换变量的 Markdown 文件
 
-## Entry Points
+## 入口点
 
-**CLI Entry:**
-- Location: `src/index.ts`
-- Triggers: User runs `gsd <command>`
-- Responsibilities: Register commands, parse args, display help
+**CLI 入口：**
+- 位置：`src/index.ts`
+- 触发方式：用户运行 `gsd <command>`
+- 职责：注册命令、解析参数、显示帮助
 
-**Commands:**
-- Location: `src/commands/*.ts`
-- Triggers: Matched command from CLI
-- Responsibilities: Validate input, call services, format output
+**命令：**
+- 位置：`src/commands/*.ts`
+- 触发方式：CLI 匹配到的命令
+- 职责：验证输入、调用服务、格式化输出
 
-## Error Handling
+## 错误处理
 
-**Strategy:** Throw exceptions, catch at command level, log and exit
+**策略：** 抛出异常，在命令层捕获，记录日志并退出
 
-**Patterns:**
-- Services throw Error with descriptive messages
-- Command handlers catch, log error to stderr, exit(1)
-- Validation errors shown before execution (fail fast)
+**模式：**
+- 服务抛出带描述性消息的 Error
+- 命令处理器捕获，将错误记录到 stderr，exit(1)
+- 验证错误在执行前显示（快速失败）
 
-## Cross-Cutting Concerns
+## 横切关注点
 
-**Logging:**
-- Console.log for normal output
-- Console.error for errors
-- Chalk for colored output
+**日志记录：**
+- Console.log 用于正常输出
+- Console.error 用于错误
+- Chalk 用于彩色输出
 
-**Validation:**
-- Zod schemas for config file parsing
-- Manual validation in command handlers
-- Fail fast on invalid input
+**验证：**
+- Zod schema 用于配置文件解析
+- 命令处理器中的手动验证
+- 无效输入时快速失败
 
-**File Operations:**
-- FileService abstraction over fs-extra
-- All paths validated before operations
-- Atomic writes (temp file + rename)
+**文件操作：**
+- FileService 对 fs-extra 的抽象
+- 所有路径在操作前验证
+- 原子写入（临时文件 + 重命名）
 
 ---
 
-*Architecture analysis: 2025-01-20*
-*Update when major patterns change*
+*架构分析：2025-01-20*
+*在主要模式变更时更新*
 ```
 </good_examples>
 
 <guidelines>
-**What belongs in ARCHITECTURE.md:**
-- Overall architectural pattern (monolith, microservices, layered, etc.)
-- Conceptual layers and their relationships
-- Data flow / request lifecycle
-- Key abstractions and patterns
-- Entry points
-- Error handling strategy
-- Cross-cutting concerns (logging, auth, validation)
+**ARCHITECTURE.md 中应包含的内容：**
+- 总体架构模式（单体、微服务、分层等）
+- 概念层次及其关系
+- 数据流/请求生命周期
+- 关键抽象和模式
+- 入口点
+- 错误处理策略
+- 横切关注点（日志记录、认证、验证）
 
-**What does NOT belong here:**
-- Exhaustive file listings (that's STRUCTURE.md)
-- Technology choices (that's STACK.md)
-- Line-by-line code walkthrough (defer to code reading)
-- Implementation details of specific features
+**不应包含在此处的内容：**
+- 详尽的文件列表（那是 STRUCTURE.md 的内容）
+- 技术选型（那是 STACK.md 的内容）
+- 逐行代码走查（留给代码阅读）
+- 特定功能的实现细节
 
-**File paths ARE welcome:**
-Include file paths as concrete examples of abstractions. Use backtick formatting: `src/services/user.ts`. This makes the architecture document actionable for Claude when planning.
+**欢迎包含文件路径：**
+将文件路径作为抽象的具体示例包含进来。使用反引号格式：`src/services/user.ts`。这使得架构文档在 Claude 进行规划时更具可操作性。
 
-**When filling this template:**
-- Read main entry points (index, server, main)
-- Identify layers by reading imports/dependencies
-- Trace a typical request/command execution
-- Note recurring patterns (services, controllers, repositories)
-- Keep descriptions conceptual, not mechanical
+**填写此模板时：**
+- 阅读主要入口点（index、server、main）
+- 通过阅读导入/依赖关系识别层次
+- 跟踪一个典型的请求/命令执行过程
+- 记录反复出现的模式（服务、控制器、仓储）
+- 保持描述概念化，而非机械化
 
-**Useful for phase planning when:**
-- Adding new features (where does it fit in the layers?)
-- Refactoring (understanding current patterns)
-- Identifying where to add code (which layer handles X?)
-- Understanding dependencies between components
+**在以下情况下对阶段规划有用：**
+- 添加新功能（它在哪个层次中？）
+- 重构（了解当前模式）
+- 确定代码添加位置（哪个层次处理 X？）
+- 了解组件之间的依赖关系
 </guidelines>

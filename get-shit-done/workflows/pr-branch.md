@@ -1,71 +1,71 @@
 <purpose>
-Create a clean branch for pull requests by filtering out .planning/ commits.
-The PR branch contains only code changes — reviewers don't see GSD artifacts
-(PLAN.md, SUMMARY.md, STATE.md, CONTEXT.md, etc.).
+创建一个干净的分支用于 Pull Request，过滤掉 .planning/ 的提交。
+PR 分支仅包含代码变更——审阅者不会看到 GSD 制品
+（PLAN.md、SUMMARY.md、STATE.md、CONTEXT.md 等）。
 
-Uses git cherry-pick with path filtering to rebuild a clean history.
+使用 git cherry-pick 配合路径过滤来重建干净的历史。
 </purpose>
 
 <process>
 
 <step name="detect_state">
-Parse `$ARGUMENTS` for target branch (default: `main`).
+从 `$ARGUMENTS` 中解析目标分支（默认：`main`）。
 
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
 TARGET=${1:-main}
 ```
 
-Check preconditions:
-- Must be on a feature branch (not main/master)
-- Must have commits ahead of target
+检查前置条件：
+- 必须在功能分支上（不是 main/master）
+- 必须有领先于目标的提交
 
 ```bash
 AHEAD=$(git rev-list --count "$TARGET".."$CURRENT_BRANCH" 2>/dev/null)
 if [ "$AHEAD" = "0" ]; then
-  echo "No commits ahead of $TARGET — nothing to filter."
+  echo "没有领先于 $TARGET 的提交——无需过滤。"
   exit 0
 fi
 ```
 
-Display:
+显示：
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► PR BRANCH
+ GSD ► PR 分支
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Branch: {CURRENT_BRANCH}
-Target: {TARGET}
-Commits: {AHEAD} ahead
+分支：{CURRENT_BRANCH}
+目标：{TARGET}
+提交数：领先 {AHEAD} 个
 ```
 </step>
 
 <step name="analyze_commits">
-Classify commits:
+分类提交：
 
 ```bash
-# Get all commits ahead of target
+# 获取所有领先于目标的提交
 git log --oneline "$TARGET".."$CURRENT_BRANCH" --no-merges
 ```
 
-For each commit, check if it ONLY touches .planning/ files:
+对于每个提交，检查它是否仅涉及 .planning/ 文件：
 
 ```bash
-# For each commit hash
+# 对于每个提交哈希
 FILES=$(git diff-tree --no-commit-id --name-only -r $HASH)
 ALL_PLANNING=$(echo "$FILES" | grep -v "^\.planning/" | wc -l)
 ```
 
-Classify:
-- **Code commits**: Touch at least one non-.planning/ file → INCLUDE
-- **Planning-only commits**: Touch only .planning/ files → EXCLUDE
-- **Mixed commits**: Touch both → INCLUDE (planning changes come along)
+分类：
+- **代码提交**：涉及至少一个非 .planning/ 文件 → 包含
+- **仅规划提交**：仅涉及 .planning/ 文件 → 排除
+- **混合提交**：同时涉及两者 → 包含（规划变更随之而来）
 
-Display analysis:
+显示分析：
 ```
-Commits to include: {N} (code changes)
-Commits to exclude: {N} (planning-only)
-Mixed commits: {N} (code + planning — included)
+要包含的提交：{N}（代码变更）
+要排除的提交：{N}（仅规划）
+混合提交：{N}（代码 + 规划——已包含）
 ```
 </step>
 
@@ -73,22 +73,22 @@ Mixed commits: {N} (code + planning — included)
 ```bash
 PR_BRANCH="${CURRENT_BRANCH}-pr"
 
-# Create PR branch from target
+# 从目标创建 PR 分支
 git checkout -b "$PR_BRANCH" "$TARGET"
 ```
 
-Cherry-pick only code commits (in order):
+仅按顺序 cherry-pick 代码提交：
 
 ```bash
 for HASH in $CODE_COMMITS; do
   git cherry-pick "$HASH" --no-commit
-  # Remove any .planning/ files that came along in mixed commits
+  # 移除混合提交中附带的 .planning/ 文件
   git rm -r --cached .planning/ 2>/dev/null || true
   git commit -C "$HASH"
 done
 ```
 
-Return to original branch:
+返回原始分支：
 ```bash
 git checkout "$CURRENT_BRANCH"
 ```
@@ -96,34 +96,35 @@ git checkout "$CURRENT_BRANCH"
 
 <step name="verify">
 ```bash
-# Verify no .planning/ files in PR branch
+# 验证 PR 分支中没有 .planning/ 文件
 PLANNING_FILES=$(git diff --name-only "$TARGET".."$PR_BRANCH" | grep "^\.planning/" | wc -l)
 TOTAL_FILES=$(git diff --name-only "$TARGET".."$PR_BRANCH" | wc -l)
 PR_COMMITS=$(git rev-list --count "$TARGET".."$PR_BRANCH")
 ```
 
-Display results:
+显示结果：
 ```
-✅ PR branch created: {PR_BRANCH}
+✅ PR 分支已创建：{PR_BRANCH}
 
-Original: {AHEAD} commits, {ORIGINAL_FILES} files
-PR branch: {PR_COMMITS} commits, {TOTAL_FILES} files
-Planning files: {PLANNING_FILES} (should be 0)
+原始：{AHEAD} 个提交，{ORIGINAL_FILES} 个文件
+PR 分支：{PR_COMMITS} 个提交，{TOTAL_FILES} 个文件
+规划文件：{PLANNING_FILES}（应为 0）
 
-Next steps:
+下一步：
   git push origin {PR_BRANCH}
   gh pr create --base {TARGET} --head {PR_BRANCH}
 
-Or use /gsd:ship to create the PR automatically.
+或使用 /gsd:ship 自动创建 PR。
 ```
 </step>
 
 </process>
 
 <success_criteria>
-- [ ] PR branch created from target
-- [ ] Planning-only commits excluded
-- [ ] No .planning/ files in PR branch diff
-- [ ] Commit messages preserved from original
-- [ ] User shown next steps
+- [ ] 从目标创建了 PR 分支
+- [ ] 排除了仅规划的提交
+- [ ] PR 分支差异中没有 .planning/ 文件
+- [ ] 原始提交消息已保留
+- [ ] 向用户展示了下一步
 </success_criteria>
+</output>

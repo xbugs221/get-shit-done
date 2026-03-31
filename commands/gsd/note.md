@@ -1,7 +1,7 @@
 ---
 name: gsd:note
-description: Zero-friction idea capture. Append, list, or promote notes to todos.
-argument-hint: "<text> | list | promote <N> [--global]"
+description: 零摩擦的想法捕获。追加、列出或将笔记提升为待办事项。
+argument-hint: "<文本> | list | promote <N> [--global]"
 allowed-tools:
   - Read
   - Write
@@ -9,14 +9,14 @@ allowed-tools:
   - Grep
 ---
 <objective>
-Zero-friction idea capture — one Write call, one confirmation line.
+零摩擦想法捕获——一次 Write 调用，一行确认。
 
-Three subcommands:
-- **append** (default): Save a timestamped note file. No questions, no formatting.
-- **list**: Show all notes from project and global scopes.
-- **promote**: Convert a note into a structured todo.
+三个子命令：
+- **append**（默认）：保存带时间戳的笔记文件，无提问无格式化
+- **list**：显示项目和全局范围的所有笔记
+- **promote**：将笔记转换为结构化待办事项
 
-Runs inline — no Task, no AskUserQuestion, no Bash.
+内联运行——不使用 Task、AskUserQuestion 或 Bash。
 </objective>
 
 <execution_context>
@@ -29,6 +29,6 @@ $ARGUMENTS
 </context>
 
 <process>
-Execute the note workflow from @~/.claude/get-shit-done/workflows/note.md end-to-end.
-Capture the note, list notes, or promote to todo — depending on arguments.
+端到端执行 @~/.claude/get-shit-done/workflows/note.md 工作流。
+根据参数捕获笔记、列出笔记或提升为待办事项。
 </process>

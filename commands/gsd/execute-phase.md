@@ -1,6 +1,6 @@
 ---
 name: gsd:execute-phase
-description: Execute all plans in a phase with wave-based parallelization
+description: 使用基于波次的并行化执行阶段中的所有计划
 argument-hint: "<phase-number> [--wave N] [--gaps-only] [--interactive]"
 allowed-tools:
   - Read
@@ -14,20 +14,15 @@ allowed-tools:
   - AskUserQuestion
 ---
 <objective>
-Execute all plans in a phase using wave-based parallel execution.
+使用基于波次的并行执行来执行阶段中的所有计划。
 
-Orchestrator stays lean: discover plans, analyze dependencies, group into waves, spawn subagents, collect results. Each subagent loads the full execute-plan context and handles its own plan.
+协调器保持精简：发现计划、分析依赖关系、按波次分组、生成子代理、收集结果。每个子代理加载完整的 execute-plan 上下文并处理自己的计划。
 
-Optional wave filter:
-- `--wave N` executes only Wave `N` for pacing, quota management, or staged rollout
-- phase verification/completion still only happens when no incomplete plans remain after the selected wave finishes
+标志处理规则：
+- 标志仅在其字面标记出现在 `$ARGUMENTS` 中时才激活
+- 未出现在 `$ARGUMENTS` 中的标志视为未激活
 
-Flag handling rule:
-- The optional flags documented below are available behaviors, not implied active behaviors
-- A flag is active only when its literal token appears in `$ARGUMENTS`
-- If a documented flag is absent from `$ARGUMENTS`, treat it as inactive
-
-Context budget: ~15% orchestrator, 100% fresh per subagent.
+上下文预算：协调器约 15%，每个子代理 100% 全新。
 </objective>
 
 <execution_context>
@@ -36,24 +31,20 @@ Context budget: ~15% orchestrator, 100% fresh per subagent.
 </execution_context>
 
 <context>
-Phase: $ARGUMENTS
+阶段：$ARGUMENTS
 
-**Available optional flags (documentation only — not automatically active):**
-- `--wave N` — Execute only Wave `N` in the phase. Use when you want to pace execution or stay inside usage limits.
-- `--gaps-only` — Execute only gap closure plans (plans with `gap_closure: true` in frontmatter). Use after verify-work creates fix plans.
-- `--interactive` — Execute plans sequentially inline (no subagents) with user checkpoints between tasks. Lower token usage, pair-programming style. Best for small phases, bug fixes, and verification gaps.
+**可选标志（仅在 `$ARGUMENTS` 中出现时才激活）：**
+- `--wave N` — 仅执行波次 `N`，用于控制节奏或配额管理
+- `--gaps-only` — 仅执行差距修复计划（frontmatter 中 `gap_closure: true`）。在 verify-work 创建修复计划后使用
+- `--interactive` — 按顺序内联执行（不用子代理），任务间设用户检查点。更低 token 用量，适合小型阶段、bug 修复和验证差距
 
-**Active flags must be derived from `$ARGUMENTS`:**
-- `--wave N` is active only if the literal `--wave` token is present in `$ARGUMENTS`
-- `--gaps-only` is active only if the literal `--gaps-only` token is present in `$ARGUMENTS`
-- `--interactive` is active only if the literal `--interactive` token is present in `$ARGUMENTS`
-- If none of these tokens appear, run the standard full-phase execution flow with no flag-specific filtering
-- Do not infer that a flag is active just because it is documented in this prompt
+阶段验证/完成仅在所选波次完成后没有未完成计划时才执行。
 
-Context files are resolved inside the workflow via `gsd-tools init execute-phase` and per-subagent `<files_to_read>` blocks.
+上下文文件在工作流内部通过 `gsd-tools init execute-phase` 和每个子代理的 `<files_to_read>` 块来解析。
 </context>
 
 <process>
-Execute the execute-phase workflow from @~/.claude/get-shit-done/workflows/execute-phase.md end-to-end.
-Preserve all workflow gates (wave execution, checkpoint handling, verification, state updates, routing).
+端到端执行 @~/.claude/get-shit-done/workflows/execute-phase.md 中的 execute-phase 工作流。
+保留所有工作流关卡（波次执行、检查点处理、验证、状态更新、路由）。
 </process>
+</output>

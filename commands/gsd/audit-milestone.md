@@ -1,6 +1,6 @@
 ---
 name: gsd:audit-milestone
-description: Audit milestone completion against original intent before archiving
+description: 在归档之前审计里程碑完成情况与原始意图的一致性
 argument-hint: "[version]"
 allowed-tools:
   - Read
@@ -11,9 +11,9 @@ allowed-tools:
   - Write
 ---
 <objective>
-Verify milestone achieved its definition of done. Check requirements coverage, cross-phase integration, and end-to-end flows.
+验证里程碑是否达成其完成定义。检查需求覆盖率、跨阶段集成和端到端流程。
 
-**This command IS the orchestrator.** Reads existing VERIFICATION.md files (phases already verified during execute-phase), aggregates tech debt and deferred gaps, then spawns integration checker for cross-phase wiring.
+**此命令本身就是编排器。** 读取现有 VERIFICATION.md 文件（阶段已在 execute-phase 期间验证），汇总技术债务和延期缺口，然后启动集成检查器进行跨阶段连接检查。
 </objective>
 
 <execution_context>
@@ -21,16 +21,16 @@ Verify milestone achieved its definition of done. Check requirements coverage, c
 </execution_context>
 
 <context>
-Version: $ARGUMENTS (optional — defaults to current milestone)
+版本：$ARGUMENTS（可选——默认为当前里程碑）
 
-Core planning files are resolved in-workflow (`init milestone-op`) and loaded only as needed.
+核心规划文件在工作流内解析（`init milestone-op`），仅在需要时加载。
 
-**Completed Work:**
+**已完成的工作：**
 Glob: .planning/phases/*/*-SUMMARY.md
 Glob: .planning/phases/*/*-VERIFICATION.md
 </context>
 
 <process>
-Execute the audit-milestone workflow from @~/.claude/get-shit-done/workflows/audit-milestone.md end-to-end.
-Preserve all workflow gates (scope determination, verification reading, integration check, requirements coverage, routing).
+端到端执行 @~/.claude/get-shit-done/workflows/audit-milestone.md 中的 audit-milestone 工作流。
+保留所有工作流关卡（范围确定、验证读取、集成检查、需求覆盖、路由）。
 </process>

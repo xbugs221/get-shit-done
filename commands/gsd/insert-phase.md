@@ -1,6 +1,6 @@
 ---
 name: gsd:insert-phase
-description: Insert urgent work as decimal phase (e.g., 72.1) between existing phases
+description: 在现有阶段之间插入紧急工作作为小数阶段（例如 72.1）
 argument-hint: <after> <description>
 allowed-tools:
   - Read
@@ -9,11 +9,7 @@ allowed-tools:
 ---
 
 <objective>
-Insert a decimal phase for urgent work discovered mid-milestone that must be completed between existing integer phases.
-
-Uses decimal numbering (72.1, 72.2, etc.) to preserve the logical sequence of planned phases while accommodating urgent insertions.
-
-Purpose: Handle urgent work discovered during execution without renumbering entire roadmap.
+为执行过程中发现的紧急工作插入小数阶段（72.1、72.2 等），保留逻辑顺序，无需重新编号整个路线图。
 </objective>
 
 <execution_context>
@@ -21,12 +17,13 @@ Purpose: Handle urgent work discovered during execution without renumbering enti
 </execution_context>
 
 <context>
-Arguments: $ARGUMENTS (format: <after-phase-number> <description>)
+参数：$ARGUMENTS（格式：<在哪个阶段之后> <描述>）
 
-Roadmap and state are resolved in-workflow via `init phase-op` and targeted tool calls.
+路线图和状态通过 `init phase-op` 和工具调用在工作流内部解析。
 </context>
 
 <process>
-Execute the insert-phase workflow from @~/.claude/get-shit-done/workflows/insert-phase.md end-to-end.
-Preserve all validation gates (argument parsing, phase verification, decimal calculation, roadmap updates).
+执行 @~/.claude/get-shit-done/workflows/insert-phase.md 中的插入阶段工作流。
+保留所有验证关卡（参数解析、阶段验证、小数计算、路线图更新）。
 </process>
+</output>

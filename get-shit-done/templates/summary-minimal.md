@@ -1,41 +1,41 @@
 ---
 phase: XX-name
 plan: YY
-subsystem: [primary category]
-tags: [searchable tech]
+subsystem: [主要类别]
+tags: [可搜索的技术标签]
 provides:
-  - [bullet list of what was built/delivered]
-affects: [list of phase names or keywords]
+  - [交付成果列表]
+affects: [受影响的阶段名称或关键词列表]
 tech-stack:
-  added: [libraries/tools]
-  patterns: [architectural/code patterns]
+  added: [库/工具]
+  patterns: [架构/代码模式]
 key-files:
-  created: [important files created]
-  modified: [important files modified]
+  created: [创建的重要文件]
+  modified: [修改的重要文件]
 key-decisions: []
 duration: Xmin
 completed: YYYY-MM-DD
 ---
 
-# Phase [X]: [Name] Summary (Minimal)
+# 阶段 [X]：[名称] 总结（精简版）
 
-**[Substantive one-liner describing outcome]**
+**[描述成果的实质性一句话]**
 
-## Performance
-- **Duration:** [time]
-- **Tasks:** [count]
-- **Files modified:** [count]
+## 执行情况
+- **耗时：** [时间]
+- **任务：** [数量]
+- **修改的文件：** [数量]
 
-## Accomplishments
-- [Most important outcome]
-- [Second key accomplishment]
+## 成果
+- [最重要的成果]
+- [第二个关键成果]
 
-## Task Commits
-1. **Task 1: [task name]** - `hash`
-2. **Task 2: [task name]** - `hash`
+## 任务提交记录
+1. **任务 1：[任务名称]** - `hash`
+2. **任务 2：[任务名称]** - `hash`
 
-## Files Created/Modified
-- `path/to/file.ts` - What it does
+## 创建/修改的文件
+- `path/to/file.ts` - 功能描述
 
-## Next Phase Readiness
-[Ready for next phase]
+## 下一阶段就绪状态
+[为下一阶段准备就绪]

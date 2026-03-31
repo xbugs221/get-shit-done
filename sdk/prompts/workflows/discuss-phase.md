@@ -1,110 +1,110 @@
 <purpose>
-Extract implementation decisions that downstream agents need. Analyze the phase to identify gray areas and capture decisions that guide research and planning.
-Headless SDK variant — in autonomous mode, AI self-discusses by analyzing available context and making decisions based on project artifacts and codebase patterns.
+提取下游代理所需的实现决策。分析阶段以识别灰色地带，并捕获指导研究和规划的决策。
+无头 SDK 变体 — 在自主模式下，AI 通过分析可用上下文并基于项目工件和代码库模式做出决策来进行自我讨论。
 </purpose>
 
 <downstream_awareness>
-**CONTEXT.md feeds into:**
+**CONTEXT.md 输入到：**
 
-1. **Researcher** — Reads CONTEXT.md to know WHAT to research
-   - Locked decisions guide research focus
-   - Discretion areas get options explored
+1. **研究者** — 读取 CONTEXT.md 以了解需要研究什么
+   - 已锁定的决策指导研究重点
+   - 自由裁量区域会被探索各种选项
 
-2. **Planner** — Reads CONTEXT.md to know WHAT decisions are locked
-   - Locked decisions become non-negotiable plan constraints
-   - Discretion areas allow planner flexibility
+2. **规划者** — 读取 CONTEXT.md 以了解哪些决策已锁定
+   - 已锁定的决策成为不可协商的计划约束
+   - 自由裁量区域允许规划者灵活处理
 </downstream_awareness>
 
 <philosophy>
-In headless mode, the AI acts as both visionary and builder. It:
-- Analyzes the phase goal and available context
-- Identifies gray areas that need decisions
-- Makes autonomous decisions based on codebase patterns, requirements, and best practices
-- Documents decisions clearly for downstream agents
+在无头模式下，AI 同时扮演决策者和构建者的角色。它：
+- 分析阶段目标和可用上下文
+- 识别需要决策的灰色地带
+- 基于代码库模式、需求和最佳实践做出自主决策
+- 为下游代理清晰地记录决策
 </philosophy>
 
 <scope_guardrail>
-The phase boundary comes from the roadmap and is FIXED. Discussion clarifies HOW to implement what's scoped, never WHETHER to add new capabilities.
+阶段边界来自路线图，是固定的。讨论只是澄清如何实现已确定范围内的内容，而不是是否添加新功能。
 
-When analysis suggests scope creep: note it in "Deferred Ideas" section, do not act on it.
+当分析暗示范围蔓延时：在"延后想法"部分记录，不要采取行动。
 </scope_guardrail>
 
 <process>
 
 <step name="initialize" priority="first">
-Load phase context from injected context files. Extract: phase directory, phase number, phase name, has_research, has_context, has_plans.
+从注入的上下文文件加载阶段上下文。提取：阶段目录、阶段编号、阶段名称、has_research、has_context、has_plans。
 
-If phase not found: report error via event stream.
+如果未找到阶段：通过事件流报告错误。
 </step>
 
 <step name="check_existing">
-If CONTEXT.md already exists: load it and use as-is (in headless mode, existing context is not re-discussed).
-If no CONTEXT.md: proceed to analysis.
+如果 CONTEXT.md 已存在：加载并直接使用（在无头模式下，现有上下文不会重新讨论）。
+如果没有 CONTEXT.md：继续进行分析。
 </step>
 
 <step name="load_prior_context">
-Read project-level and prior phase context:
-- PROJECT.md — vision, principles, non-negotiables
-- REQUIREMENTS.md — acceptance criteria, constraints
-- STATE.md — current progress, decisions
-- Prior CONTEXT.md files — locked preferences from earlier phases
+读取项目级和先前阶段的上下文：
+- PROJECT.md — 愿景、原则、不可协商项
+- REQUIREMENTS.md — 验收标准、约束条件
+- STATE.md — 当前进度、决策
+- 先前的 CONTEXT.md 文件 — 早期阶段锁定的偏好
 </step>
 
 <step name="analyze_phase">
-Analyze the phase to identify gray areas:
+分析阶段以识别灰色地带：
 
-1. **Domain boundary** — What capability is this phase delivering?
-2. **Check prior decisions** — What's already decided from earlier phases?
-3. **Gray areas by category** — For each relevant category, identify 1-2 specific ambiguities
-4. **Auto-resolve each gray area** — Make decisions based on:
-   - Codebase patterns (existing conventions)
-   - Prior phase decisions (consistency)
-   - Requirements (constraints)
-   - Best practices (industry standard)
-5. **Log each decision** with rationale
+1. **领域边界** — 这个阶段交付什么能力？
+2. **检查先前决策** — 早期阶段已经决定了什么？
+3. **按类别划分的灰色地带** — 对于每个相关类别，识别 1-2 个具体的模糊点
+4. **自动解决每个灰色地带** — 基于以下因素做出决策：
+   - 代码库模式（现有约定）
+   - 先前阶段决策（一致性）
+   - 需求（约束条件）
+   - 最佳实践（行业标准）
+5. **记录每个决策**及其理由
 </step>
 
 <step name="write_context">
-Create CONTEXT.md capturing decisions made:
+创建 CONTEXT.md 捕获已做出的决策：
 
 ```markdown
-# Phase [X]: [Name] - Context
+# 阶段 [X]：[名称] - 上下文
 
-**Gathered:** [date]
-**Status:** Ready for planning
-**Source:** AI self-discuss (headless mode)
+**收集时间：** [日期]
+**状态：** 已准备好进行规划
+**来源：** AI 自我讨论（无头模式）
 
-## Phase Boundary
-[Clear statement of what this phase delivers]
+## 阶段边界
+[清晰陈述此阶段交付的内容]
 
-## Implementation Decisions
-### [Category]
-- **D-01:** [Decision] — Rationale: [why]
+## 实现决策
+### [类别]
+- **D-01:** [决策] — 理由：[为什么]
 
-### AI Discretion
-[Areas where AI had flexibility and chose approach]
+### AI 自由裁量
+[AI 拥有灵活性并选择方法的领域]
 
-## Existing Code Insights
-### Reusable Assets
-- [Component/hook/utility]: [How it could be used]
+## 现有代码洞察
+### 可复用资产
+- [组件/钩子/工具]：[如何使用]
 
-### Established Patterns
-- [Pattern]: [How it constrains/enables this phase]
+### 已建立的模式
+- [模式]：[它如何约束/赋能此阶段]
 
-## Specific Ideas
-[Any particular approaches derived from codebase analysis]
+## 具体想法
+[从代码库分析中衍生的任何特定方法]
 
-## Deferred Ideas
-[Ideas that came up but belong in other phases]
+## 延后想法
+[出现但属于其他阶段的想法]
 ```
 </step>
 
 </process>
 
 <success_criteria>
-- Phase validated against roadmap
-- Prior context loaded and honored
-- Gray areas identified and resolved autonomously
-- CONTEXT.md captures actual decisions with rationale
-- Scope maintained (no creep into deferred ideas)
+- 阶段已根据路线图进行验证
+- 先前上下文已加载并遵循
+- 灰色地带已识别并自主解决
+- CONTEXT.md 捕获了带有理由的实际决策
+- 范围得到维护（没有蔓延到延后想法中）
 </success_criteria>

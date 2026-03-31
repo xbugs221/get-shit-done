@@ -1,6 +1,6 @@
 ---
 name: gsd:plant-seed
-description: Capture a forward-looking idea with trigger conditions — surfaces automatically at the right milestone
+description: 捕获一个具有触发条件的前瞻性想法 — 在合适的里程碑时自动浮现
 argument-hint: "[idea summary]"
 allowed-tools:
   - Read
@@ -11,12 +11,10 @@ allowed-tools:
 ---
 
 <objective>
-Capture an idea that's too big for now but should surface automatically when the right
-milestone arrives. Seeds solve context rot: instead of a one-liner in Deferred that nobody
-reads, a seed preserves the full WHY, WHEN to surface, and breadcrumbs to details.
+捕获当前规模过大但应在合适里程碑时自动浮现的想法。种子保留完整的原因（WHY）、何时浮现（WHEN）及细节线索，解决上下文腐化问题。
 
-Creates: .planning/seeds/SEED-NNN-slug.md
-Consumed by: /gsd:new-milestone (scans seeds and presents matches)
+创建：.planning/seeds/SEED-NNN-slug.md
+使用方：/gsd:new-milestone（扫描种子并呈现匹配项）
 </objective>
 
 <execution_context>
@@ -24,5 +22,5 @@ Consumed by: /gsd:new-milestone (scans seeds and presents matches)
 </execution_context>
 
 <process>
-Execute the plant-seed workflow from @~/.claude/get-shit-done/workflows/plant-seed.md end-to-end.
+从头到尾执行 @~/.claude/get-shit-done/workflows/plant-seed.md 中的 plant-seed 工作流。
 </process>

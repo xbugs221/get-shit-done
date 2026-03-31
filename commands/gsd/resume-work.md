@@ -1,6 +1,6 @@
 ---
 name: gsd:resume-work
-description: Resume work from previous session with full context restoration
+description: 从上一次会话恢复工作，完整还原上下文
 allowed-tools:
   - Read
   - Bash
@@ -10,31 +10,22 @@ allowed-tools:
 ---
 
 <objective>
-Restore complete project context and resume work seamlessly from previous session.
-
-Routes to the resume-project workflow which handles:
-
-- STATE.md loading (or reconstruction if missing)
-- Checkpoint detection (.continue-here files)
-- Incomplete work detection (PLAN without SUMMARY)
-- Status presentation
-- Context-aware next action routing
-  </objective>
+还原完整的项目上下文，从上一次会话无缝恢复工作。
+</objective>
 
 <execution_context>
 @~/.claude/get-shit-done/workflows/resume-project.md
 </execution_context>
 
 <process>
-**Follow the resume-project workflow** from `@~/.claude/get-shit-done/workflows/resume-project.md`.
+**遵循 resume-project 工作流**，来自 `@~/.claude/get-shit-done/workflows/resume-project.md`。
 
-The workflow handles all resumption logic including:
-
-1. Project existence verification
-2. STATE.md loading or reconstruction
-3. Checkpoint and incomplete work detection
-4. Visual status presentation
-5. Context-aware option offering (checks CONTEXT.md before suggesting plan vs discuss)
-6. Routing to appropriate next command
-7. Session continuity updates
-   </process>
+该工作流处理所有恢复逻辑：
+1. 项目存在性验证
+2. STATE.md 加载或重建
+3. 检查点和未完成工作检测（.continue-here 文件、有 PLAN 但无 SUMMARY）
+4. 可视化状态展示
+5. 上下文感知的选项提供（在建议规划 vs 讨论之前检查 CONTEXT.md）
+6. 路由到适当的下一个命令
+7. 会话连续性更新
+</process>

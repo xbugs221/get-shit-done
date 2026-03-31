@@ -1,141 +1,141 @@
 <purpose>
-Create a pull request from completed phase/milestone work, generate a rich PR body from planning artifacts, optionally run code review, and prepare for merge. Closes the plan → execute → verify → ship loop.
+从已完成的阶段/里程碑工作中创建 Pull Request，从规划产物生成丰富的 PR 正文，可选地运行代码审查，并准备合并。关闭 规划 → 执行 → 验证 → 发布 的循环。
 </purpose>
 
 <required_reading>
-Read all files referenced by the invoking prompt's execution_context before starting.
+在开始之前，阅读调用提示的 execution_context 中引用的所有文件。
 </required_reading>
 
 <process>
 
 <step name="initialize">
-Parse arguments and load project state:
+解析参数并加载项目状态：
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init phase-op "${PHASE_ARG}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Parse from init JSON: `phase_found`, `phase_dir`, `phase_number`, `phase_name`, `padded_phase`, `commit_docs`.
+从初始化 JSON 中解析：`phase_found`、`phase_dir`、`phase_number`、`phase_name`、`padded_phase`、`commit_docs`。
 
-Also load config for branching strategy:
+同时加载分支策略的配置：
 ```bash
 CONFIG=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" state load)
 ```
 
-Extract: `branching_strategy`, `branch_name`.
+提取：`branching_strategy`、`branch_name`。
 </step>
 
 <step name="preflight_checks">
-Verify the work is ready to ship:
+验证工作是否已准备好发布：
 
-1. **Verification passed?**
+1. **验证是否通过？**
    ```bash
    VERIFICATION=$(cat ${PHASE_DIR}/*-VERIFICATION.md 2>/dev/null)
    ```
-   Check for `status: passed` or `status: human_needed` (with human approval).
-   If no VERIFICATION.md or status is `gaps_found`: warn and ask user to confirm.
+   检查 `status: passed` 或 `status: human_needed`（需人工批准）。
+   如果没有 VERIFICATION.md 或状态为 `gaps_found`：发出警告并要求用户确认。
 
-2. **Clean working tree?**
+2. **工作区是否干净？**
    ```bash
    git status --short
    ```
-   If uncommitted changes exist: ask user to commit or stash first.
+   如果存在未提交的更改：要求用户先提交或暂存。
 
-3. **On correct branch?**
+3. **是否在正确的分支上？**
    ```bash
    CURRENT_BRANCH=$(git branch --show-current)
    ```
-   If on `main`/`master`: warn — should be on a feature branch.
-   If branching_strategy is `none`: offer to create a branch now.
+   如果在 `main`/`master` 上：发出警告——应该在功能分支上。
+   如果 branching_strategy 为 `none`：提议现在创建一个分支。
 
-4. **Remote configured?**
+4. **远程仓库是否已配置？**
    ```bash
    git remote -v | head -2
    ```
-   Detect `origin` remote. If no remote: error — can't create PR.
+   检测 `origin` 远程仓库。如果没有远程仓库：报错——无法创建 PR。
 
-5. **`gh` CLI available?**
+5. **`gh` CLI 是否可用？**
    ```bash
    which gh && gh auth status 2>&1
    ```
-   If `gh` not found or not authenticated: provide setup instructions and exit.
+   如果 `gh` 未找到或未认证：提供设置说明并退出。
 </step>
 
 <step name="push_branch">
-Push the current branch to remote:
+将当前分支推送到远程仓库：
 
 ```bash
 git push origin ${CURRENT_BRANCH} 2>&1
 ```
 
-If push fails (e.g., no upstream): set upstream:
+如果推送失败（例如没有上游）：设置上游：
 ```bash
 git push --set-upstream origin ${CURRENT_BRANCH} 2>&1
 ```
 
-Report: "Pushed `{branch}` to origin ({commit_count} commits ahead of main)"
+报告："已将 `{branch}` 推送到 origin（领先 main {commit_count} 个提交）"
 </step>
 
 <step name="generate_pr_body">
-Auto-generate a rich PR body from planning artifacts:
+从规划产物自动生成丰富的 PR 正文：
 
-**1. Title:**
+**1. 标题：**
 ```
 Phase {phase_number}: {phase_name}
 ```
-Or for milestone: `Milestone {version}: {name}`
+或者对于里程碑：`Milestone {version}: {name}`
 
-**2. Summary section:**
-Read ROADMAP.md for phase goal. Read VERIFICATION.md for verification status.
+**2. 概要部分：**
+从 ROADMAP.md 读取阶段目标。从 VERIFICATION.md 读取验证状态。
 
 ```markdown
-## Summary
+## 概要
 
-**Phase {N}: {Name}**
-**Goal:** {goal from ROADMAP.md}
-**Status:** Verified ✓
+**阶段 {N}: {Name}**
+**目标：** {ROADMAP.md 中的目标}
+**状态：** 已验证 ✓
 
-{One paragraph synthesized from SUMMARY.md files — what was built}
+{从 SUMMARY.md 文件综合的一段话——描述构建了什么}
 ```
 
-**3. Changes section:**
-For each SUMMARY.md in the phase directory:
+**3. 变更部分：**
+对于阶段目录中的每个 SUMMARY.md：
 ```markdown
-## Changes
+## 变更
 
-### Plan {plan_id}: {plan_name}
-{one_liner from SUMMARY.md frontmatter}
+### 计划 {plan_id}: {plan_name}
+{SUMMARY.md frontmatter 中的 one_liner}
 
-**Key files:**
-{key-files.created and key-files.modified from SUMMARY.md frontmatter}
+**关键文件：**
+{SUMMARY.md frontmatter 中的 key-files.created 和 key-files.modified}
 ```
 
-**4. Requirements section:**
+**4. 需求部分：**
 ```markdown
-## Requirements Addressed
+## 已满足的需求
 
-{REQ-IDs from plan frontmatter, linked to REQUIREMENTS.md descriptions}
+{计划 frontmatter 中的 REQ-ID，链接到 REQUIREMENTS.md 的描述}
 ```
 
-**5. Testing section:**
+**5. 测试部分：**
 ```markdown
-## Verification
+## 验证
 
-- [x] Automated verification: {pass/fail from VERIFICATION.md}
-- {human verification items from VERIFICATION.md, if any}
+- [x] 自动化验证：{VERIFICATION.md 中的通过/失败}
+- {VERIFICATION.md 中的人工验证项目（如有）}
 ```
 
-**6. Decisions section:**
+**6. 决策部分：**
 ```markdown
-## Key Decisions
+## 关键决策
 
-{Decisions from STATE.md accumulated context relevant to this phase}
+{STATE.md 中与此阶段相关的累积上下文中的决策}
 ```
 </step>
 
 <step name="create_pr">
-Create the PR using the generated body:
+使用生成的正文创建 PR：
 
 ```bash
 gh pr create \
@@ -144,44 +144,44 @@ gh pr create \
   --base main
 ```
 
-If `--draft` flag was passed: add `--draft`.
+如果传递了 `--draft` 标志：添加 `--draft`。
 
-Report: "PR #{number} created: {url}"
+报告："PR #{number} 已创建：{url}"
 </step>
 
 <step name="optional_review">
-Ask if user wants to trigger a code review:
+询问用户是否要触发代码审查：
 
 ```
 AskUserQuestion:
-  question: "PR created. Run a code review before merge?"
+  question: "PR 已创建。合并前运行代码审查吗？"
   options:
-    - label: "Skip review"
-      description: "PR is ready — merge when CI passes"
-    - label: "Self-review"
-      description: "I'll review the diff in the PR myself"
-    - label: "Request review"
-      description: "Request review from a teammate"
+    - label: "跳过审查"
+      description: "PR 已就绪——CI 通过后合并"
+    - label: "自我审查"
+      description: "我将在 PR 中自己审查 diff"
+    - label: "请求审查"
+      description: "请求队友审查"
 ```
 
-**If "Request review":**
+**如果选择"请求审查"：**
 ```bash
 gh pr edit ${PR_NUMBER} --add-reviewer "${REVIEWER}"
 ```
 
-**If "Self-review":**
-Report the PR URL and suggest: "Review the diff at {url}/files"
+**如果选择"自我审查"：**
+报告 PR URL 并建议："在 {url}/files 审查 diff"
 </step>
 
 <step name="track_shipping">
-Update STATE.md to reflect the shipping action:
+更新 STATE.md 以反映发布操作：
 
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" state update "Last Activity" "$(date +%Y-%m-%d)"
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" state update "Status" "Phase ${PHASE_NUMBER} shipped — PR #${PR_NUMBER}"
 ```
 
-If `commit_docs` is true:
+如果 `commit_docs` 为 true：
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs(${padded_phase}): ship phase ${PHASE_NUMBER} — PR #${PR_NUMBER}" --files .planning/STATE.md
 ```
@@ -191,19 +191,19 @@ node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs(${padded_phase
 ```
 ───────────────────────────────────────────────────────────────
 
-## ✓ Phase {X}: {Name} — Shipped
+## ✓ 阶段 {X}: {Name} — 已发布
 
 PR: #{number} ({url})
-Branch: {branch} → main
-Commits: {count}
-Verification: ✓ Passed
-Requirements: {N} REQ-IDs addressed
+分支: {branch} → main
+提交数: {count}
+验证: ✓ 已通过
+需求: 已满足 {N} 个 REQ-ID
 
-Next steps:
-- Review/approve PR
-- Merge when CI passes
-- /gsd:complete-milestone (if last phase in milestone)
-- /gsd:progress (to see what's next)
+后续步骤：
+- 审查/批准 PR
+- CI 通过后合并
+- /gsd:complete-milestone（如果是里程碑中的最后一个阶段）
+- /gsd:progress（查看下一步）
 
 ───────────────────────────────────────────────────────────────
 ```
@@ -212,17 +212,18 @@ Next steps:
 </process>
 
 <offer_next>
-After shipping:
+发布后：
 
-- /gsd:complete-milestone — if all phases in milestone are done
-- /gsd:progress — see overall project state
-- /gsd:execute-phase {next} — continue to next phase
+- /gsd:complete-milestone — 如果里程碑中的所有阶段都已完成
+- /gsd:progress — 查看整体项目状态
+- /gsd:execute-phase {next} — 继续下一个阶段
 </offer_next>
 
 <success_criteria>
-- [ ] Preflight checks passed (verification, clean tree, branch, remote, gh)
-- [ ] Branch pushed to remote
-- [ ] PR created with rich auto-generated body
-- [ ] STATE.md updated with shipping status
-- [ ] User knows PR number and next steps
+- [ ] 预检查通过（验证、干净的工作区、分支、远程仓库、gh）
+- [ ] 分支已推送到远程仓库
+- [ ] PR 已创建，包含丰富的自动生成正文
+- [ ] STATE.md 已更新发布状态
+- [ ] 用户知道 PR 编号和后续步骤
 </success_criteria>
+</output>

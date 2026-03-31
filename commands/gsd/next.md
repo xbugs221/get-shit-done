@@ -1,6 +1,6 @@
 ---
 name: gsd:next
-description: Automatically advance to the next logical step in the GSD workflow
+description: 自动推进到 GSD 工作流中的下一个逻辑步骤
 allowed-tools:
   - Read
   - Bash
@@ -9,10 +9,10 @@ allowed-tools:
   - SlashCommand
 ---
 <objective>
-Detect the current project state and automatically invoke the next logical GSD workflow step.
-No arguments needed — reads STATE.md, ROADMAP.md, and phase directories to determine what comes next.
+检测当前项目状态并自动调用下一个逻辑 GSD 工作流步骤。
+无需参数——通过读取 STATE.md、ROADMAP.md 和阶段目录确定下一步。
 
-Designed for rapid multi-project workflows where remembering which phase/step you're on is overhead.
+专为快速多项目工作流设计，省去记忆当前阶段/步骤的负担。
 </objective>
 
 <execution_context>
@@ -20,5 +20,5 @@ Designed for rapid multi-project workflows where remembering which phase/step yo
 </execution_context>
 
 <process>
-Execute the next workflow from @~/.claude/get-shit-done/workflows/next.md end-to-end.
+端到端执行 @~/.claude/get-shit-done/workflows/next.md 工作流。
 </process>

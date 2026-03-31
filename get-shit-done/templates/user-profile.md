@@ -1,146 +1,146 @@
-# Developer Profile
+# 开发者画像
 
-> This profile was generated from session analysis. It contains behavioral directives
-> for Claude to follow when working with this developer. HIGH confidence dimensions
-> should be acted on directly. LOW confidence dimensions should be approached with
-> hedging ("Based on your profile, I'll try X -- let me know if that's off").
+> 此画像是通过会话分析生成的。它包含 Claude 在与此开发者协作时应遵循的行为指令。
+> HIGH（高）置信度的维度应直接执行。LOW（低）置信度的维度应以试探的方式处理
+> （"根据你的画像，我会尝试 X -- 如果不对请告诉我"）。
 
-**Generated:** {{generated_at}}
-**Source:** {{data_source}}
-**Projects Analyzed:** {{projects_list}}
-**Messages Analyzed:** {{message_count}}
+**生成时间：** {{generated_at}}
+**数据来源：** {{data_source}}
+**分析的项目：** {{projects_list}}
+**分析的消息数：** {{message_count}}
 
 ---
 
-## Quick Reference
+## 快速参考
 
 {{summary_instructions}}
 
 ---
 
-## Communication Style
+## 沟通风格
 
-**Rating:** {{communication_style.rating}} | **Confidence:** {{communication_style.confidence}}
+**评级：** {{communication_style.rating}} | **置信度：** {{communication_style.confidence}}
 
-**Directive:** {{communication_style.claude_instruction}}
+**指令：** {{communication_style.claude_instruction}}
 
 {{communication_style.summary}}
 
-**Evidence:**
+**证据：**
 
 {{communication_style.evidence}}
 
 ---
 
-## Decision Speed
+## 决策速度
 
-**Rating:** {{decision_speed.rating}} | **Confidence:** {{decision_speed.confidence}}
+**评级：** {{decision_speed.rating}} | **置信度：** {{decision_speed.confidence}}
 
-**Directive:** {{decision_speed.claude_instruction}}
+**指令：** {{decision_speed.claude_instruction}}
 
 {{decision_speed.summary}}
 
-**Evidence:**
+**证据：**
 
 {{decision_speed.evidence}}
 
 ---
 
-## Explanation Depth
+## 解释深度
 
-**Rating:** {{explanation_depth.rating}} | **Confidence:** {{explanation_depth.confidence}}
+**评级：** {{explanation_depth.rating}} | **置信度：** {{explanation_depth.confidence}}
 
-**Directive:** {{explanation_depth.claude_instruction}}
+**指令：** {{explanation_depth.claude_instruction}}
 
 {{explanation_depth.summary}}
 
-**Evidence:**
+**证据：**
 
 {{explanation_depth.evidence}}
 
 ---
 
-## Debugging Approach
+## 调试方法
 
-**Rating:** {{debugging_approach.rating}} | **Confidence:** {{debugging_approach.confidence}}
+**评级：** {{debugging_approach.rating}} | **置信度：** {{debugging_approach.confidence}}
 
-**Directive:** {{debugging_approach.claude_instruction}}
+**指令：** {{debugging_approach.claude_instruction}}
 
 {{debugging_approach.summary}}
 
-**Evidence:**
+**证据：**
 
 {{debugging_approach.evidence}}
 
 ---
 
-## UX Philosophy
+## 用户体验理念
 
-**Rating:** {{ux_philosophy.rating}} | **Confidence:** {{ux_philosophy.confidence}}
+**评级：** {{ux_philosophy.rating}} | **置信度：** {{ux_philosophy.confidence}}
 
-**Directive:** {{ux_philosophy.claude_instruction}}
+**指令：** {{ux_philosophy.claude_instruction}}
 
 {{ux_philosophy.summary}}
 
-**Evidence:**
+**证据：**
 
 {{ux_philosophy.evidence}}
 
 ---
 
-## Vendor Philosophy
+## 供应商理念
 
-**Rating:** {{vendor_philosophy.rating}} | **Confidence:** {{vendor_philosophy.confidence}}
+**评级：** {{vendor_philosophy.rating}} | **置信度：** {{vendor_philosophy.confidence}}
 
-**Directive:** {{vendor_philosophy.claude_instruction}}
+**指令：** {{vendor_philosophy.claude_instruction}}
 
 {{vendor_philosophy.summary}}
 
-**Evidence:**
+**证据：**
 
 {{vendor_philosophy.evidence}}
 
 ---
 
-## Frustration Triggers
+## 挫败感触发因素
 
-**Rating:** {{frustration_triggers.rating}} | **Confidence:** {{frustration_triggers.confidence}}
+**评级：** {{frustration_triggers.rating}} | **置信度：** {{frustration_triggers.confidence}}
 
-**Directive:** {{frustration_triggers.claude_instruction}}
+**指令：** {{frustration_triggers.claude_instruction}}
 
 {{frustration_triggers.summary}}
 
-**Evidence:**
+**证据：**
 
 {{frustration_triggers.evidence}}
 
 ---
 
-## Learning Style
+## 学习风格
 
-**Rating:** {{learning_style.rating}} | **Confidence:** {{learning_style.confidence}}
+**评级：** {{learning_style.rating}} | **置信度：** {{learning_style.confidence}}
 
-**Directive:** {{learning_style.claude_instruction}}
+**指令：** {{learning_style.claude_instruction}}
 
 {{learning_style.summary}}
 
-**Evidence:**
+**证据：**
 
 {{learning_style.evidence}}
 
 ---
 
-## Profile Metadata
+## 画像元数据
 
-| Field | Value |
-|-------|-------|
-| Profile Version | {{profile_version}} |
-| Generated | {{generated_at}} |
-| Source | {{data_source}} |
-| Projects | {{projects_count}} |
-| Messages | {{message_count}} |
-| Dimensions Scored | {{dimensions_scored}}/8 |
-| High Confidence | {{high_confidence_count}} |
-| Medium Confidence | {{medium_confidence_count}} |
-| Low Confidence | {{low_confidence_count}} |
-| Sensitive Content Excluded | {{sensitive_excluded_summary}} |
+| 字段 | 值 |
+|------|------|
+| 画像版本 | {{profile_version}} |
+| 生成时间 | {{generated_at}} |
+| 数据来源 | {{data_source}} |
+| 项目数 | {{projects_count}} |
+| 消息数 | {{message_count}} |
+| 已评分维度 | {{dimensions_scored}}/8 |
+| 高置信度 | {{high_confidence_count}} |
+| 中置信度 | {{medium_confidence_count}} |
+| 低置信度 | {{low_confidence_count}} |
+| 已排除的敏感内容 | {{sensitive_excluded_summary}} |
+</output>

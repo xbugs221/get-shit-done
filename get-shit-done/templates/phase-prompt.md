@@ -1,46 +1,46 @@
-# Phase Prompt Template
+# 阶段提示模板
 
-> **Note:** Planning methodology is in `agents/gsd-planner.md`.
-> This template defines the PLAN.md output format that the agent produces.
+> **注意：** 规划方法论在 `agents/gsd-planner.md` 中。
+> 此模板定义了 agent 生成的 PLAN.md 输出格式。
 
-Template for `.planning/phases/XX-name/{phase}-{plan}-PLAN.md` - executable phase plans optimized for parallel execution.
+用于 `.planning/phases/XX-name/{phase}-{plan}-PLAN.md` 的模板 - 为并行执行优化的可执行阶段计划。
 
-**Naming:** Use `{phase}-{plan}-PLAN.md` format (e.g., `01-02-PLAN.md` for Phase 1, Plan 2)
+**命名规则：** 使用 `{phase}-{plan}-PLAN.md` 格式（例如 `01-02-PLAN.md` 表示阶段 1，计划 2）
 
 ---
 
-## File Template
+## 文件模板
 
 ```markdown
 ---
 phase: XX-name
 plan: NN
 type: execute
-wave: N                     # Execution wave (1, 2, 3...). Pre-computed at plan time.
-depends_on: []              # Plan IDs this plan requires (e.g., ["01-01"]).
-files_modified: []          # Files this plan modifies.
-autonomous: true            # false if plan has checkpoints requiring user interaction
-requirements: []            # REQUIRED — Requirement IDs from ROADMAP this plan addresses. MUST NOT be empty.
-user_setup: []              # Human-required setup Claude cannot automate (see below)
+wave: N                     # 执行波次（1、2、3...）。在规划时预计算。
+depends_on: []              # 此计划依赖的计划 ID（例如 ["01-01"]）。
+files_modified: []          # 此计划修改的文件。
+autonomous: true            # 如果计划有需要用户交互的检查点则为 false
+requirements: []            # 必填 — 此计划对应的 ROADMAP 中的需求 ID。不能为空。
+user_setup: []              # Claude 无法自动化的人工设置项（见下文）
 
-# Goal-backward verification (derived during planning, verified after execution)
+# 目标回溯验证（在规划时推导，在执行后验证）
 must_haves:
-  truths: []                # Observable behaviors that must be true for goal achievement
-  artifacts: []             # Files that must exist with real implementation
-  key_links: []             # Critical connections between artifacts
+  truths: []                # 目标达成必须为真的可观察行为
+  artifacts: []             # 必须存在的带有实际实现的文件
+  key_links: []             # 产物之间的关键连接
 ---
 
 <objective>
-[What this plan accomplishes]
+[此计划完成什么]
 
-Purpose: [Why this matters for the project]
-Output: [What artifacts will be created]
+Purpose: [为什么这对项目重要]
+Output: [将创建什么产物]
 </objective>
 
 <execution_context>
 @~/.claude/get-shit-done/workflows/execute-plan.md
 @~/.claude/get-shit-done/templates/summary.md
-[If plan contains checkpoint tasks (type="checkpoint:*"), add:]
+[如果计划包含检查点任务（type="checkpoint:*"），添加：]
 @~/.claude/get-shit-done/references/checkpoints.md
 </execution_context>
 
@@ -49,170 +49,170 @@ Output: [What artifacts will be created]
 @.planning/ROADMAP.md
 @.planning/STATE.md
 
-# Only reference prior plan SUMMARYs if genuinely needed:
-# - This plan uses types/exports from prior plan
-# - Prior plan made decision that affects this plan
-# Do NOT reflexively chain: Plan 02 refs 01, Plan 03 refs 02...
+# 仅在确实需要时引用之前计划的 SUMMARY：
+# - 此计划使用了之前计划的类型/导出
+# - 之前的计划做出了影响此计划的决策
+# 不要条件反射式地串联：计划 02 引用 01，计划 03 引用 02...
 
-[Relevant source files:]
+[相关源文件：]
 @src/path/to/relevant.ts
 </context>
 
 <tasks>
 
 <task type="auto">
-  <name>Task 1: [Action-oriented name]</name>
+  <name>任务 1：[面向操作的名称]</name>
   <files>path/to/file.ext, another/file.ext</files>
   <read_first>path/to/reference.ext, path/to/source-of-truth.ext</read_first>
-  <action>[Specific implementation - what to do, how to do it, what to avoid and WHY. Include CONCRETE values: exact identifiers, parameters, expected outputs, file paths, command arguments. Never say "align X with Y" without specifying the exact target state.]</action>
-  <verify>[Command or check to prove it worked]</verify>
+  <action>[具体实现 - 做什么、怎么做、避免什么以及为什么。包含具体值：确切的标识符、参数、预期输出、文件路径、命令参数。永远不要说"将 X 与 Y 对齐"而不指定确切的目标状态。]</action>
+  <verify>[证明其工作正常的命令或检查]</verify>
   <acceptance_criteria>
-    - [Grep-verifiable condition: "file.ext contains 'exact string'"]
-    - [Measurable condition: "output.ext uses 'expected-value', NOT 'wrong-value'"]
+    - [可用 grep 验证的条件："file.ext 包含 'exact string'"]
+    - [可测量的条件："output.ext 使用 'expected-value'，而不是 'wrong-value'"]
   </acceptance_criteria>
-  <done>[Measurable acceptance criteria]</done>
+  <done>[可测量的验收标准]</done>
 </task>
 
 <task type="auto">
-  <name>Task 2: [Action-oriented name]</name>
+  <name>任务 2：[面向操作的名称]</name>
   <files>path/to/file.ext</files>
   <read_first>path/to/reference.ext</read_first>
-  <action>[Specific implementation with concrete values]</action>
-  <verify>[Command or check]</verify>
+  <action>[带有具体值的具体实现]</action>
+  <verify>[命令或检查]</verify>
   <acceptance_criteria>
-    - [Grep-verifiable condition]
+    - [可用 grep 验证的条件]
   </acceptance_criteria>
-  <done>[Acceptance criteria]</done>
+  <done>[验收标准]</done>
 </task>
 
-<!-- For checkpoint task examples and patterns, see @~/.claude/get-shit-done/references/checkpoints.md -->
+<!-- 检查点任务的示例和模式，请参阅 @~/.claude/get-shit-done/references/checkpoints.md -->
 
 <task type="checkpoint:decision" gate="blocking">
-  <decision>[What needs deciding]</decision>
-  <context>[Why this decision matters]</context>
+  <decision>[需要决定什么]</decision>
+  <context>[为什么这个决定重要]</context>
   <options>
-    <option id="option-a"><name>[Name]</name><pros>[Benefits]</pros><cons>[Tradeoffs]</cons></option>
-    <option id="option-b"><name>[Name]</name><pros>[Benefits]</pros><cons>[Tradeoffs]</cons></option>
+    <option id="option-a"><name>[名称]</name><pros>[优势]</pros><cons>[权衡]</cons></option>
+    <option id="option-b"><name>[名称]</name><pros>[优势]</pros><cons>[权衡]</cons></option>
   </options>
-  <resume-signal>Select: option-a or option-b</resume-signal>
+  <resume-signal>选择：option-a 或 option-b</resume-signal>
 </task>
 
 <task type="checkpoint:human-verify" gate="blocking">
-  <what-built>[What Claude built] - server running at [URL]</what-built>
-  <how-to-verify>Visit [URL] and verify: [visual checks only, NO CLI commands]</how-to-verify>
-  <resume-signal>Type "approved" or describe issues</resume-signal>
+  <what-built>[Claude 构建了什么] - 服务运行在 [URL]</what-built>
+  <how-to-verify>访问 [URL] 并验证：[仅视觉检查，不要 CLI 命令]</how-to-verify>
+  <resume-signal>输入 "approved" 或描述问题</resume-signal>
 </task>
 
 </tasks>
 
 <verification>
-Before declaring plan complete:
-- [ ] [Specific test command]
-- [ ] [Build/type check passes]
-- [ ] [Behavior verification]
+在声明计划完成之前：
+- [ ] [具体的测试命令]
+- [ ] [构建/类型检查通过]
+- [ ] [行为验证]
 </verification>
 
 <success_criteria>
 
-- All tasks completed
-- All verification checks pass
-- No errors or warnings introduced
-- [Plan-specific criteria]
+- 所有任务已完成
+- 所有验证检查通过
+- 没有引入错误或警告
+- [计划特定的标准]
   </success_criteria>
 
 <output>
-After completion, create `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md`
+完成后，创建 `.planning/phases/XX-name/{phase}-{plan}-SUMMARY.md`
 </output>
 ```
 
 ---
 
-## Frontmatter Fields
+## 前置元数据字段
 
-| Field | Required | Purpose |
+| 字段 | 必填 | 用途 |
 |-------|----------|---------|
-| `phase` | Yes | Phase identifier (e.g., `01-foundation`) |
-| `plan` | Yes | Plan number within phase (e.g., `01`, `02`) |
-| `type` | Yes | Always `execute` for standard plans, `tdd` for TDD plans |
-| `wave` | Yes | Execution wave number (1, 2, 3...). Pre-computed at plan time. |
-| `depends_on` | Yes | Array of plan IDs this plan requires. |
-| `files_modified` | Yes | Files this plan touches. |
-| `autonomous` | Yes | `true` if no checkpoints, `false` if has checkpoints |
-| `requirements` | Yes | **MUST** list requirement IDs from ROADMAP. Every roadmap requirement MUST appear in at least one plan. |
-| `user_setup` | No | Array of human-required setup items (external services) |
-| `must_haves` | Yes | Goal-backward verification criteria (see below) |
+| `phase` | 是 | 阶段标识符（例如 `01-foundation`） |
+| `plan` | 是 | 阶段内的计划编号（例如 `01`、`02`） |
+| `type` | 是 | 标准计划始终为 `execute`，TDD 计划为 `tdd` |
+| `wave` | 是 | 执行波次编号（1、2、3...）。在规划时预计算。 |
+| `depends_on` | 是 | 此计划依赖的计划 ID 数组。 |
+| `files_modified` | 是 | 此计划涉及的文件。 |
+| `autonomous` | 是 | 无检查点时为 `true`，有检查点时为 `false` |
+| `requirements` | 是 | **必须**列出 ROADMAP 中的需求 ID。每个路线图需求必须至少出现在一个计划中。 |
+| `user_setup` | 否 | 人工设置项数组（外部服务） |
+| `must_haves` | 是 | 目标回溯验证标准（见下文） |
 
-**Wave is pre-computed:** Wave numbers are assigned during `/gsd:plan-phase`. Execute-phase reads `wave` directly from frontmatter and groups plans by wave number. No runtime dependency analysis needed.
+**波次是预计算的：** 波次编号在 `/gsd:plan-phase` 期间分配。Execute-phase 直接从前置元数据读取 `wave` 并按波次编号分组计划。不需要运行时依赖分析。
 
-**Must-haves enable verification:** The `must_haves` field carries goal-backward requirements from planning to execution. After all plans complete, execute-phase spawns a verification subagent that checks these criteria against the actual codebase.
+**必须项启用验证：** `must_haves` 字段将目标回溯需求从规划传递到执行。在所有计划完成后，execute-phase 生成一个验证子 agent，根据实际代码库检查这些标准。
 
 ---
 
-## Parallel vs Sequential
+## 并行与顺序执行
 
 <parallel_examples>
 
-**Wave 1 candidates (parallel):**
+**波次 1 候选项（并行）：**
 
 ```yaml
-# Plan 01 - User feature
+# 计划 01 - 用户功能
 wave: 1
 depends_on: []
 files_modified: [src/models/user.ts, src/api/users.ts]
 autonomous: true
 
-# Plan 02 - Product feature (no overlap with Plan 01)
+# 计划 02 - 产品功能（与计划 01 无重叠）
 wave: 1
 depends_on: []
 files_modified: [src/models/product.ts, src/api/products.ts]
 autonomous: true
 
-# Plan 03 - Order feature (no overlap)
+# 计划 03 - 订单功能（无重叠）
 wave: 1
 depends_on: []
 files_modified: [src/models/order.ts, src/api/orders.ts]
 autonomous: true
 ```
 
-All three run in parallel (Wave 1) - no dependencies, no file conflicts.
+三个计划全部并行运行（波次 1）- 无依赖，无文件冲突。
 
-**Sequential (genuine dependency):**
+**顺序执行（真正的依赖）：**
 
 ```yaml
-# Plan 01 - Auth foundation
+# 计划 01 - 认证基础
 wave: 1
 depends_on: []
 files_modified: [src/lib/auth.ts, src/middleware/auth.ts]
 autonomous: true
 
-# Plan 02 - Protected features (needs auth)
+# 计划 02 - 受保护功能（需要认证）
 wave: 2
 depends_on: ["01"]
 files_modified: [src/features/dashboard.ts]
 autonomous: true
 ```
 
-Plan 02 in Wave 2 waits for Plan 01 in Wave 1 - genuine dependency on auth types/middleware.
+计划 02 在波次 2 等待波次 1 的计划 01 完成 - 对认证类型/中间件有真正的依赖。
 
-**Checkpoint plan:**
+**检查点计划：**
 
 ```yaml
-# Plan 03 - UI with verification
+# 计划 03 - 带验证的 UI
 wave: 3
 depends_on: ["01", "02"]
 files_modified: [src/components/Dashboard.tsx]
-autonomous: false  # Has checkpoint:human-verify
+autonomous: false  # 包含 checkpoint:human-verify
 ```
 
-Wave 3 runs after Waves 1 and 2. Pauses at checkpoint, orchestrator presents to user, resumes on approval.
+波次 3 在波次 1 和 2 之后运行。在检查点暂停，编排器将其呈现给用户，批准后恢复。
 
 </parallel_examples>
 
 ---
 
-## Context Section
+## 上下文部分
 
-**Parallel-aware context:**
+**并行感知的上下文：**
 
 ```markdown
 <context>
@@ -220,89 +220,89 @@ Wave 3 runs after Waves 1 and 2. Pauses at checkpoint, orchestrator presents to 
 @.planning/ROADMAP.md
 @.planning/STATE.md
 
-# Only include SUMMARY refs if genuinely needed:
-# - This plan imports types from prior plan
-# - Prior plan made decision affecting this plan
-# - Prior plan's output is input to this plan
+# 仅在确实需要时包含 SUMMARY 引用：
+# - 此计划导入了之前计划的类型
+# - 之前的计划做出了影响此计划的决策
+# - 之前计划的输出是此计划的输入
 #
-# Independent plans need NO prior SUMMARY references.
-# Do NOT reflexively chain: 02 refs 01, 03 refs 02...
+# 独立的计划不需要之前的 SUMMARY 引用。
+# 不要条件反射式地串联：02 引用 01，03 引用 02...
 
 @src/relevant/source.ts
 </context>
 ```
 
-**Bad pattern (creates false dependencies):**
+**错误模式（创建虚假依赖）：**
 ```markdown
 <context>
-@.planning/phases/03-features/03-01-SUMMARY.md  # Just because it's earlier
-@.planning/phases/03-features/03-02-SUMMARY.md  # Reflexive chaining
+@.planning/phases/03-features/03-01-SUMMARY.md  # 仅仅因为它在前面
+@.planning/phases/03-features/03-02-SUMMARY.md  # 条件反射式串联
 </context>
 ```
 
 ---
 
-## Scope Guidance
+## 范围指南
 
-**Plan sizing:**
+**计划大小：**
 
-- 2-3 tasks per plan
-- ~50% context usage maximum
-- Complex phases: Multiple focused plans, not one large plan
+- 每个计划 2-3 个任务
+- 最多约 50% 上下文使用量
+- 复杂阶段：多个聚焦的计划，而不是一个大计划
 
-**When to split:**
+**何时拆分：**
 
-- Different subsystems (auth vs API vs UI)
-- >3 tasks
-- Risk of context overflow
-- TDD candidates - separate plans
+- 不同的子系统（认证 vs API vs UI）
+- 超过 3 个任务
+- 有上下文溢出风险
+- TDD 候选项 - 单独的计划
 
-**Vertical slices preferred:**
+**优先垂直切片：**
 
 ```
-PREFER: Plan 01 = User (model + API + UI)
-        Plan 02 = Product (model + API + UI)
+推荐：计划 01 = 用户（模型 + API + UI）
+      计划 02 = 产品（模型 + API + UI）
 
-AVOID:  Plan 01 = All models
-        Plan 02 = All APIs
-        Plan 03 = All UIs
+避免：计划 01 = 所有模型
+      计划 02 = 所有 API
+      计划 03 = 所有 UI
 ```
 
 ---
 
-## TDD Plans
+## TDD 计划
 
-TDD features get dedicated plans with `type: tdd`.
+TDD 功能使用 `type: tdd` 的专用计划。
 
-**Heuristic:** Can you write `expect(fn(input)).toBe(output)` before writing `fn`?
-→ Yes: Create a TDD plan
-→ No: Standard task in standard plan
+**启发规则：** 你能在编写 `fn` 之前写出 `expect(fn(input)).toBe(output)` 吗？
+→ 能：创建 TDD 计划
+→ 不能：标准计划中的标准任务
 
-See `~/.claude/get-shit-done/references/tdd.md` for TDD plan structure.
+参见 `~/.claude/get-shit-done/references/tdd.md` 了解 TDD 计划结构。
 
 ---
 
-## Task Types
+## 任务类型
 
-| Type | Use For | Autonomy |
+| 类型 | 用途 | 自主性 |
 |------|---------|----------|
-| `auto` | Everything Claude can do independently | Fully autonomous |
-| `checkpoint:human-verify` | Visual/functional verification | Pauses, returns to orchestrator |
-| `checkpoint:decision` | Implementation choices | Pauses, returns to orchestrator |
-| `checkpoint:human-action` | Truly unavoidable manual steps (rare) | Pauses, returns to orchestrator |
+| `auto` | Claude 能独立完成的所有事情 | 完全自主 |
+| `checkpoint:human-verify` | 视觉/功能验证 | 暂停，返回编排器 |
+| `checkpoint:decision` | 实现选择 | 暂停，返回编排器 |
+| `checkpoint:human-action` | 真正不可避免的手动步骤（少见） | 暂停，返回编排器 |
 
-**Checkpoint behavior in parallel execution:**
-- Plan runs until checkpoint
-- Agent returns with checkpoint details + agent_id
-- Orchestrator presents to user
-- User responds
-- Orchestrator resumes agent with `resume: agent_id`
+**并行执行中的检查点行为：**
+- 计划运行到检查点
+- Agent 返回检查点详情 + agent_id
+- 编排器呈现给用户
+- 用户回应
+- 编排器使用 `resume: agent_id` 恢复 agent
 
 ---
 
-## Examples
+## 示例
 
-**Autonomous parallel plan:**
+**自主并行计划：**
 
 ```markdown
 ---
@@ -316,10 +316,10 @@ autonomous: true
 ---
 
 <objective>
-Implement complete User feature as vertical slice.
+将完整的用户功能实现为垂直切片。
 
-Purpose: Self-contained user management that can run parallel to other features.
-Output: User model, API endpoints, and UI components.
+Purpose: 可与其他功能并行运行的独立用户管理。
+Output: 用户模型、API 端点和 UI 组件。
 </objective>
 
 <context>
@@ -330,38 +330,38 @@ Output: User model, API endpoints, and UI components.
 
 <tasks>
 <task type="auto">
-  <name>Task 1: Create User model</name>
+  <name>任务 1：创建用户模型</name>
   <files>src/features/user/model.ts</files>
-  <action>Define User type with id, email, name, createdAt. Export TypeScript interface.</action>
-  <verify>tsc --noEmit passes</verify>
-  <done>User type exported and usable</done>
+  <action>定义包含 id、email、name、createdAt 的 User 类型。导出 TypeScript 接口。</action>
+  <verify>tsc --noEmit 通过</verify>
+  <done>User 类型已导出且可用</done>
 </task>
 
 <task type="auto">
-  <name>Task 2: Create User API endpoints</name>
+  <name>任务 2：创建用户 API 端点</name>
   <files>src/features/user/api.ts</files>
-  <action>GET /users (list), GET /users/:id (single), POST /users (create). Use User type from model.</action>
-  <verify>fetch tests pass for all endpoints</verify>
-  <done>All CRUD operations work</done>
+  <action>GET /users（列表）、GET /users/:id（单个）、POST /users（创建）。使用模型中的 User 类型。</action>
+  <verify>所有端点的 fetch 测试通过</verify>
+  <done>所有 CRUD 操作可用</done>
 </task>
 </tasks>
 
 <verification>
-- [ ] npm run build succeeds
-- [ ] API endpoints respond correctly
+- [ ] npm run build 成功
+- [ ] API 端点正确响应
 </verification>
 
 <success_criteria>
-- All tasks completed
-- User feature works end-to-end
+- 所有任务已完成
+- 用户功能端到端可用
 </success_criteria>
 
 <output>
-After completion, create `.planning/phases/03-features/03-01-SUMMARY.md`
+完成后，创建 `.planning/phases/03-features/03-01-SUMMARY.md`
 </output>
 ```
 
-**Plan with checkpoint (non-autonomous):**
+**带检查点的计划（非自主）：**
 
 ```markdown
 ---
@@ -375,10 +375,10 @@ autonomous: false
 ---
 
 <objective>
-Build dashboard with visual verification.
+构建仪表板并进行视觉验证。
 
-Purpose: Integrate user and product features into unified view.
-Output: Working dashboard component.
+Purpose: 将用户和产品功能集成到统一视图中。
+Output: 可用的仪表板组件。
 </objective>
 
 <execution_context>
@@ -396,215 +396,215 @@ Output: Working dashboard component.
 
 <tasks>
 <task type="auto">
-  <name>Task 1: Build Dashboard layout</name>
+  <name>任务 1：构建仪表板布局</name>
   <files>src/components/Dashboard.tsx</files>
-  <action>Create responsive grid with UserList and ProductList components. Use Tailwind for styling.</action>
-  <verify>npm run build succeeds</verify>
-  <done>Dashboard renders without errors</done>
+  <action>创建包含 UserList 和 ProductList 组件的响应式网格。使用 Tailwind 进行样式设计。</action>
+  <verify>npm run build 成功</verify>
+  <done>仪表板渲染无错误</done>
 </task>
 
-<!-- Checkpoint pattern: Claude starts server, user visits URL. See checkpoints.md for full patterns. -->
+<!-- 检查点模式：Claude 启动服务器，用户访问 URL。完整模式请参阅 checkpoints.md。 -->
 <task type="auto">
-  <name>Start dev server</name>
-  <action>Run `npm run dev` in background, wait for ready</action>
-  <verify>fetch http://localhost:3000 returns 200</verify>
+  <name>启动开发服务器</name>
+  <action>在后台运行 `npm run dev`，等待就绪</action>
+  <verify>fetch http://localhost:3000 返回 200</verify>
 </task>
 
 <task type="checkpoint:human-verify" gate="blocking">
-  <what-built>Dashboard - server at http://localhost:3000</what-built>
-  <how-to-verify>Visit localhost:3000/dashboard. Check: desktop grid, mobile stack, no scroll issues.</how-to-verify>
-  <resume-signal>Type "approved" or describe issues</resume-signal>
+  <what-built>仪表板 - 服务运行在 http://localhost:3000</what-built>
+  <how-to-verify>访问 localhost:3000/dashboard。检查：桌面端网格布局、移动端堆叠布局、无滚动问题。</how-to-verify>
+  <resume-signal>输入 "approved" 或描述问题</resume-signal>
 </task>
 </tasks>
 
 <verification>
-- [ ] npm run build succeeds
-- [ ] Visual verification passed
+- [ ] npm run build 成功
+- [ ] 视觉验证通过
 </verification>
 
 <success_criteria>
-- All tasks completed
-- User approved visual layout
+- 所有任务已完成
+- 用户批准了视觉布局
 </success_criteria>
 
 <output>
-After completion, create `.planning/phases/03-features/03-03-SUMMARY.md`
+完成后，创建 `.planning/phases/03-features/03-03-SUMMARY.md`
 </output>
 ```
 
 ---
 
-## Anti-Patterns
+## 反模式
 
-**Bad: Reflexive dependency chaining**
+**错误：条件反射式依赖串联**
 ```yaml
-depends_on: ["03-01"]  # Just because 01 comes before 02
+depends_on: ["03-01"]  # 仅仅因为 01 在 02 之前
 ```
 
-**Bad: Horizontal layer grouping**
+**错误：水平层分组**
 ```
-Plan 01: All models
-Plan 02: All APIs (depends on 01)
-Plan 03: All UIs (depends on 02)
+计划 01：所有模型
+计划 02：所有 API（依赖 01）
+计划 03：所有 UI（依赖 02）
 ```
 
-**Bad: Missing autonomy flag**
+**错误：缺少自主性标志**
 ```yaml
-# Has checkpoint but no autonomous: false
+# 有检查点但没有 autonomous: false
 depends_on: []
 files_modified: [...]
-# autonomous: ???  <- Missing!
+# autonomous: ???  <- 缺失！
 ```
 
-**Bad: Vague tasks**
+**错误：模糊的任务**
 ```xml
 <task type="auto">
-  <name>Set up authentication</name>
-  <action>Add auth to the app</action>
+  <name>设置认证</name>
+  <action>给应用添加认证</action>
 </task>
 ```
 
-**Bad: Missing read_first (executor modifies files it hasn't read)**
+**错误：缺少 read_first（执行器修改未读取的文件）**
 ```xml
 <task type="auto">
-  <name>Update database config</name>
+  <name>更新数据库配置</name>
   <files>src/config/database.ts</files>
-  <!-- No read_first! Executor doesn't know current state or conventions -->
-  <action>Update the database config to match production settings</action>
+  <!-- 没有 read_first！执行器不知道当前状态或约定 -->
+  <action>更新数据库配置以匹配生产环境设置</action>
 </task>
 ```
 
-**Bad: Vague acceptance criteria (not verifiable)**
+**错误：模糊的验收标准（不可验证）**
 ```xml
 <acceptance_criteria>
-  - Config is properly set up
-  - Database connection works correctly
+  - 配置已正确设置
+  - 数据库连接正常工作
 </acceptance_criteria>
 ```
 
-**Good: Concrete with read_first + verifiable criteria**
+**正确：具体的 read_first + 可验证的标准**
 ```xml
 <task type="auto">
-  <name>Update database config for connection pooling</name>
+  <name>更新数据库配置以支持连接池</name>
   <files>src/config/database.ts</files>
   <read_first>src/config/database.ts, .env.example, docker-compose.yml</read_first>
-  <action>Add pool configuration: min=2, max=20, idleTimeoutMs=30000. Add SSL config: rejectUnauthorized=true when NODE_ENV=production. Add .env.example entry: DATABASE_POOL_MAX=20.</action>
+  <action>添加连接池配置：min=2, max=20, idleTimeoutMs=30000。添加 SSL 配置：NODE_ENV=production 时 rejectUnauthorized=true。在 .env.example 中添加条目：DATABASE_POOL_MAX=20。</action>
   <acceptance_criteria>
-    - database.ts contains "max: 20" and "idleTimeoutMillis: 30000"
-    - database.ts contains SSL conditional on NODE_ENV
-    - .env.example contains DATABASE_POOL_MAX
+    - database.ts 包含 "max: 20" 和 "idleTimeoutMillis: 30000"
+    - database.ts 包含基于 NODE_ENV 的 SSL 条件判断
+    - .env.example 包含 DATABASE_POOL_MAX
   </acceptance_criteria>
 </task>
 ```
 
 ---
 
-## Guidelines
+## 指南
 
-- Always use XML structure for Claude parsing
-- Include `wave`, `depends_on`, `files_modified`, `autonomous` in every plan
-- Prefer vertical slices over horizontal layers
-- Only reference prior SUMMARYs when genuinely needed
-- Group checkpoints with related auto tasks in same plan
-- 2-3 tasks per plan, ~50% context max
+- 始终使用 XML 结构以便 Claude 解析
+- 每个计划都包含 `wave`、`depends_on`、`files_modified`、`autonomous`
+- 优先垂直切片而非水平分层
+- 仅在确实需要时引用之前的 SUMMARY
+- 将检查点与相关的自动任务放在同一计划中
+- 每个计划 2-3 个任务，最多约 50% 上下文
 
 ---
 
-## User Setup (External Services)
+## 用户设置（外部服务）
 
-When a plan introduces external services requiring human configuration, declare in frontmatter:
+当计划引入需要人工配置的外部服务时，在前置元数据中声明：
 
 ```yaml
 user_setup:
   - service: stripe
-    why: "Payment processing requires API keys"
+    why: "支付处理需要 API 密钥"
     env_vars:
       - name: STRIPE_SECRET_KEY
         source: "Stripe Dashboard → Developers → API keys → Secret key"
       - name: STRIPE_WEBHOOK_SECRET
         source: "Stripe Dashboard → Developers → Webhooks → Signing secret"
     dashboard_config:
-      - task: "Create webhook endpoint"
+      - task: "创建 webhook 端点"
         location: "Stripe Dashboard → Developers → Webhooks → Add endpoint"
         details: "URL: https://[your-domain]/api/webhooks/stripe"
     local_dev:
       - "stripe listen --forward-to localhost:3000/api/webhooks/stripe"
 ```
 
-**The automation-first rule:** `user_setup` contains ONLY what Claude literally cannot do:
-- Account creation (requires human signup)
-- Secret retrieval (requires dashboard access)
-- Dashboard configuration (requires human in browser)
+**自动化优先规则：** `user_setup` 仅包含 Claude 确实无法完成的事项：
+- 账号创建（需要人工注册）
+- 密钥获取（需要访问仪表板）
+- 仪表板配置（需要人工在浏览器中操作）
 
-**NOT included:** Package installs, code changes, file creation, CLI commands Claude can run.
+**不包含：** 包安装、代码更改、文件创建、Claude 可以运行的 CLI 命令。
 
-**Result:** Execute-plan generates `{phase}-USER-SETUP.md` with checklist for the user.
+**结果：** Execute-plan 生成 `{phase}-USER-SETUP.md`，包含给用户的检查清单。
 
-See `~/.claude/get-shit-done/templates/user-setup.md` for full schema and examples
+参见 `~/.claude/get-shit-done/templates/user-setup.md` 了解完整的模式和示例
 
 ---
 
-## Must-Haves (Goal-Backward Verification)
+## 必须项（目标回溯验证）
 
-The `must_haves` field defines what must be TRUE for the phase goal to be achieved. Derived during planning, verified after execution.
+`must_haves` 字段定义了阶段目标达成必须为 TRUE 的条件。在规划时推导，在执行后验证。
 
-**Structure:**
+**结构：**
 
 ```yaml
 must_haves:
   truths:
-    - "User can see existing messages"
-    - "User can send a message"
-    - "Messages persist across refresh"
+    - "用户可以看到现有消息"
+    - "用户可以发送消息"
+    - "消息在刷新后持久化"
   artifacts:
     - path: "src/components/Chat.tsx"
-      provides: "Message list rendering"
+      provides: "消息列表渲染"
       min_lines: 30
     - path: "src/app/api/chat/route.ts"
-      provides: "Message CRUD operations"
+      provides: "消息 CRUD 操作"
       exports: ["GET", "POST"]
     - path: "prisma/schema.prisma"
-      provides: "Message model"
+      provides: "消息模型"
       contains: "model Message"
   key_links:
     - from: "src/components/Chat.tsx"
       to: "/api/chat"
-      via: "fetch in useEffect"
+      via: "useEffect 中的 fetch"
       pattern: "fetch.*api/chat"
     - from: "src/app/api/chat/route.ts"
       to: "prisma.message"
-      via: "database query"
+      via: "数据库查询"
       pattern: "prisma\\.message\\.(find|create)"
 ```
 
-**Field descriptions:**
+**字段描述：**
 
-| Field | Purpose |
+| 字段 | 用途 |
 |-------|---------|
-| `truths` | Observable behaviors from user perspective. Each must be testable. |
-| `artifacts` | Files that must exist with real implementation. |
-| `artifacts[].path` | File path relative to project root. |
-| `artifacts[].provides` | What this artifact delivers. |
-| `artifacts[].min_lines` | Optional. Minimum lines to be considered substantive. |
-| `artifacts[].exports` | Optional. Expected exports to verify. |
-| `artifacts[].contains` | Optional. Pattern that must exist in file. |
-| `key_links` | Critical connections between artifacts. |
-| `key_links[].from` | Source artifact. |
-| `key_links[].to` | Target artifact or endpoint. |
-| `key_links[].via` | How they connect (description). |
-| `key_links[].pattern` | Optional. Regex to verify connection exists. |
+| `truths` | 从用户角度可观察的行为。每个都必须可测试。 |
+| `artifacts` | 必须存在的带有实际实现的文件。 |
+| `artifacts[].path` | 相对于项目根目录的文件路径。 |
+| `artifacts[].provides` | 此产物提供什么。 |
+| `artifacts[].min_lines` | 可选。被视为实质性内容的最少行数。 |
+| `artifacts[].exports` | 可选。要验证的预期导出。 |
+| `artifacts[].contains` | 可选。文件中必须存在的模式。 |
+| `key_links` | 产物之间的关键连接。 |
+| `key_links[].from` | 源产物。 |
+| `key_links[].to` | 目标产物或端点。 |
+| `key_links[].via` | 如何连接（描述）。 |
+| `key_links[].pattern` | 可选。用于验证连接存在的正则表达式。 |
 
-**Why this matters:**
+**为什么这很重要：**
 
-Task completion ≠ Goal achievement. A task "create chat component" can complete by creating a placeholder. The `must_haves` field captures what must actually work, enabling verification to catch gaps before they compound.
+任务完成 ≠ 目标达成。一个"创建聊天组件"的任务可以通过创建一个占位符来完成。`must_haves` 字段捕获了实际上必须工作的内容，使验证能够在差距累积之前发现它们。
 
-**Verification flow:**
+**验证流程：**
 
-1. Plan-phase derives must_haves from phase goal (goal-backward)
-2. Must_haves written to PLAN.md frontmatter
-3. Execute-phase runs all plans
-4. Verification subagent checks must_haves against codebase
-5. Gaps found → fix plans created → execute → re-verify
-6. All must_haves pass → phase complete
+1. Plan-phase 从阶段目标推导 must_haves（目标回溯）
+2. Must_haves 写入 PLAN.md 前置元数据
+3. Execute-phase 运行所有计划
+4. 验证子 agent 根据代码库检查 must_haves
+5. 发现差距 → 创建修复计划 → 执行 → 重新验证
+6. 所有 must_haves 通过 → 阶段完成
 
-See `~/.claude/get-shit-done/workflows/verify-phase.md` for verification logic.
+参见 `~/.claude/get-shit-done/workflows/verify-phase.md` 了解验证逻辑。

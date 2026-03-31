@@ -1,6 +1,6 @@
 ---
 name: gsd:ui-phase
-description: Generate UI design contract (UI-SPEC.md) for frontend phases
+description: 为前端阶段生成 UI 设计契约（UI-SPEC.md）
 argument-hint: "[phase]"
 allowed-tools:
   - Read
@@ -14,9 +14,9 @@ allowed-tools:
   - mcp__context7__*
 ---
 <objective>
-Create a UI design contract (UI-SPEC.md) for a frontend phase.
-Orchestrates gsd-ui-researcher and gsd-ui-checker.
-Flow: Validate → Research UI → Verify UI-SPEC → Done
+为前端阶段创建 UI 设计契约（UI-SPEC.md）。
+协调 gsd-ui-researcher 和 gsd-ui-checker。
+流程：验证 → 研究 UI → 校验 UI-SPEC → 完成
 </objective>
 
 <execution_context>
@@ -25,10 +25,9 @@ Flow: Validate → Research UI → Verify UI-SPEC → Done
 </execution_context>
 
 <context>
-Phase number: $ARGUMENTS — optional, auto-detects next unplanned phase if omitted.
+阶段编号：$ARGUMENTS — 可选，省略则自动检测下一个未规划的阶段。
 </context>
 
 <process>
-Execute @~/.claude/get-shit-done/workflows/ui-phase.md end-to-end.
-Preserve all workflow gates.
+端到端执行 @~/.claude/get-shit-done/workflows/ui-phase.md，保留所有工作流门禁。
 </process>

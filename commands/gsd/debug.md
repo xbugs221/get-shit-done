@@ -1,7 +1,7 @@
 ---
 name: gsd:debug
-description: Systematic debugging with persistent state across context resets
-argument-hint: [issue description]
+description: 具有跨上下文重置持久化状态的系统化调试
+argument-hint: [问题描述]
 allowed-tools:
   - Read
   - Bash
@@ -10,22 +10,22 @@ allowed-tools:
 ---
 
 <objective>
-Debug issues using scientific method with subagent isolation.
+使用科学方法和子代理隔离来调试问题。
 
-**Orchestrator role:** Gather symptoms, spawn gsd-debugger agent, handle checkpoints, spawn continuations.
+**协调器角色：** 收集症状，生成 gsd-debugger 代理，处理检查点，生成后续代理。
 
-**Why subagent:** Investigation burns context fast (reading files, forming hypotheses, testing). Fresh 200k context per investigation. Main context stays lean for user interaction.
+**为什么使用子代理：** 调查会快速消耗上下文。每次调查都有全新的 200k 上下文，主上下文保持精简用于用户交互。
 </objective>
 
 <available_agent_types>
-Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
-- gsd-debugger — Diagnoses and fixes issues
+有效的 GSD 子代理类型（使用精确名称）：
+- gsd-debugger — 诊断并修复问题
 </available_agent_types>
 
 <context>
-User's issue: $ARGUMENTS
+用户的问题：$ARGUMENTS
 
-Check for active sessions:
+检查活跃会话：
 ```bash
 ls .planning/debug/*.md 2>/dev/null | grep -v resolved | head -5
 ```
@@ -33,56 +33,53 @@ ls .planning/debug/*.md 2>/dev/null | grep -v resolved | head -5
 
 <process>
 
-## 0. Initialize Context
+## 0. 初始化上下文
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" state load)
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Extract `commit_docs` from init JSON. Resolve debugger model:
+从初始化 JSON 中提取 `commit_docs`。解析调试器模型：
 ```bash
 debugger_model=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" resolve-model gsd-debugger --raw)
 ```
 
-## 1. Check Active Sessions
+## 1. 检查活跃会话
 
-If active sessions exist AND no $ARGUMENTS:
-- List sessions with status, hypothesis, next action
-- User picks number to resume OR describes new issue
+如果存在活跃会话且没有 $ARGUMENTS：
+- 列出会话及其状态、假设、下一步操作
+- 用户选择编号以恢复或描述新问题
 
-If $ARGUMENTS provided OR user describes new issue:
-- Continue to symptom gathering
+如果提供了 $ARGUMENTS 或用户描述了新问题：继续症状收集。
 
-## 2. Gather Symptoms (if new issue)
+## 2. 收集症状（新问题时）
 
-Use AskUserQuestion for each:
+对每项使用 AskUserQuestion：
 
-1. **Expected behavior** - What should happen?
-2. **Actual behavior** - What happens instead?
-3. **Error messages** - Any errors? (paste or describe)
-4. **Timeline** - When did this start? Ever worked?
-5. **Reproduction** - How do you trigger it?
+1. **预期行为** - 应该发生什么？
+2. **实际行为** - 实际发生了什么？
+3. **错误信息** - 有任何错误吗？
+4. **时间线** - 什么时候开始的？之前正常吗？
+5. **复现方式** - 如何触发？
 
-After all gathered, confirm ready to investigate.
+全部收集完毕后，确认开始调查。
 
-## 3. Spawn gsd-debugger Agent
-
-Fill prompt and spawn:
+## 3. 生成 gsd-debugger 代理
 
 ```markdown
 <objective>
-Investigate issue: {slug}
+调查问题：{slug}
 
-**Summary:** {trigger}
+**摘要：** {trigger}
 </objective>
 
 <symptoms>
-expected: {expected}
-actual: {actual}
-errors: {errors}
-reproduction: {reproduction}
-timeline: {timeline}
+预期：{expected}
+实际：{actual}
+错误：{errors}
+复现：{reproduction}
+时间线：{timeline}
 </symptoms>
 
 <mode>
@@ -91,7 +88,7 @@ goal: find_and_fix
 </mode>
 
 <debug_file>
-Create: .planning/debug/{slug}.md
+创建：.planning/debug/{slug}.md
 </debug_file>
 ```
 
@@ -100,52 +97,43 @@ Task(
   prompt=filled_prompt,
   subagent_type="gsd-debugger",
   model="{debugger_model}",
-  description="Debug {slug}"
+  description="调试 {slug}"
 )
 ```
 
-## 4. Handle Agent Return
+## 4. 处理代理返回
 
-**If `## ROOT CAUSE FOUND`:**
-- Display root cause and evidence summary
-- Offer options:
-  - "Fix now" - spawn fix subagent
-  - "Plan fix" - suggest /gsd:plan-phase --gaps
-  - "Manual fix" - done
+**`## ROOT CAUSE FOUND`：**
+- 显示根因和证据摘要
+- 选项："立即修复"（生成修复子代理）、"规划修复"（建议 /gsd:plan-phase --gaps）、"手动修复"
 
-**If `## CHECKPOINT REACHED`:**
-- Present checkpoint details to user
-- Get user response
-- If checkpoint type is `human-verify`:
-  - If user confirms fixed: continue so agent can finalize/resolve/archive
-  - If user reports issues: continue so agent returns to investigation/fixing
-- Spawn continuation agent (see step 5)
+**`## CHECKPOINT REACHED`：**
+- 向用户展示检查点详情并获取回复
+- `human-verify` 类型：用户确认已修复则继续完成/归档，报告问题则回到调查/修复
+- 生成后续代理（见步骤 5）
 
-**If `## INVESTIGATION INCONCLUSIVE`:**
-- Show what was checked and eliminated
-- Offer options:
-  - "Continue investigating" - spawn new agent with additional context
-  - "Manual investigation" - done
-  - "Add more context" - gather more symptoms, spawn again
+**`## INVESTIGATION INCONCLUSIVE`：**
+- 显示已检查和已排除的内容
+- 选项："继续调查"（使用额外上下文生成新代理）、"手动调查"、"添加更多上下文"（重新收集症状）
 
-## 5. Spawn Continuation Agent (After Checkpoint)
+## 5. 生成后续代理（检查点之后）
 
-When user responds to checkpoint, spawn fresh agent:
+当用户回复检查点时，生成全新代理：
 
 ```markdown
 <objective>
-Continue debugging {slug}. Evidence is in the debug file.
+继续调试 {slug}。证据在调试文件中。
 </objective>
 
 <prior_state>
 <files_to_read>
-- .planning/debug/{slug}.md (Debug session state)
+- .planning/debug/{slug}.md（调试会话状态）
 </files_to_read>
 </prior_state>
 
 <checkpoint_response>
-**Type:** {checkpoint_type}
-**Response:** {user_response}
+**类型：** {checkpoint_type}
+**回复：** {user_response}
 </checkpoint_response>
 
 <mode>
@@ -158,16 +146,17 @@ Task(
   prompt=continuation_prompt,
   subagent_type="gsd-debugger",
   model="{debugger_model}",
-  description="Continue debug {slug}"
+  description="继续调试 {slug}"
 )
 ```
 
 </process>
 
 <success_criteria>
-- [ ] Active sessions checked
-- [ ] Symptoms gathered (if new)
-- [ ] gsd-debugger spawned with context
-- [ ] Checkpoints handled correctly
-- [ ] Root cause confirmed before fixing
+- [ ] 已检查活跃会话
+- [ ] 已收集症状（新问题时）
+- [ ] 已生成带上下文的 gsd-debugger
+- [ ] 检查点已正确处理
+- [ ] 修复前已确认根因
 </success_criteria>
+</output>

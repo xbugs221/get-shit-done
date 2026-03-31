@@ -1,127 +1,127 @@
 <purpose>
-Verify phase goal achievement through goal-backward analysis. Check that the codebase delivers what the phase promised, not just that tasks completed.
-Headless SDK variant — runs autonomously without interactive prompts.
+通过目标反向分析验证阶段目标是否达成。检查代码库是否交付了阶段承诺的内容，而不仅仅是任务是否完成。
+无头 SDK 变体 — 无需交互式提示即可自主运行。
 </purpose>
 
 <core_principle>
-**Task completion does not equal goal achievement.**
+**任务完成不等于目标达成。**
 
-A task "create chat component" can be marked complete when the component is a placeholder. The task was done — but the goal "working chat interface" was not achieved.
+一个"创建聊天组件"的任务可以在组件只是占位符时就标记为完成。任务完成了 — 但"可工作的聊天界面"这一目标并未实现。
 
-Goal-backward verification:
-1. What must be TRUE for the goal to be achieved?
-2. What must EXIST for those truths to hold?
-3. What must be WIRED for those artifacts to function?
+目标反向验证：
+1. 目标达成需要哪些条件为真？
+2. 这些条件成立需要哪些产物存在？
+3. 这些产物运作需要哪些连接被建立？
 
-Then verify each level against the actual codebase.
+然后针对实际代码库验证每个层级。
 </core_principle>
 
 <process>
 
 <step name="load_context" priority="first">
-Load phase operation context from injected context files. Extract: phase directory, phase number, phase name, plan count.
+从注入的上下文文件加载阶段操作上下文。提取：阶段目录、阶段编号、阶段名称、计划数量。
 
-Load phase details, plans, and summaries. Extract the **phase goal** from the roadmap (the outcome to verify, not tasks) and **requirements** if they exist.
+加载阶段详情、计划和摘要。从路线图中提取**阶段目标**（要验证的结果，而非任务）和**需求**（如果存在）。
 </step>
 
 <step name="establish_must_haves">
-**Option A: Must-haves in PLAN frontmatter**
+**选项 A：PLAN 前置信息中的必须项**
 
-Extract must_haves from each PLAN: `{ truths: [...], artifacts: [...], key_links: [...] }`
+从每个 PLAN 中提取 must_haves：`{ truths: [...], artifacts: [...], key_links: [...] }`
 
-Aggregate all must_haves across plans for phase-level verification.
+汇总所有计划的 must_haves 进行阶段级验证。
 
-**Option B: Use Success Criteria from roadmap**
+**选项 B：使用路线图中的成功标准**
 
-If no must_haves in frontmatter, use Success Criteria directly as truths. Derive artifacts and key links from there.
+如果前置信息中没有 must_haves，直接使用成功标准作为条件。从中推导产物和关键链接。
 
-**Option C: Derive from phase goal (fallback)**
+**选项 C：从阶段目标推导（回退方案）**
 
-If neither source available: state the goal, derive 3-7 observable truths, derive artifacts, derive key links.
+如果两个来源都不可用：陈述目标，推导 3-7 个可观察的条件，推导产物，推导关键链接。
 </step>
 
 <step name="verify_truths">
-For each observable truth, determine if the codebase enables it.
+对于每个可观察的条件，判断代码库是否支持它。
 
-**Status:** VERIFIED (all supporting artifacts pass) | FAILED (artifact missing/stub/unwired) | UNCERTAIN (needs investigation)
+**状态：**已验证（所有支持产物通过）| 失败（产物缺失/占位/未连接）| 不确定（需要调查）
 
-For each truth: identify supporting artifacts, check artifact status, check wiring, determine truth status.
+对于每个条件：识别支持产物，检查产物状态，检查连接，确定条件状态。
 </step>
 
 <step name="verify_artifacts">
-Three-level verification:
+三级验证：
 
-**Level 1 — Exists:** File exists on disk.
-**Level 2 — Substantive:** File has real content (not stub/placeholder). Check line count, expected patterns.
-**Level 3 — Wired:** File is imported AND used by other code.
+**第 1 级 — 存在：**文件存在于磁盘上。
+**第 2 级 — 实质性：**文件有真实内容（非占位符/桩代码）。检查行数、预期模式。
+**第 3 级 — 已连接：**文件被导入并被其他代码使用。
 
-| Exists | Substantive | Wired | Status |
-|--------|-------------|-------|--------|
-| Yes    | Yes         | Yes   | VERIFIED |
-| Yes    | Yes         | No    | ORPHANED |
-| Yes    | No          | -     | STUB |
-| No     | -           | -     | MISSING |
+| 存在 | 实质性 | 已连接 | 状态 |
+|------|--------|--------|------|
+| 是   | 是     | 是     | 已验证 |
+| 是   | 是     | 否     | 孤立 |
+| 是   | 否     | -      | 桩代码 |
+| 否   | -      | -      | 缺失 |
 </step>
 
 <step name="verify_wiring">
-Key links are critical connections. If broken, the goal fails even with all artifacts present.
+关键链接是关键连接。如果断开，即使所有产物都存在，目标也会失败。
 
-Verify each key link by checking imports, usage patterns, fetch calls, database queries, form handlers, and state rendering.
+通过检查导入、使用模式、fetch 调用、数据库查询、表单处理器和状态渲染来验证每个关键链接。
 </step>
 
 <step name="verify_requirements">
-For each requirement mapped to this phase: identify supporting truths/artifacts, determine status (SATISFIED / BLOCKED / UNCERTAIN).
+对于映射到此阶段的每个需求：识别支持条件/产物，确定状态（已满足 / 受阻 / 不确定）。
 </step>
 
 <step name="scan_antipatterns">
-Scan files modified in this phase for:
+扫描此阶段修改的文件中的：
 
-| Pattern | Severity |
-|---------|----------|
-| TODO/FIXME/XXX/HACK | Warning |
-| Placeholder content | Blocker |
-| Empty returns | Warning |
-| Log-only functions | Warning |
+| 模式 | 严重程度 |
+|------|----------|
+| TODO/FIXME/XXX/HACK | 警告 |
+| 占位符内容 | 阻塞 |
+| 空返回 | 警告 |
+| 仅记录日志的函数 | 警告 |
 
-Categorize: Blocker (prevents goal) | Warning (incomplete) | Info (notable).
+分类：阻塞（阻止目标）| 警告（不完整）| 信息（值得注意）。
 </step>
 
 <step name="determine_status">
-**passed:** All truths VERIFIED, all artifacts pass levels 1-3, all key links WIRED, no blocker anti-patterns.
+**通过：**所有条件已验证，所有产物通过第 1-3 级，所有关键链接已连接，无阻塞反模式。
 
-**gaps_found:** Any truth FAILED, artifact MISSING/STUB, key link NOT_WIRED, or blocker found.
+**发现差距：**任何条件失败，产物缺失/桩代码，关键链接未连接，或发现阻塞项。
 
-**Score:** verified_truths / total_truths
+**评分：**已验证条件数 / 总条件数
 </step>
 
 <step name="generate_fix_plans">
-If gaps_found:
-1. Cluster related gaps by concern
-2. Generate plan per cluster: objective, 2-3 tasks, re-verify step
-3. Order by dependency: fix missing, fix stubs, fix wiring, verify
+如果发现差距：
+1. 按关注点聚类相关差距
+2. 为每个聚类生成计划：目标、2-3 个任务、重新验证步骤
+3. 按依赖排序：修复缺失、修复桩代码、修复连接、验证
 </step>
 
 <step name="create_report">
-Create VERIFICATION.md with: frontmatter (phase/timestamp/status/score), goal achievement, artifact table, wiring table, requirements coverage, anti-patterns, gaps summary, fix plans (if gaps_found).
+创建 VERIFICATION.md，包含：前置信息（阶段/时间戳/状态/评分）、目标达成情况、产物表、连接表、需求覆盖、反模式、差距摘要、修复计划（如果发现差距）。
 </step>
 
 <step name="return_to_orchestrator">
-Return status (passed | gaps_found), score (N/M must-haves), report path.
+返回状态（通过 | 发现差距）、评分（N/M 必须项）、报告路径。
 
-If gaps_found: list gaps and recommended fix plan names.
+如果发现差距：列出差距和推荐的修复计划名称。
 </step>
 
 </process>
 
 <success_criteria>
-- Must-haves established (from frontmatter or derived)
-- All truths verified with status and evidence
-- All artifacts checked at all three levels
-- All key links verified
-- Requirements coverage assessed
-- Anti-patterns scanned and categorized
-- Overall status determined
-- Fix plans generated (if gaps_found)
-- VERIFICATION.md created with complete report
-- Results returned to orchestrator
+- 必须项已建立（来自前置信息或推导）
+- 所有条件已验证且带有状态和证据
+- 所有产物已在三个层级全部检查
+- 所有关键链接已验证
+- 需求覆盖已评估
+- 反模式已扫描和分类
+- 总体状态已确定
+- 修复计划已生成（如果发现差距）
+- VERIFICATION.md 已创建且包含完整报告
+- 结果已返回给编排器
 </success_criteria>

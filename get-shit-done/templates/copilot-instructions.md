@@ -1,7 +1,7 @@
-# Instructions for GSD
+# GSD 使用说明
 
-- Use the get-shit-done skill when the user asks for GSD or uses a `gsd-*` command.
-- Treat `/gsd-...` or `gsd-...` as command invocations and load the matching file from `.github/skills/gsd-*`.
-- When a command says to spawn a subagent, prefer a matching custom agent from `.github/agents`.
-- Do not apply GSD workflows unless the user explicitly asks for them.
-- After completing any `gsd-*` command (or any deliverable it triggers: feature, bug fix, tests, docs, etc.), ALWAYS: (1) offer the user the next step by prompting via `ask_user`; repeat this feedback loop until the user explicitly indicates they are done.
+- 当用户请求 GSD 或使用 `gsd-*` 命令时，使用 get-shit-done 技能。
+- 将 `/gsd-...` 或 `gsd-...` 视为命令调用，并从 `.github/skills/gsd-*` 加载匹配的文件。
+- 当命令要求生成子代理时，优先使用 `.github/agents` 中匹配的自定义代理。
+- 除非用户明确要求，否则不要应用 GSD 工作流。
+- 完成任何 `gsd-*` 命令（或其触发的任何交付物：功能、bug 修复、测试、文档等）后，始终：(1) 通过 `ask_user` 向用户提示下一步；重复此反馈循环直到用户明确表示已完成。

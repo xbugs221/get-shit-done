@@ -1,7 +1,7 @@
 ---
 name: gsd:new-milestone
-description: Start a new milestone cycle — update PROJECT.md and route to requirements
-argument-hint: "[milestone name, e.g., 'v1.1 Notifications']"
+description: 开始新的里程碑周期 — 更新 PROJECT.md 并路由到需求阶段
+argument-hint: "[里程碑名称，例如 'v1.1 通知系统']"
 allowed-tools:
   - Read
   - Write
@@ -10,18 +10,18 @@ allowed-tools:
   - AskUserQuestion
 ---
 <objective>
-Start a new milestone: questioning → research (optional) → requirements → roadmap.
+开始新的里程碑：提问 → 研究（可选） → 需求 → 路线图。
 
-Brownfield equivalent of new-project. Project exists, PROJECT.md has history. Gathers "what's next", updates PROJECT.md, then runs requirements → roadmap cycle.
+等同于 new-project 的棕地版本。项目已存在，PROJECT.md 有历史记录。收集"下一步做什么"，更新 PROJECT.md，然后运行需求 → 路线图周期。
 
-**Creates/Updates:**
-- `.planning/PROJECT.md` — updated with new milestone goals
-- `.planning/research/` — domain research (optional, NEW features only)
-- `.planning/REQUIREMENTS.md` — scoped requirements for this milestone
-- `.planning/ROADMAP.md` — phase structure (continues numbering)
-- `.planning/STATE.md` — reset for new milestone
+**创建/更新：**
+- `.planning/PROJECT.md` — 更新为新里程碑目标
+- `.planning/research/` — 领域研究（可选，仅限新功能）
+- `.planning/REQUIREMENTS.md` — 本里程碑的范围化需求
+- `.planning/ROADMAP.md` — 阶段结构（继续编号）
+- `.planning/STATE.md` — 为新里程碑重置
 
-**After:** `/gsd:plan-phase [N]` to start execution.
+**之后：** `/gsd:plan-phase [N]` 开始执行。
 </objective>
 
 <execution_context>
@@ -33,12 +33,12 @@ Brownfield equivalent of new-project. Project exists, PROJECT.md has history. Ga
 </execution_context>
 
 <context>
-Milestone name: $ARGUMENTS (optional - will prompt if not provided)
+里程碑名称：$ARGUMENTS（可选 - 如未提供将提示输入）
 
-Project and milestone context files are resolved inside the workflow (`init new-milestone`) and delegated via `<files_to_read>` blocks where subagents are used.
+项目和里程碑上下文在工作流内部解析（`init new-milestone`），通过 `<files_to_read>` 块委派给子 agent。
 </context>
 
 <process>
-Execute the new-milestone workflow from @~/.claude/get-shit-done/workflows/new-milestone.md end-to-end.
-Preserve all workflow gates (validation, questioning, research, requirements, roadmap approval, commits).
+端到端执行 @~/.claude/get-shit-done/workflows/new-milestone.md 工作流。
+保留所有工作流门控（验证、提问、研究、需求、路线图审批、提交）。
 </process>

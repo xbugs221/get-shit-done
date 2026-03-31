@@ -1,6 +1,6 @@
 ---
 name: gsd:pr-branch
-description: Create a clean PR branch by filtering out .planning/ commits — ready for code review
+description: 通过过滤 .planning/ 提交创建干净的 PR 分支 — 为代码审查做好准备
 argument-hint: "[target branch, default: main]"
 allowed-tools:
   - Bash
@@ -9,11 +9,7 @@ allowed-tools:
 ---
 
 <objective>
-Create a clean branch suitable for pull requests by filtering out .planning/ commits
-from the current branch. Reviewers see only code changes, not GSD planning artifacts.
-
-This solves the problem of PR diffs being cluttered with PLAN.md, SUMMARY.md, STATE.md
-changes that are irrelevant to code review.
+从当前分支过滤 .planning/ 提交，创建适合 PR 的干净分支。审查者只看到代码变更，不会被 PLAN.md、SUMMARY.md、STATE.md 等规划产物干扰。
 </objective>
 
 <execution_context>
@@ -21,5 +17,5 @@ changes that are irrelevant to code review.
 </execution_context>
 
 <process>
-Execute the pr-branch workflow from @~/.claude/get-shit-done/workflows/pr-branch.md end-to-end.
+从头到尾执行 @~/.claude/get-shit-done/workflows/pr-branch.md 中的 pr-branch 工作流。
 </process>

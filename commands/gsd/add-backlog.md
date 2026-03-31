@@ -1,6 +1,6 @@
 ---
 name: gsd:add-backlog
-description: Add an idea to the backlog parking lot (999.x numbering)
+description: 将想法添加到待办停车场（使用 999.x 编号）
 argument-hint: <description>
 allowed-tools:
   - Read
@@ -9,68 +9,66 @@ allowed-tools:
 ---
 
 <objective>
-Add a backlog item to the roadmap using 999.x numbering. Backlog items are
-unsequenced ideas that aren't ready for active planning — they live outside
-the normal phase sequence and accumulate context over time.
+使用 999.x 编号将待办事项添加到路线图。待办事项是尚未进入主动规划的无序想法，存在于正常阶段序列之外，随时间积累上下文。
 </objective>
 
 <process>
 
-1. **Read ROADMAP.md** to find existing backlog entries:
+1. **读取 ROADMAP.md** 查找现有待办条目：
    ```bash
    cat .planning/ROADMAP.md
    ```
 
-2. **Find next backlog number:**
+2. **查找下一个待办编号：**
    ```bash
    NEXT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" phase next-decimal 999 --raw)
    ```
-   If no 999.x phases exist, start at 999.1.
+   如果不存在 999.x 阶段，则从 999.1 开始。
 
-3. **Create the phase directory:**
+3. **创建阶段目录：**
    ```bash
    SLUG=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" generate-slug "$ARGUMENTS")
    mkdir -p ".planning/phases/${NEXT}-${SLUG}"
    touch ".planning/phases/${NEXT}-${SLUG}/.gitkeep"
    ```
 
-4. **Add to ROADMAP.md** under a `## Backlog` section. If the section doesn't exist, create it at the end:
+4. **添加到 ROADMAP.md** 的 `## Backlog` 部分下（不存在则在末尾创建）：
 
    ```markdown
    ## Backlog
 
    ### Phase {NEXT}: {description} (BACKLOG)
 
-   **Goal:** [Captured for future planning]
-   **Requirements:** TBD
-   **Plans:** 0 plans
+   **目标：** [已捕获，留待未来规划]
+   **需求：** 待定
+   **计划：** 0 个计划
 
-   Plans:
-   - [ ] TBD (promote with /gsd:review-backlog when ready)
+   计划：
+   - [ ] 待定（准备好后使用 /gsd:review-backlog 提升）
    ```
 
-5. **Commit:**
+5. **提交：**
    ```bash
    node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: add backlog item ${NEXT} — ${ARGUMENTS}" --files .planning/ROADMAP.md ".planning/phases/${NEXT}-${SLUG}/.gitkeep"
    ```
 
-6. **Report:**
+6. **报告：**
    ```
-   ## 📋 Backlog Item Added
+   ## 📋 已添加待办事项
 
-   Phase {NEXT}: {description}
-   Directory: .planning/phases/{NEXT}-{slug}/
+   阶段 {NEXT}: {description}
+   目录：.planning/phases/{NEXT}-{slug}/
 
-   This item lives in the backlog parking lot.
-   Use /gsd:discuss-phase {NEXT} to explore it further.
-   Use /gsd:review-backlog to promote items to active milestone.
+   此事项存放在待办停车场中。
+   使用 /gsd:discuss-phase {NEXT} 进一步探索。
+   使用 /gsd:review-backlog 将事项提升到活跃里程碑。
    ```
 
 </process>
 
 <notes>
-- 999.x numbering keeps backlog items out of the active phase sequence
-- Phase directories are created immediately, so /gsd:discuss-phase and /gsd:plan-phase work on them
-- No `Depends on:` field — backlog items are unsequenced by definition
-- Sparse numbering is fine (999.1, 999.3) — always uses next-decimal
+- 999.x 编号使待办事项不会进入活跃阶段序列
+- 阶段目录立即创建，供 /gsd:discuss-phase 和 /gsd:plan-phase 使用
+- 无 `Depends on:` 字段——待办事项按定义无序
+- 编号可不连续（999.1、999.3）——始终使用 next-decimal
 </notes>

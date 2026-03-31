@@ -1,63 +1,60 @@
 ---
-description: Manage parallel workstreams — list, create, switch, status, progress, complete, and resume
+description: 管理并行工作流 — 列出、创建、切换、状态、进度、完成和恢复
 ---
 
 # /gsd:workstreams
 
-Manage parallel workstreams for concurrent milestone work.
+管理并行工作流，用于并发里程碑工作。
 
-## Usage
+## 用法
 
 `/gsd:workstreams [subcommand] [args]`
 
-### Subcommands
+### 子命令
 
-| Command | Description |
+| 命令 | 描述 |
 |---------|-------------|
-| `list` | List all workstreams with status |
-| `create <name>` | Create a new workstream |
-| `status <name>` | Detailed status for one workstream |
-| `switch <name>` | Set active workstream |
-| `progress` | Progress summary across all workstreams |
-| `complete <name>` | Archive a completed workstream |
-| `resume <name>` | Resume work in a workstream |
+| `list` | 列出所有工作流及其状态 |
+| `create <name>` | 创建新工作流 |
+| `status <name>` | 查看单个工作流的详细状态 |
+| `switch <name>` | 设置活跃工作流 |
+| `progress` | 所有工作流的进度概览 |
+| `complete <name>` | 归档已完成的工作流 |
+| `resume <name>` | 恢复某个工作流中的工作 |
 
-## Step 1: Parse Subcommand
+## 第一步：解析子命令
 
-Parse the user's input to determine which workstream operation to perform.
-If no subcommand given, default to `list`.
+解析用户输入以确定操作。未给出子命令时默认为 `list`。
 
-## Step 2: Execute Operation
+## 第二步：执行操作
 
 ### list
-Run: `node "$GSD_TOOLS" workstream list --raw --cwd "$CWD"`
-Display the workstreams in a table format showing name, status, current phase, and progress.
+运行：`node "$GSD_TOOLS" workstream list --raw --cwd "$CWD"`
+以表格格式显示工作流的名称、状态、当前阶段和进度。
 
 ### create
-Run: `node "$GSD_TOOLS" workstream create <name> --raw --cwd "$CWD"`
-After creation, display the new workstream path and suggest next steps:
-- `/gsd:new-milestone --ws <name>` to set up the milestone
+运行：`node "$GSD_TOOLS" workstream create <name> --raw --cwd "$CWD"`
+创建后显示新工作流路径并建议：`/gsd:new-milestone --ws <name>`
 
 ### status
-Run: `node "$GSD_TOOLS" workstream status <name> --raw --cwd "$CWD"`
-Display detailed phase breakdown and state information.
+运行：`node "$GSD_TOOLS" workstream status <name> --raw --cwd "$CWD"`
+显示详细的阶段分解和状态信息。
 
 ### switch
-Run: `node "$GSD_TOOLS" workstream set <name> --raw --cwd "$CWD"`
-Also set `GSD_WORKSTREAM` env var for the current session.
+运行：`node "$GSD_TOOLS" workstream set <name> --raw --cwd "$CWD"`
+同时设置 `GSD_WORKSTREAM` 环境变量。
 
 ### progress
-Run: `node "$GSD_TOOLS" workstream progress --raw --cwd "$CWD"`
-Display a progress overview across all workstreams.
+运行：`node "$GSD_TOOLS" workstream progress --raw --cwd "$CWD"`
+显示所有工作流的进度概览。
 
 ### complete
-Run: `node "$GSD_TOOLS" workstream complete <name> --raw --cwd "$CWD"`
-Archive the workstream to milestones/.
+运行：`node "$GSD_TOOLS" workstream complete <name> --raw --cwd "$CWD"`
+将工作流归档到 milestones/。
 
 ### resume
-Set the workstream as active and suggest `/gsd:resume-work --ws <name>`.
+将工作流设置为活跃状态并建议使用 `/gsd:resume-work --ws <name>`。
 
-## Step 3: Display Results
+## 第三步：显示结果
 
-Format the JSON output from gsd-tools into a human-readable display.
-Include the `${GSD_WS}` flag in any routing suggestions.
+将 gsd-tools 的 JSON 输出格式化为人类可读的显示，在所有路由建议中包含 `${GSD_WS}` 标志。

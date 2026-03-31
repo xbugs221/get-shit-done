@@ -1,84 +1,84 @@
 <purpose>
-Create executable phase plans (PLAN.md files) for a roadmap phase with integrated research and verification.
-Headless SDK variant — runs autonomously. Research, planning, and plan-checking proceed without user prompts.
-Default flow: Research (if needed) -> Plan -> Verify -> Done.
+为路线图阶段创建可执行的阶段计划（PLAN.md 文件），集成研究和验证。
+无头 SDK 变体 — 自主运行。研究、规划和计划检查均无需用户提示。
+默认流程：研究（如需要）-> 规划 -> 验证 -> 完成。
 </purpose>
 
 <process>
 
 <step name="initialize">
-Load all context from injected context files. Extract: phase directory, phase number, phase name, research status, context status, plan count, requirement IDs.
+从注入的上下文文件加载所有上下文。提取：阶段目录、阶段编号、阶段名称、研究状态、上下文状态、计划数量、需求 ID。
 
-If planning directory is missing: report error via event stream.
+如果规划目录缺失：通过事件流报告错误。
 </step>
 
 <step name="validate_phase">
-Validate phase exists in roadmap. If not found: report error with available phases.
+验证阶段是否存在于路线图中。如果未找到：报告错误并列出可用阶段。
 </step>
 
 <step name="load_context">
-Load CONTEXT.md if it exists. This contains user decisions that constrain planning.
+如果 CONTEXT.md 存在则加载。其中包含约束规划的用户决策。
 
-If no CONTEXT.md exists: proceed without — plan using research and requirements only. In headless mode, there is no interactive discuss-phase; context comes from prior artifacts or is skipped.
+如果没有 CONTEXT.md：直接继续 — 仅使用研究和需求进行规划。在无头模式下，没有交互式讨论阶段；上下文来自先前的工件或被跳过。
 </step>
 
 <step name="handle_research">
-If RESEARCH.md exists: use existing research.
+如果 RESEARCH.md 存在：使用现有研究。
 
-If RESEARCH.md is missing and research is enabled:
-1. Execute research phase (spawn researcher agent)
-2. Researcher writes RESEARCH.md
-3. Continue to planning
+如果 RESEARCH.md 缺失且研究已启用：
+1. 执行研究阶段（生成研究者代理）
+2. 研究者编写 RESEARCH.md
+3. 继续进行规划
 
-If research is disabled: skip to planning step.
+如果研究已禁用：跳到规划步骤。
 </step>
 
 <step name="spawn_planner">
-Execute planning with the planner agent definition. Provide:
-- Phase number, name, and goal
-- Context files: state, roadmap, requirements, context, research
-- Phase requirement IDs (every ID must appear in a plan's requirements field)
+使用规划者代理定义执行规划。提供：
+- 阶段编号、名称和目标
+- 上下文文件：状态、路线图、需求、上下文、研究
+- 阶段需求 ID（每个 ID 必须出现在某个计划的 requirements 字段中）
 
-The planner creates PLAN.md files with task breakdown, dependency analysis, and verification criteria.
+规划者创建包含任务分解、依赖分析和验证标准的 PLAN.md 文件。
 </step>
 
 <step name="handle_planner_return">
-- **PLANNING COMPLETE** — Plans created. If plan checker is enabled: proceed to verification.
-- **PLANNING BLOCKED** — Log blocker, report via event stream.
-- **PLANNING INCONCLUSIVE** — Report with available context.
+- **规划完成** — 计划已创建。如果计划检查器已启用：继续进行验证。
+- **规划受阻** — 记录阻塞项，通过事件流报告。
+- **规划不确定** — 报告可用上下文。
 </step>
 
 <step name="spawn_plan_checker">
-If plan checker is enabled, execute verification with the plan-checker agent. Provide:
-- Phase number and goal
-- Plan files to verify
-- Roadmap, requirements, context, research files
-- Phase requirement IDs
+如果计划检查器已启用，使用计划检查器代理执行验证。提供：
+- 阶段编号和目标
+- 待验证的计划文件
+- 路线图、需求、上下文、研究文件
+- 阶段需求 ID
 
-The checker verifies plans will achieve the phase goal before execution.
+检查器在执行前验证计划是否能实现阶段目标。
 </step>
 
 <step name="handle_checker_return">
-- **VERIFICATION PASSED** — Plans ready for execution.
-- **ISSUES FOUND** — Enter revision loop (max 3 iterations):
-  1. Send issues back to planner for targeted revision
-  2. Re-run plan checker
-  3. If max iterations reached: proceed with current plans, log remaining issues
+- **验证通过** — 计划已准备好执行。
+- **发现问题** — 进入修订循环（最多 3 次迭代）：
+  1. 将问题发回给规划者进行针对性修订
+  2. 重新运行计划检查器
+  3. 如果达到最大迭代次数：使用当前计划继续，记录剩余问题
 </step>
 
 <step name="requirements_coverage_gate">
-After plans pass the checker (or checker is skipped), verify all phase requirements are covered:
-1. Extract requirement IDs claimed by plans
-2. Compare against phase requirements from roadmap
-3. If gaps found: log as warning, continue (headless mode does not block for coverage gaps)
+计划通过检查器（或检查器被跳过）后，验证所有阶段需求是否已覆盖：
+1. 提取计划声明的需求 ID
+2. 与路线图中的阶段需求进行比较
+3. 如果发现差距：记录为警告，继续（无头模式不会因覆盖差距而阻塞）
 </step>
 
 </process>
 
 <success_criteria>
-- Phase validated against roadmap
-- Research completed (unless skipped or existing)
-- PLAN.md file(s) created with valid structure
-- Plan checker passed (or issues logged)
-- Requirements coverage verified
+- 阶段已根据路线图进行验证
+- 研究已完成（除非被跳过或已存在）
+- PLAN.md 文件已创建且结构有效
+- 计划检查器已通过（或问题已记录）
+- 需求覆盖已验证
 </success_criteria>

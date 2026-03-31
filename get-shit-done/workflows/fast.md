@@ -1,105 +1,106 @@
 <purpose>
-Execute a trivial task inline without subagent overhead. No PLAN.md, no Task spawning,
-no research, no plan checking. Just: understand → do → commit → log.
+在内联模式下执行简单任务，无需子代理开销。不创建 PLAN.md，不启动 Task，
+不进行研究，不进行计划检查。只需：理解 → 执行 → 提交 → 记录。
 
-For tasks like: fix a typo, update a config value, add a missing import, rename a
-variable, commit uncommitted work, add a .gitignore entry, bump a version number.
+适用任务如：修正拼写错误、更新配置值、添加缺少的导入、重命名
+变量、提交未提交的工作、添加 .gitignore 条目、更新版本号。
 
-Use /gsd:quick for anything that needs multi-step planning or research.
+对于需要多步骤规划或研究的任务，使用 /gsd:quick。
 </purpose>
 
 <process>
 
 <step name="parse_task">
-Parse `$ARGUMENTS` for the task description.
+从 `$ARGUMENTS` 解析任务描述。
 
-If empty, ask:
+如果为空，询问：
 ```
-What's the quick fix? (one sentence)
+快速修复是什么？（一句话）
 ```
 
-Store as `$TASK`.
+存储为 `$TASK`。
 </step>
 
 <step name="scope_check">
-**Before doing anything, verify this is actually trivial.**
+**在做任何事之前，验证这确实是简单任务。**
 
-A task is trivial if it can be completed in:
-- ≤ 3 file edits
-- ≤ 1 minute of work
-- No new dependencies or architecture changes
-- No research needed
+任务被视为简单的条件：
+- 不超过 3 个文件编辑
+- 不超过 1 分钟的工作量
+- 无新依赖或架构变更
+- 不需要研究
 
-If the task seems non-trivial (multi-file refactor, new feature, needs research),
-say:
+如果任务看起来不简单（多文件重构、新功能、需要研究），
+则提示：
 
 ```
-This looks like it needs planning. Use /gsd:quick instead:
-  /gsd:quick "{task description}"
+这个任务似乎需要规划。请改用 /gsd:quick：
+  /gsd:quick "{任务描述}"
 ```
 
-And stop.
+然后停止。
 </step>
 
 <step name="execute_inline">
-Do the work directly:
+直接完成工作：
 
-1. Read the relevant file(s)
-2. Make the change(s)
-3. Verify the change works (run existing tests if applicable, or do a quick sanity check)
+1. 读取相关文件
+2. 进行修改
+3. 验证修改有效（运行现有测试（如适用），或做简单的健全性检查）
 
-**No PLAN.md.** Just do it.
+**不创建 PLAN.md。**直接做。
 </step>
 
 <step name="commit">
-Commit the change atomically:
+原子提交更改：
 
 ```bash
 git add -A
-git commit -m "fix: {concise description of what changed}"
+git commit -m "fix: {简要描述变更内容}"
 ```
 
-Use conventional commit format: `fix:`, `feat:`, `docs:`, `chore:`, `refactor:` as appropriate.
+使用约定式提交格式：根据情况选择 `fix:`、`feat:`、`docs:`、`chore:`、`refactor:`。
 </step>
 
 <step name="log_to_state">
-If `.planning/STATE.md` exists, append to the "Quick Tasks Completed" table.
-If the table doesn't exist, skip this step silently.
+如果 `.planning/STATE.md` 存在，追加到"快速任务已完成"表中。
+如果表不存在，静默跳过此步骤。
 
 ```bash
-# Check if STATE.md has quick tasks table
+# 检查 STATE.md 是否有快速任务表
 if grep -q "Quick Tasks Completed" .planning/STATE.md 2>/dev/null; then
-  # Append entry — workflow handles the format
+  # 追加条目——工作流处理格式
   echo "| $(date +%Y-%m-%d) | fast | $TASK | ✅ |" >> .planning/STATE.md
 fi
 ```
 </step>
 
 <step name="done">
-Report completion:
+报告完成：
 
 ```
-✅ Done: {what was changed}
-   Commit: {short hash}
-   Files: {list of changed files}
+✅ 完成：{变更了什么}
+   提交：{短哈希}
+   文件：{变更文件列表}
 ```
 
-No next-step suggestions. No workflow routing. Just done.
+不建议下一步。不进行工作流路由。只是完成。
 </step>
 
 </process>
 
 <guardrails>
-- NEVER spawn a Task/subagent — this runs inline
-- NEVER create PLAN.md or SUMMARY.md files
-- NEVER run research or plan-checking
-- If the task takes more than 3 file edits, STOP and redirect to /gsd:quick
-- If you're unsure how to implement it, STOP and redirect to /gsd:quick
+- 绝不启动 Task/子代理——在内联模式下运行
+- 绝不创建 PLAN.md 或 SUMMARY.md 文件
+- 绝不运行研究或计划检查
+- 如果任务超过 3 个文件编辑，停止并重定向到 /gsd:quick
+- 如果你不确定如何实现，停止并重定向到 /gsd:quick
 </guardrails>
 
 <success_criteria>
-- [ ] Task completed in current context (no subagents)
-- [ ] Atomic git commit with conventional message
-- [ ] STATE.md updated if it exists
-- [ ] Total operation under 2 minutes wall time
+- [ ] 任务在当前上下文中完成（无子代理）
+- [ ] 带约定式消息的原子 git 提交
+- [ ] 如果 STATE.md 存在则已更新
+- [ ] 总操作时间不超过 2 分钟
 </success_criteria>
+</output>

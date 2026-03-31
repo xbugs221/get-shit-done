@@ -1,6 +1,6 @@
 ---
 name: gsd:list-phase-assumptions
-description: Surface Claude's assumptions about a phase approach before planning
+description: 在规划前展示 Claude 对阶段方案的假设
 argument-hint: "[phase]"
 allowed-tools:
   - Read
@@ -10,10 +10,10 @@ allowed-tools:
 ---
 
 <objective>
-Analyze a phase and present Claude's assumptions about technical approach, implementation order, scope boundaries, risk areas, and dependencies.
+分析指定阶段，展示 Claude 关于技术方案、实现顺序、范围边界、风险领域和依赖关系的假设。
 
-Purpose: Help users see what Claude thinks BEFORE planning begins - enabling course correction early when assumptions are wrong.
-Output: Conversational output only (no file creation) - ends with "What do you think?" prompt
+目的：在规划开始前暴露假设，便于用户尽早纠正。
+输出：仅对话输出（不创建文件），以"你觉得怎么样？"结束。
 </objective>
 
 <execution_context>
@@ -21,26 +21,24 @@ Output: Conversational output only (no file creation) - ends with "What do you t
 </execution_context>
 
 <context>
-Phase number: $ARGUMENTS (required)
+阶段编号：$ARGUMENTS（必填）
 
-Project state and roadmap are loaded in-workflow using targeted reads.
+项目状态和路线图在工作流内部通过针对性读取加载。
 </context>
 
 <process>
-1. Validate phase number argument (error if missing or invalid)
-2. Check if phase exists in roadmap
-3. Follow list-phase-assumptions.md workflow:
-   - Analyze roadmap description
-   - Surface assumptions about: technical approach, implementation order, scope, risks, dependencies
-   - Present assumptions clearly
-   - Prompt "What do you think?"
-4. Gather feedback and offer next steps
+1. 验证阶段编号参数（缺失或无效时报错）
+2. 检查阶段是否存在于路线图中
+3. 按 list-phase-assumptions.md 工作流执行：
+   - 分析路线图描述
+   - 展示五方面假设：技术方案、实现顺序、范围、风险、依赖关系
+   - 提示"你觉得怎么样？"
+4. 收集反馈并提供后续步骤
 </process>
 
 <success_criteria>
-
-- Phase validated against roadmap
-- Assumptions surfaced across five areas
-- User prompted for feedback
-- User knows next steps (discuss context, plan phase, or correct assumptions)
-  </success_criteria>
+- 阶段已根据路线图验证
+- 五个方面的假设已展示
+- 已提示用户反馈
+- 用户知道后续步骤（讨论上下文、规划阶段或纠正假设）
+</success_criteria>

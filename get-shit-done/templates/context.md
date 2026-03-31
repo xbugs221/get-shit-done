@@ -1,352 +1,353 @@
-# Phase Context Template
+# 阶段上下文模板
 
-Template for `.planning/phases/XX-name/{phase_num}-CONTEXT.md` - captures implementation decisions for a phase.
+用于 `.planning/phases/XX-name/{phase_num}-CONTEXT.md` 的模板 - 捕获阶段的实施决策。
 
-**Purpose:** Document decisions that downstream agents need. Researcher uses this to know WHAT to investigate. Planner uses this to know WHAT choices are locked vs flexible.
+**用途：** 记录下游代理需要的决策。研究者用它来了解需要调查什么。规划者用它来了解哪些选择是锁定的，哪些是灵活的。
 
-**Key principle:** Categories are NOT predefined. They emerge from what was actually discussed for THIS phase. A CLI phase has CLI-relevant sections, a UI phase has UI-relevant sections.
+**关键原则：** 类别不是预定义的。它们来源于本阶段实际讨论的内容。CLI 阶段有 CLI 相关的部分，UI 阶段有 UI 相关的部分。
 
-**Downstream consumers:**
-- `gsd-phase-researcher` — Reads decisions to focus research (e.g., "card layout" → research card component patterns)
-- `gsd-planner` — Reads decisions to create specific tasks (e.g., "infinite scroll" → task includes virtualization)
+**下游消费者：**
+- `gsd-phase-researcher` — 读取决策以聚焦研究（例如，"卡片布局" → 研究卡片组件模式）
+- `gsd-planner` — 读取决策以创建具体任务（例如，"无限滚动" → 任务包含虚拟化）
 
 ---
 
-## File Template
+## 文件模板
 
 ```markdown
-# Phase [X]: [Name] - Context
+# 阶段 [X]：[名称] - 上下文
 
-**Gathered:** [date]
-**Status:** Ready for planning
+**收集日期：** [date]
+**状态：** 准备规划
 
 <domain>
-## Phase Boundary
+## 阶段边界
 
-[Clear statement of what this phase delivers — the scope anchor. This comes from ROADMAP.md and is fixed. Discussion clarifies implementation within this boundary.]
+[清晰描述本阶段交付什么 — 范围锚点。这来自 ROADMAP.md 且是固定的。讨论在此边界内澄清实施方式。]
 
 </domain>
 
 <decisions>
-## Implementation Decisions
+## 实施决策
 
-### [Area 1 that was discussed]
-- **D-01:** [Specific decision made]
-- **D-02:** [Another decision if applicable]
+### [讨论过的领域 1]
+- **D-01:** [做出的具体决策]
+- **D-02:** [另一个决策（如适用）]
 
-### [Area 2 that was discussed]
-- **D-03:** [Specific decision made]
+### [讨论过的领域 2]
+- **D-03:** [做出的具体决策]
 
-### [Area 3 that was discussed]
-- **D-04:** [Specific decision made]
+### [讨论过的领域 3]
+- **D-04:** [做出的具体决策]
 
-### Claude's Discretion
-[Areas where user explicitly said "you decide" — Claude has flexibility here during planning/implementation]
+### Claude 自行决定
+[用户明确表示"你来决定"的领域 — Claude 在规划/实施期间在此有灵活性]
 
 </decisions>
 
 <specifics>
-## Specific Ideas
+## 具体想法
 
-[Any particular references, examples, or "I want it like X" moments from discussion. Product references, specific behaviors, interaction patterns.]
+[讨论中出现的任何特定参考、示例或"我希望像 X 一样"的时刻。产品参考、特定行为、交互模式。]
 
-[If none: "No specific requirements — open to standard approaches"]
+[如果没有："无特定要求 — 接受标准方案"]
 
 </specifics>
 
 <canonical_refs>
-## Canonical References
+## 规范参考
 
-**Downstream agents MUST read these before planning or implementing.**
+**下游代理在规划或实施之前必须阅读这些内容。**
 
-[List every spec, ADR, feature doc, or design doc that defines requirements or constraints for this phase. Use full relative paths so agents can read them directly. Group by topic area when the phase has multiple concerns.]
+[列出为本阶段定义需求或约束的每个规格、ADR、功能文档或设计文档。使用完整的相对路径，以便代理可以直接读取。当阶段涉及多个关注点时按主题分组。]
 
-### [Topic area 1]
-- `path/to/spec-or-adr.md` — [What this doc decides/defines that's relevant]
-- `path/to/doc.md` §N — [Specific section and what it covers]
+### [主题领域 1]
+- `path/to/spec-or-adr.md` — [此文档决定/定义了什么与本阶段相关]
+- `path/to/doc.md` §N — [具体章节及其涵盖的内容]
 
-### [Topic area 2]
-- `path/to/feature-doc.md` — [What capability this defines]
+### [主题领域 2]
+- `path/to/feature-doc.md` — [此文档定义了什么能力]
 
-[If the project has no external specs: "No external specs — requirements are fully captured in decisions above"]
+[如果项目没有外部规格："无外部规格 — 需求完全在上述决策中捕获"]
 
 </canonical_refs>
 
 <code_context>
-## Existing Code Insights
+## 现有代码洞察
 
-### Reusable Assets
-- [Component/hook/utility]: [How it could be used in this phase]
+### 可复用资产
+- [组件/hook/工具函数]：[在本阶段中如何使用]
 
-### Established Patterns
-- [Pattern]: [How it constrains/enables this phase]
+### 已建立的模式
+- [模式]：[它如何约束/赋能本阶段]
 
-### Integration Points
-- [Where new code connects to existing system]
+### 集成点
+- [新代码与现有系统连接的位置]
 
 </code_context>
 
 <deferred>
-## Deferred Ideas
+## 推迟的想法
 
-[Ideas that came up during discussion but belong in other phases. Captured here so they're not lost, but explicitly out of scope for this phase.]
+[讨论中出现但属于其他阶段的想法。在此捕获以免遗失，但明确不在本阶段范围内。]
 
-[If none: "None — discussion stayed within phase scope"]
+[如果没有："无 — 讨论保持在阶段范围内"]
 
 </deferred>
 
 ---
 
-*Phase: XX-name*
-*Context gathered: [date]*
+*阶段：XX-name*
+*上下文收集日期：[date]*
 ```
 
 <good_examples>
 
-**Example 1: Visual feature (Post Feed)**
+**示例 1：视觉功能（帖子信息流）**
 
 ```markdown
-# Phase 3: Post Feed - Context
+# 阶段 3：帖子信息流 - 上下文
 
-**Gathered:** 2025-01-20
-**Status:** Ready for planning
+**收集日期：** 2025-01-20
+**状态：** 准备规划
 
 <domain>
-## Phase Boundary
+## 阶段边界
 
-Display posts from followed users in a scrollable feed. Users can view posts and see engagement counts. Creating posts and interactions are separate phases.
+在可滚动的信息流中显示关注用户的帖子。用户可以查看帖子并看到互动计数。创建帖子和交互属于单独的阶段。
 
 </domain>
 
 <decisions>
-## Implementation Decisions
+## 实施决策
 
-### Layout style
-- Card-based layout, not timeline or list
-- Each card shows: author avatar, name, timestamp, full post content, reaction counts
-- Cards have subtle shadows, rounded corners — modern feel
+### 布局样式
+- 卡片式布局，不是时间线或列表
+- 每张卡片显示：作者头像、名称、时间戳、完整帖子内容、反应计数
+- 卡片有微妙的阴影、圆角 — 现代感
 
-### Loading behavior
-- Infinite scroll, not pagination
-- Pull-to-refresh on mobile
-- New posts indicator at top ("3 new posts") rather than auto-inserting
+### 加载行为
+- 无限滚动，不是分页
+- 移动端下拉刷新
+- 顶部新帖子指示器（"3 条新帖子"）而不是自动插入
 
-### Empty state
-- Friendly illustration + "Follow people to see posts here"
-- Suggest 3-5 accounts to follow based on interests
+### 空状态
+- 友好的插图 + "关注他人即可在此看到帖子"
+- 根据兴趣推荐 3-5 个账号关注
 
-### Claude's Discretion
-- Loading skeleton design
-- Exact spacing and typography
-- Error state handling
+### Claude 自行决定
+- 加载骨架屏设计
+- 精确的间距和排版
+- 错误状态处理
 
 </decisions>
 
 <canonical_refs>
-## Canonical References
+## 规范参考
 
-### Feed display
-- `docs/features/social-feed.md` — Feed requirements, post card fields, engagement display rules
-- `docs/decisions/adr-012-infinite-scroll.md` — Scroll strategy decision, virtualization requirements
+### 信息流显示
+- `docs/features/social-feed.md` — 信息流需求、帖子卡片字段、互动显示规则
+- `docs/decisions/adr-012-infinite-scroll.md` — 滚动策略决策、虚拟化要求
 
-### Empty states
-- `docs/design/empty-states.md` — Empty state patterns, illustration guidelines
+### 空状态
+- `docs/design/empty-states.md` — 空状态模式、插图指南
 
 </canonical_refs>
 
 <specifics>
-## Specific Ideas
+## 具体想法
 
-- "I like how Twitter shows the new posts indicator without disrupting your scroll position"
-- Cards should feel like Linear's issue cards — clean, not cluttered
+- "我喜欢 Twitter 在不打断你滚动位置的情况下显示新帖子指示器的方式"
+- 卡片应该感觉像 Linear 的问题卡片 — 干净、不杂乱
 
 </specifics>
 
 <deferred>
-## Deferred Ideas
+## 推迟的想法
 
-- Commenting on posts — Phase 5
-- Bookmarking posts — add to backlog
+- 在帖子上评论 — 阶段 5
+- 收藏帖子 — 添加到待办列表
 
 </deferred>
 
 ---
 
-*Phase: 03-post-feed*
-*Context gathered: 2025-01-20*
+*阶段：03-post-feed*
+*上下文收集日期：2025-01-20*
 ```
 
-**Example 2: CLI tool (Database backup)**
+**示例 2：CLI 工具（数据库备份）**
 
 ```markdown
-# Phase 2: Backup Command - Context
+# 阶段 2：备份命令 - 上下文
 
-**Gathered:** 2025-01-20
-**Status:** Ready for planning
+**收集日期：** 2025-01-20
+**状态：** 准备规划
 
 <domain>
-## Phase Boundary
+## 阶段边界
 
-CLI command to backup database to local file or S3. Supports full and incremental backups. Restore command is a separate phase.
+用于将数据库备份到本地文件或 S3 的 CLI 命令。支持完整备份和增量备份。恢复命令属于单独的阶段。
 
 </domain>
 
 <decisions>
-## Implementation Decisions
+## 实施决策
 
-### Output format
-- JSON for programmatic use, table format for humans
-- Default to table, --json flag for JSON
-- Verbose mode (-v) shows progress, silent by default
+### 输出格式
+- JSON 用于程序化使用，表格格式用于人类阅读
+- 默认表格，--json 标志用于 JSON
+- 详细模式（-v）显示进度，默认静默
 
-### Flag design
-- Short flags for common options: -o (output), -v (verbose), -f (force)
-- Long flags for clarity: --incremental, --compress, --encrypt
-- Required: database connection string (positional or --db)
+### 标志设计
+- 常用选项使用短标志：-o（输出）、-v（详细）、-f（强制）
+- 长标志保证清晰：--incremental、--compress、--encrypt
+- 必填：数据库连接字符串（位置参数或 --db）
 
-### Error recovery
-- Retry 3 times on network failure, then fail with clear message
-- --no-retry flag to fail fast
-- Partial backups are deleted on failure (no corrupt files)
+### 错误恢复
+- 网络故障时重试 3 次，然后以清晰的消息失败
+- --no-retry 标志用于快速失败
+- 失败时删除部分备份（无损坏文件）
 
-### Claude's Discretion
-- Exact progress bar implementation
-- Compression algorithm choice
-- Temp file handling
+### Claude 自行决定
+- 精确的进度条实现
+- 压缩算法选择
+- 临时文件处理
 
 </decisions>
 
 <canonical_refs>
-## Canonical References
+## 规范参考
 
-### Backup CLI
-- `docs/features/backup-restore.md` — Backup requirements, supported backends, encryption spec
-- `docs/decisions/adr-007-cli-conventions.md` — Flag naming, exit codes, output format standards
+### 备份 CLI
+- `docs/features/backup-restore.md` — 备份需求、支持的后端、加密规范
+- `docs/decisions/adr-007-cli-conventions.md` — 标志命名、退出码、输出格式标准
 
 </canonical_refs>
 
 <specifics>
-## Specific Ideas
+## 具体想法
 
-- "I want it to feel like pg_dump — familiar to database people"
-- Should work in CI pipelines (exit codes, no interactive prompts)
+- "我希望它感觉像 pg_dump — 数据库工作者感到熟悉"
+- 应该在 CI 管道中工作（退出码、无交互式提示）
 
 </specifics>
 
 <deferred>
-## Deferred Ideas
+## 推迟的想法
 
-- Scheduled backups — separate phase
-- Backup rotation/retention — add to backlog
+- 定时备份 — 单独的阶段
+- 备份轮换/保留 — 添加到待办列表
 
 </deferred>
 
 ---
 
-*Phase: 02-backup-command*
-*Context gathered: 2025-01-20*
+*阶段：02-backup-command*
+*上下文收集日期：2025-01-20*
 ```
 
-**Example 3: Organization task (Photo library)**
+**示例 3：组织任务（照片库）**
 
 ```markdown
-# Phase 1: Photo Organization - Context
+# 阶段 1：照片整理 - 上下文
 
-**Gathered:** 2025-01-20
-**Status:** Ready for planning
+**收集日期：** 2025-01-20
+**状态：** 准备规划
 
 <domain>
-## Phase Boundary
+## 阶段边界
 
-Organize existing photo library into structured folders. Handle duplicates and apply consistent naming. Tagging and search are separate phases.
+将现有照片库整理到结构化文件夹中。处理重复项并应用一致的命名。标签和搜索属于单独的阶段。
 
 </domain>
 
 <decisions>
-## Implementation Decisions
+## 实施决策
 
-### Grouping criteria
-- Primary grouping by year, then by month
-- Events detected by time clustering (photos within 2 hours = same event)
-- Event folders named by date + location if available
+### 分组标准
+- 主要按年份分组，然后按月份
+- 通过时间聚类检测事件（2 小时内的照片 = 同一事件）
+- 事件文件夹按日期 + 位置（如有）命名
 
-### Duplicate handling
-- Keep highest resolution version
-- Move duplicates to _duplicates folder (don't delete)
-- Log all duplicate decisions for review
+### 重复项处理
+- 保留最高分辨率版本
+- 将重复项移至 _duplicates 文件夹（不删除）
+- 记录所有重复项决策以供审查
 
-### Naming convention
-- Format: YYYY-MM-DD_HH-MM-SS_originalname.ext
-- Preserve original filename as suffix for searchability
-- Handle name collisions with incrementing suffix
+### 命名约定
+- 格式：YYYY-MM-DD_HH-MM-SS_originalname.ext
+- 保留原始文件名作为后缀以便搜索
+- 使用递增后缀处理名称冲突
 
-### Claude's Discretion
-- Exact clustering algorithm
-- How to handle photos with no EXIF data
-- Folder emoji usage
+### Claude 自行决定
+- 精确的聚类算法
+- 如何处理没有 EXIF 数据的照片
+- 文件夹表情符号的使用
 
 </decisions>
 
 <canonical_refs>
-## Canonical References
+## 规范参考
 
-### Organization rules
-- `docs/features/photo-organization.md` — Grouping rules, duplicate policy, naming spec
-- `docs/decisions/adr-003-exif-handling.md` — EXIF extraction strategy, fallback for missing metadata
+### 整理规则
+- `docs/features/photo-organization.md` — 分组规则、重复项策略、命名规范
+- `docs/decisions/adr-003-exif-handling.md` — EXIF 提取策略、缺失元数据的回退方案
 
 </canonical_refs>
 
 <specifics>
-## Specific Ideas
+## 具体想法
 
-- "I want to be able to find photos by roughly when they were taken"
-- Don't delete anything — worst case, move to a review folder
+- "我希望能够大致按拍摄时间查找照片"
+- 不删除任何东西 — 最坏的情况是移至审查文件夹
 
 </specifics>
 
 <deferred>
-## Deferred Ideas
+## 推迟的想法
 
-- Face detection grouping — future phase
-- Cloud sync — out of scope for now
+- 人脸检测分组 — 未来阶段
+- 云同步 — 目前不在范围内
 
 </deferred>
 
 ---
 
-*Phase: 01-photo-organization*
-*Context gathered: 2025-01-20*
+*阶段：01-photo-organization*
+*上下文收集日期：2025-01-20*
 ```
 
 </good_examples>
 
 <guidelines>
-**This template captures DECISIONS for downstream agents.**
+**此模板捕获供下游代理使用的决策。**
 
-The output should answer: "What does the researcher need to investigate? What choices are locked for the planner?"
+输出应回答："研究者需要调查什么？哪些选择对规划者来说是锁定的？"
 
-**Good content (concrete decisions):**
-- "Card-based layout, not timeline"
-- "Retry 3 times on network failure, then fail"
-- "Group by year, then by month"
-- "JSON for programmatic use, table for humans"
+**好的内容（具体决策）：**
+- "卡片式布局，不是时间线"
+- "网络故障时重试 3 次，然后失败"
+- "按年份分组，然后按月份"
+- "JSON 用于程序化使用，表格用于人类阅读"
 
-**Bad content (too vague):**
-- "Should feel modern and clean"
-- "Good user experience"
-- "Fast and responsive"
-- "Easy to use"
+**差的内容（太模糊）：**
+- "应该感觉现代和干净"
+- "良好的用户体验"
+- "快速且响应灵敏"
+- "易于使用"
 
-**After creation:**
-- File lives in phase directory: `.planning/phases/XX-name/{phase_num}-CONTEXT.md`
-- `gsd-phase-researcher` uses decisions to focus investigation AND reads canonical_refs to know WHAT docs to study
-- `gsd-planner` uses decisions + research to create executable tasks AND reads canonical_refs to verify alignment
-- Downstream agents should NOT need to ask the user again about captured decisions
+**创建后：**
+- 文件位于阶段目录中：`.planning/phases/XX-name/{phase_num}-CONTEXT.md`
+- `gsd-phase-researcher` 使用决策来聚焦调查，并读取 canonical_refs 以了解要研究哪些文档
+- `gsd-planner` 使用决策 + 研究来创建可执行任务，并读取 canonical_refs 以验证对齐
+- 下游代理不应需要再次就已捕获的决策询问用户
 
-**CRITICAL — Canonical references:**
-- The `<canonical_refs>` section is MANDATORY. Every CONTEXT.md must have one.
-- If your project has external specs, ADRs, or design docs, list them with full relative paths grouped by topic
-- If ROADMAP.md lists `Canonical refs:` per phase, extract and expand those
-- Inline mentions like "see ADR-019" scattered in decisions are useless to downstream agents — they need full paths and section references in a dedicated section they can find
-- If no external specs exist, say so explicitly — don't silently omit the section
+**关键 — 规范参考：**
+- `<canonical_refs>` 部分是必填的。每个 CONTEXT.md 都必须包含。
+- 如果你的项目有外部规格、ADR 或设计文档，使用完整的相对路径按主题列出
+- 如果 ROADMAP.md 在每个阶段列出了 `Canonical refs:`，提取并展开它们
+- 散布在决策中的内联提及如"参见 ADR-019"对下游代理没用 — 它们需要在一个专门的、能找到的部分中看到完整路径和章节引用
+- 如果不存在外部规格，明确说明 — 不要默默省略该部分
 </guidelines>
+</output>

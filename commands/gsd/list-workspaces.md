@@ -1,12 +1,12 @@
 ---
 name: gsd:list-workspaces
-description: List active GSD workspaces and their status
+description: 列出活跃的 GSD 工作区及其状态
 allowed-tools:
   - Bash
   - Read
 ---
 <objective>
-Scan `~/gsd-workspaces/` for workspace directories containing `WORKSPACE.md` manifests. Display a summary table with name, path, repo count, strategy, and GSD project status.
+扫描 `~/gsd-workspaces/` 中包含 `WORKSPACE.md` 的工作区目录，显示名称、路径、仓库数量、策略和 GSD 项目状态的摘要表格。
 </objective>
 
 <execution_context>
@@ -15,5 +15,5 @@ Scan `~/gsd-workspaces/` for workspace directories containing `WORKSPACE.md` man
 </execution_context>
 
 <process>
-Execute the list-workspaces workflow from @~/.claude/get-shit-done/workflows/list-workspaces.md end-to-end.
+端到端执行 @~/.claude/get-shit-done/workflows/list-workspaces.md 工作流。
 </process>

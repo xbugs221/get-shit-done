@@ -1,6 +1,6 @@
 <purpose>
 
-Mark a shipped version (v1.0, v1.1, v2.0) as complete. Creates historical record in MILESTONES.md, performs full PROJECT.md evolution review, reorganizes ROADMAP.md with milestone groupings, and tags the release in git.
+将已发布的版本（v1.0、v1.1、v2.0）标记为完成。在 MILESTONES.md 中创建历史记录，执行完整的 PROJECT.md 演进审查，使用里程碑分组重新组织 ROADMAP.md，并在 git 中创建发布标签。
 
 </purpose>
 
@@ -16,22 +16,22 @@ Mark a shipped version (v1.0, v1.1, v2.0) as complete. Creates historical record
 
 <archival_behavior>
 
-When a milestone completes:
+当里程碑完成时：
 
-1. Extract full milestone details to `.planning/milestones/v[X.Y]-ROADMAP.md`
-2. Archive requirements to `.planning/milestones/v[X.Y]-REQUIREMENTS.md`
-3. Update ROADMAP.md — replace milestone details with one-line summary
-4. Delete REQUIREMENTS.md (fresh one for next milestone)
-5. Perform full PROJECT.md evolution review
-6. Offer to create next milestone inline
-7. Archive UI artifacts (`*-UI-SPEC.md`, `*-UI-REVIEW.md`) alongside other phase documents
-8. Clean up `.planning/ui-reviews/` screenshot files (binary assets, never archived)
+1. 将完整的里程碑详情提取到 `.planning/milestones/v[X.Y]-ROADMAP.md`
+2. 将需求归档到 `.planning/milestones/v[X.Y]-REQUIREMENTS.md`
+3. 更新 ROADMAP.md — 用一行摘要替换里程碑详情
+4. 删除 REQUIREMENTS.md（为下一个里程碑准备新的）
+5. 执行完整的 PROJECT.md 演进审查
+6. 提供内联创建下一个里程碑的选项
+7. 将 UI 产物（`*-UI-SPEC.md`、`*-UI-REVIEW.md`）与其他阶段文档一起归档
+8. 清理 `.planning/ui-reviews/` 截图文件（二进制资产，不归档）
 
-**Context Efficiency:** Archives keep ROADMAP.md constant-size and REQUIREMENTS.md milestone-scoped.
+**上下文效率：** 归档使 ROADMAP.md 保持恒定大小，REQUIREMENTS.md 保持里程碑范围。
 
-**ROADMAP archive** uses `templates/milestone-archive.md` — includes milestone header (status, phases, date), full phase details, milestone summary (decisions, issues, tech debt).
+**ROADMAP 归档**使用 `templates/milestone-archive.md` — 包括里程碑头部（状态、阶段、日期）、完整阶段详情、里程碑摘要（决策、问题、技术债务）。
 
-**REQUIREMENTS archive** contains all requirements marked complete with outcomes, traceability table with final status, notes on changed requirements.
+**REQUIREMENTS 归档**包含所有标记为完成的需求及其结果、带有最终状态的可追溯性表格、关于已更改需求的说明。
 
 </archival_behavior>
 
@@ -39,24 +39,24 @@ When a milestone completes:
 
 <step name="verify_readiness">
 
-**Use `roadmap analyze` for comprehensive readiness check:**
+**使用 `roadmap analyze` 进行全面就绪检查：**
 
 ```bash
 ROADMAP=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" roadmap analyze)
 ```
 
-This returns all phases with plan/summary counts and disk status. Use this to verify:
-- Which phases belong to this milestone?
-- All phases complete (all plans have summaries)? Check `disk_status === 'complete'` for each.
-- `progress_percent` should be 100%.
+这将返回所有阶段及其计划/摘要计数和磁盘状态。使用此来验证：
+- 哪些阶段属于此里程碑？
+- 所有阶段都完成了吗（所有计划都有摘要）？检查每个阶段的 `disk_status === 'complete'`。
+- `progress_percent` 应该为 100%。
 
-**Requirements completion check (REQUIRED before presenting):**
+**需求完成检查（展示前必须执行）：**
 
-Parse REQUIREMENTS.md traceability table:
-- Count total v1 requirements vs checked-off (`[x]`) requirements
-- Identify any non-Complete rows in the traceability table
+解析 REQUIREMENTS.md 可追溯性表格：
+- 统计总 v1 需求数与已勾选（`[x]`）需求数
+- 识别可追溯性表格中任何非 Complete 的行
 
-Present:
+展示：
 
 ```
 Milestone: [Name, e.g., "v1.0 MVP"]
@@ -71,7 +71,7 @@ Total: {phase_count} phases, {total_plans} plans, all complete
 Requirements: {N}/{M} v1 requirements checked off
 ```
 
-**If requirements incomplete** (N < M):
+**如果需求未完成**（N < M）：
 
 ```
 ⚠ Unchecked Requirements:
@@ -80,12 +80,12 @@ Requirements: {N}/{M} v1 requirements checked off
 - [ ] {REQ-ID}: {description} (Phase {Y})
 ```
 
-MUST present 3 options:
-1. **Proceed anyway** — mark milestone complete with known gaps
-2. **Run audit first** — `/gsd:audit-milestone` to assess gap severity
-3. **Abort** — return to development
+必须展示 3 个选项：
+1. **Proceed anyway** — 标记里程碑完成，带有已知缺口
+2. **Run audit first** — `/gsd:audit-milestone` 评估缺口严重程度
+3. **Abort** — 返回开发
 
-If user selects "Proceed anyway": note incomplete requirements in MILESTONES.md under `### Known Gaps` with REQ-IDs and descriptions.
+如果用户选择 "Proceed anyway"：在 MILESTONES.md 的 `### Known Gaps` 下记录未完成的需求，包含 REQ-ID 和描述。
 
 <config-check>
 
@@ -103,7 +103,7 @@ cat .planning/config.json 2>/dev/null || true
 Proceeding to stats gathering...
 ```
 
-Proceed to gather_stats.
+继续到 gather_stats。
 
 </if>
 
@@ -114,9 +114,9 @@ Ready to mark this milestone as shipped?
 (yes / wait / adjust scope)
 ```
 
-Wait for confirmation.
-- "adjust scope": Ask which phases to include.
-- "wait": Stop, user returns when ready.
+等待确认。
+- "adjust scope"：询问要包含哪些阶段。
+- "wait"：停止，用户准备好后返回。
 
 </if>
 
@@ -124,7 +124,7 @@ Wait for confirmation.
 
 <step name="gather_stats">
 
-Calculate milestone statistics:
+计算里程碑统计数据：
 
 ```bash
 git log --oneline --grep="feat(" | head -20
@@ -134,7 +134,7 @@ git log --format="%ai" FIRST_COMMIT | tail -1
 git log --format="%ai" LAST_COMMIT | head -1
 ```
 
-Present:
+展示：
 
 ```
 Milestone Stats:
@@ -151,17 +151,17 @@ Milestone Stats:
 
 <step name="extract_accomplishments">
 
-Extract one-liners from SUMMARY.md files using summary-extract:
+使用 summary-extract 从 SUMMARY.md 文件中提取一行摘要：
 
 ```bash
-# For each phase in milestone, extract one-liner
+# 对于里程碑中的每个阶段，提取一行摘要
 for summary in .planning/phases/*-*/*-SUMMARY.md; do
   [ -e "$summary" ] || continue
   node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" summary-extract "$summary" --fields one_liner --pick one_liner
 done
 ```
 
-Extract 4-6 key accomplishments. Present:
+提取 4-6 个关键成就。展示：
 
 ```
 Key accomplishments for this milestone:
@@ -176,71 +176,71 @@ Key accomplishments for this milestone:
 
 <step name="create_milestone_entry">
 
-**Note:** MILESTONES.md entry is now created automatically by `gsd-tools milestone complete` in the archive_milestone step. The entry includes version, date, phase/plan/task counts, and accomplishments extracted from SUMMARY.md files.
+**注意：** MILESTONES.md 条目现在由 archive_milestone 步骤中的 `gsd-tools milestone complete` 自动创建。该条目包含版本、日期、阶段/计划/任务计数，以及从 SUMMARY.md 文件中提取的成就。
 
-If additional details are needed (e.g., user-provided "Delivered" summary, git range, LOC stats), add them manually after the CLI creates the base entry.
+如果需要额外的详情（例如用户提供的 "Delivered" 摘要、git 范围、LOC 统计），在 CLI 创建基础条目后手动添加。
 
 </step>
 
 <step name="evolve_project_full_review">
 
-Full PROJECT.md evolution review at milestone completion.
+里程碑完成时的完整 PROJECT.md 演进审查。
 
-Read all phase summaries:
+读取所有阶段摘要：
 
 ```bash
 cat .planning/phases/*-*/*-SUMMARY.md
 ```
 
-**Full review checklist:**
+**完整审查检查清单：**
 
-1. **"What This Is" accuracy:**
-   - Compare current description to what was built
-   - Update if product has meaningfully changed
+1. **"What This Is" 准确性：**
+   - 将当前描述与实际构建的内容进行比较
+   - 如果产品发生了有意义的变化则更新
 
-2. **Core Value check:**
-   - Still the right priority? Did shipping reveal a different core value?
-   - Update if the ONE thing has shifted
+2. **Core Value 检查：**
+   - 优先级仍然正确吗？发布是否揭示了不同的核心价值？
+   - 如果唯一最重要的事情发生了转移则更新
 
-3. **Requirements audit:**
+3. **需求审计：**
 
-   **Validated section:**
-   - All Active requirements shipped this milestone → Move to Validated
-   - Format: `- ✓ [Requirement] — v[X.Y]`
+   **Validated 部分：**
+   - 此里程碑中发布的所有 Active 需求 → 移到 Validated
+   - 格式：`- ✓ [Requirement] — v[X.Y]`
 
-   **Active section:**
-   - Remove requirements moved to Validated
-   - Add new requirements for next milestone
-   - Keep unaddressed requirements
+   **Active 部分：**
+   - 移除已移到 Validated 的需求
+   - 为下一个里程碑添加新需求
+   - 保留未处理的需求
 
-   **Out of Scope audit:**
-   - Review each item — reasoning still valid?
-   - Remove irrelevant items
-   - Add requirements invalidated during milestone
+   **Out of Scope 审计：**
+   - 审查每个项目 — 理由仍然有效吗？
+   - 移除不相关的项目
+   - 添加在里程碑期间被否决的需求
 
-4. **Context update:**
-   - Current codebase state (LOC, tech stack)
-   - User feedback themes (if any)
-   - Known issues or technical debt
+4. **上下文更新：**
+   - 当前代码库状态（LOC、技术栈）
+   - 用户反馈主题（如有）
+   - 已知问题或技术债务
 
-5. **Key Decisions audit:**
-   - Extract all decisions from milestone phase summaries
-   - Add to Key Decisions table with outcomes
-   - Mark ✓ Good, ⚠️ Revisit, or — Pending
+5. **Key Decisions 审计：**
+   - 从里程碑阶段摘要中提取所有决策
+   - 添加到 Key Decisions 表格并附上结果
+   - 标记 ✓ Good、⚠️ Revisit 或 — Pending
 
-6. **Constraints check:**
-   - Any constraints changed during development? Update as needed
+6. **Constraints 检查：**
+   - 开发过程中是否有约束条件发生变化？根据需要更新
 
-Update PROJECT.md inline. Update "Last updated" footer:
+内联更新 PROJECT.md。更新 "Last updated" 页脚：
 
 ```markdown
 ---
 *Last updated: [date] after v[X.Y] milestone*
 ```
 
-**Example full evolution (v1.0 → v1.1 prep):**
+**完整演进示例（v1.0 → v1.1 准备）：**
 
-Before:
+之前：
 
 ```markdown
 ## What This Is
@@ -270,7 +270,7 @@ Real-time sync that feels instant.
 - Video chat — use external tools
 ```
 
-After v1.0:
+v1.0 之后：
 
 ```markdown
 ## What This Is
@@ -308,22 +308,22 @@ Tech stack: Next.js, Supabase, Canvas API.
 Initial user testing showed demand for shape tools.
 ```
 
-**Step complete when:**
+**步骤完成条件：**
 
-- [ ] "What This Is" reviewed and updated if needed
-- [ ] Core Value verified as still correct
-- [ ] All shipped requirements moved to Validated
-- [ ] New requirements added to Active for next milestone
-- [ ] Out of Scope reasoning audited
-- [ ] Context updated with current state
-- [ ] All milestone decisions added to Key Decisions
-- [ ] "Last updated" footer reflects milestone completion
+- [ ] "What This Is" 已审查并根据需要更新
+- [ ] Core Value 验证仍然正确
+- [ ] 所有已发布的需求移到 Validated
+- [ ] 为下一个里程碑在 Active 中添加了新需求
+- [ ] Out of Scope 的理由已审计
+- [ ] Context 已更新为当前状态
+- [ ] 所有里程碑决策已添加到 Key Decisions
+- [ ] "Last updated" 页脚反映里程碑完成
 
 </step>
 
 <step name="reorganize_roadmap">
 
-Update `.planning/ROADMAP.md` — group completed milestone phases:
+更新 `.planning/ROADMAP.md` — 对已完成的里程碑阶段分组：
 
 ```markdown
 # Roadmap: [Project Name]
@@ -367,51 +367,51 @@ Update `.planning/ROADMAP.md` — group completed milestone phases:
 
 <step name="archive_milestone">
 
-**Delegate archival to gsd-tools:**
+**将归档委托给 gsd-tools：**
 
 ```bash
 ARCHIVE=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" milestone complete "v[X.Y]" --name "[Milestone Name]")
 ```
 
-The CLI handles:
-- Creating `.planning/milestones/` directory
-- Archiving ROADMAP.md to `milestones/v[X.Y]-ROADMAP.md`
-- Archiving REQUIREMENTS.md to `milestones/v[X.Y]-REQUIREMENTS.md` with archive header
-- Moving audit file to milestones if it exists
-- Creating/appending MILESTONES.md entry with accomplishments from SUMMARY.md files
-- Updating STATE.md (status, last activity)
+CLI 处理：
+- 创建 `.planning/milestones/` 目录
+- 将 ROADMAP.md 归档到 `milestones/v[X.Y]-ROADMAP.md`
+- 将 REQUIREMENTS.md 归档到 `milestones/v[X.Y]-REQUIREMENTS.md` 并附加归档头部
+- 如果存在审计文件则移动到 milestones
+- 创建/追加 MILESTONES.md 条目，包含从 SUMMARY.md 文件中提取的成就
+- 更新 STATE.md（状态、最后活动）
 
-Extract from result: `version`, `date`, `phases`, `plans`, `tasks`, `accomplishments`, `archived`.
+从结果中提取：`version`、`date`、`phases`、`plans`、`tasks`、`accomplishments`、`archived`。
 
-Verify: `✅ Milestone archived to .planning/milestones/`
+验证：`✅ Milestone archived to .planning/milestones/`
 
-**Phase archival (optional):** After archival completes, ask the user:
+**阶段归档（可选）：** 归档完成后，询问用户：
 
 AskUserQuestion(header="Archive Phases", question="Archive phase directories to milestones/?", options: "Yes — move to milestones/v[X.Y]-phases/" | "Skip — keep phases in place")
 
-If "Yes": move phase directories to the milestone archive:
+如果 "Yes"：将阶段目录移到里程碑归档中：
 ```bash
 mkdir -p .planning/milestones/v[X.Y]-phases
-# For each phase directory in .planning/phases/:
+# 对于 .planning/phases/ 中的每个阶段目录：
 mv .planning/phases/{phase-dir} .planning/milestones/v[X.Y]-phases/
 ```
-Verify: `✅ Phase directories archived to .planning/milestones/v[X.Y]-phases/`
+验证：`✅ Phase directories archived to .planning/milestones/v[X.Y]-phases/`
 
-If "Skip": Phase directories remain in `.planning/phases/` as raw execution history. Use `/gsd:cleanup` later to archive retroactively.
+如果 "Skip"：阶段目录保留在 `.planning/phases/` 中作为原始执行历史。稍后使用 `/gsd:cleanup` 进行追溯归档。
 
-After archival, the AI still handles:
-- Reorganizing ROADMAP.md with milestone grouping (requires judgment)
-- Full PROJECT.md evolution review (requires understanding)
-- Deleting original ROADMAP.md and REQUIREMENTS.md
-- These are NOT fully delegated because they require AI interpretation of content
+归档后，AI 仍然处理：
+- 使用里程碑分组重新组织 ROADMAP.md（需要判断力）
+- 完整的 PROJECT.md 演进审查（需要理解力）
+- 删除原始的 ROADMAP.md 和 REQUIREMENTS.md
+- 这些没有完全委托是因为它们需要 AI 对内容的解读
 
 </step>
 
 <step name="reorganize_roadmap_and_delete_originals">
 
-After `milestone complete` has archived, reorganize ROADMAP.md with milestone groupings, then delete originals:
+`milestone complete` 归档后，使用里程碑分组重新组织 ROADMAP.md，然后删除原始文件：
 
-**Reorganize ROADMAP.md** — group completed milestone phases:
+**重新组织 ROADMAP.md** — 对已完成的里程碑阶段分组：
 
 ```markdown
 # Roadmap: [Project Name]
@@ -432,7 +432,7 @@ After `milestone complete` has archived, reorganize ROADMAP.md with milestone gr
 </details>
 ```
 
-**Then delete originals:**
+**然后删除原始文件：**
 
 ```bash
 rm .planning/ROADMAP.md
@@ -443,26 +443,26 @@ rm .planning/REQUIREMENTS.md
 
 <step name="write_retrospective">
 
-**Append to living retrospective:**
+**追加到持续更新的回顾文档：**
 
-Check for existing retrospective:
+检查现有的回顾文档：
 ```bash
 ls .planning/RETROSPECTIVE.md 2>/dev/null || true
 ```
 
-**If exists:** Read the file, append new milestone section before the "## Cross-Milestone Trends" section.
+**如果存在：** 读取文件，在 "## Cross-Milestone Trends" 部分之前追加新的里程碑部分。
 
-**If doesn't exist:** Create from template at `~/.claude/get-shit-done/templates/retrospective.md`.
+**如果不存在：** 从 `~/.claude/get-shit-done/templates/retrospective.md` 的模板创建。
 
-**Gather retrospective data:**
+**收集回顾数据：**
 
-1. From SUMMARY.md files: Extract key deliverables, one-liners, tech decisions
-2. From VERIFICATION.md files: Extract verification scores, gaps found
-3. From UAT.md files: Extract test results, issues found
-4. From git log: Count commits, calculate timeline
-5. From the milestone work: Reflect on what worked and what didn't
+1. 从 SUMMARY.md 文件：提取关键交付物、一行摘要、技术决策
+2. 从 VERIFICATION.md 文件：提取验证分数、发现的缺口
+3. 从 UAT.md 文件：提取测试结果、发现的问题
+4. 从 git log：统计提交数、计算时间线
+5. 从里程碑工作中：反思什么有效、什么无效
 
-**Write the milestone section:**
+**编写里程碑部分：**
 
 ```markdown
 ## Milestone: v{version} — {name}
@@ -471,19 +471,19 @@ ls .planning/RETROSPECTIVE.md 2>/dev/null || true
 **Phases:** {phase_count} | **Plans:** {plan_count}
 
 ### What Was Built
-{Extract from SUMMARY.md one-liners}
+{从 SUMMARY.md 一行摘要中提取}
 
 ### What Worked
-{Patterns that led to smooth execution}
+{导致顺利执行的模式}
 
 ### What Was Inefficient
-{Missed opportunities, rework, bottlenecks}
+{错过的机会、返工、瓶颈}
 
 ### Patterns Established
-{New conventions discovered during this milestone}
+{此里程碑期间发现的新约定}
 
 ### Key Lessons
-{Specific, actionable takeaways}
+{具体的、可操作的要点}
 
 ### Cost Observations
 - Model mix: {X}% opus, {Y}% sonnet, {Z}% haiku
@@ -491,11 +491,11 @@ ls .planning/RETROSPECTIVE.md 2>/dev/null || true
 - Notable: {efficiency observation}
 ```
 
-**Update cross-milestone trends:**
+**更新跨里程碑趋势：**
 
-If the "## Cross-Milestone Trends" section exists, update the tables with new data from this milestone.
+如果 "## Cross-Milestone Trends" 部分存在，使用此里程碑的新数据更新表格。
 
-**Commit:**
+**提交：**
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: update retrospective for v${VERSION}" --files .planning/RETROSPECTIVE.md
 ```
@@ -504,9 +504,9 @@ node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: update retros
 
 <step name="update_state">
 
-Most STATE.md updates were handled by `milestone complete`, but verify and update remaining fields:
+大部分 STATE.md 更新已由 `milestone complete` 处理，但验证并更新剩余字段：
 
-**Project Reference:**
+**Project Reference：**
 
 ```markdown
 ## Project Reference
@@ -517,45 +517,45 @@ See: .planning/PROJECT.md (updated [today])
 **Current focus:** [Next milestone or "Planning next milestone"]
 ```
 
-**Accumulated Context:**
-- Clear decisions summary (full log in PROJECT.md)
-- Clear resolved blockers
-- Keep open blockers for next milestone
+**Accumulated Context：**
+- 清除决策摘要（完整日志在 PROJECT.md 中）
+- 清除已解决的阻塞因素
+- 保留下一个里程碑的未解决阻塞因素
 
 </step>
 
 <step name="handle_branches">
 
-Check branching strategy and offer merge options.
+检查分支策略并提供合并选项。
 
-Use `init milestone-op` for context, or load config directly:
+使用 `init milestone-op` 获取上下文，或直接加载配置：
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init execute-phase "1")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Extract `branching_strategy`, `phase_branch_template`, `milestone_branch_template`, and `commit_docs` from init JSON.
+从初始化 JSON 中提取 `branching_strategy`、`phase_branch_template`、`milestone_branch_template` 和 `commit_docs`。
 
-**If "none":** Skip to git_tag.
+**如果 "none"：** 跳到 git_tag。
 
-**For "phase" strategy:**
+**对于 "phase" 策略：**
 
 ```bash
 BRANCH_PREFIX=$(echo "$PHASE_BRANCH_TEMPLATE" | sed 's/{.*//')
 PHASE_BRANCHES=$(git branch --list "${BRANCH_PREFIX}*" 2>/dev/null | sed 's/^\*//' | tr -d ' ')
 ```
 
-**For "milestone" strategy:**
+**对于 "milestone" 策略：**
 
 ```bash
 BRANCH_PREFIX=$(echo "$MILESTONE_BRANCH_TEMPLATE" | sed 's/{.*//')
 MILESTONE_BRANCH=$(git branch --list "${BRANCH_PREFIX}*" 2>/dev/null | sed 's/^\*//' | tr -d ' ' | head -1)
 ```
 
-**If no branches found:** Skip to git_tag.
+**如果未找到分支：** 跳到 git_tag。
 
-**If branches exist:**
+**如果分支存在：**
 
 ```
 ## Git Branches Detected
@@ -569,9 +569,9 @@ Options:
 3. **Keep branches** — Leave for manual handling
 ```
 
-AskUserQuestion with options: Squash merge (Recommended), Merge with history, Delete without merging, Keep branches.
+AskUserQuestion 选项：Squash merge (Recommended)、Merge with history、Delete without merging、Keep branches。
 
-**Squash merge:**
+**Squash merge：**
 
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
@@ -580,7 +580,7 @@ git checkout main
 if [ "$BRANCHING_STRATEGY" = "phase" ]; then
   for branch in $PHASE_BRANCHES; do
     git merge --squash "$branch"
-    # Strip .planning/ from staging if commit_docs is false
+    # 如果 commit_docs 为 false 则从暂存区移除 .planning/
     if [ "$COMMIT_DOCS" = "false" ]; then
       git reset HEAD .planning/ 2>/dev/null || true
     fi
@@ -590,7 +590,7 @@ fi
 
 if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
   git merge --squash "$MILESTONE_BRANCH"
-  # Strip .planning/ from staging if commit_docs is false
+  # 如果 commit_docs 为 false 则从暂存区移除 .planning/
   if [ "$COMMIT_DOCS" = "false" ]; then
     git reset HEAD .planning/ 2>/dev/null || true
   fi
@@ -600,7 +600,7 @@ fi
 git checkout "$CURRENT_BRANCH"
 ```
 
-**Merge with history:**
+**Merge with history：**
 
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
@@ -609,7 +609,7 @@ git checkout main
 if [ "$BRANCHING_STRATEGY" = "phase" ]; then
   for branch in $PHASE_BRANCHES; do
     git merge --no-ff --no-commit "$branch"
-    # Strip .planning/ from staging if commit_docs is false
+    # 如果 commit_docs 为 false 则从暂存区移除 .planning/
     if [ "$COMMIT_DOCS" = "false" ]; then
       git reset HEAD .planning/ 2>/dev/null || true
     fi
@@ -619,7 +619,7 @@ fi
 
 if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
   git merge --no-ff --no-commit "$MILESTONE_BRANCH"
-  # Strip .planning/ from staging if commit_docs is false
+  # 如果 commit_docs 为 false 则从暂存区移除 .planning/
   if [ "$COMMIT_DOCS" = "false" ]; then
     git reset HEAD .planning/ 2>/dev/null || true
   fi
@@ -629,7 +629,7 @@ fi
 git checkout "$CURRENT_BRANCH"
 ```
 
-**Delete without merging:**
+**Delete without merging：**
 
 ```bash
 if [ "$BRANCHING_STRATEGY" = "phase" ]; then
@@ -643,13 +643,13 @@ if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
 fi
 ```
 
-**Keep branches:** Report "Branches preserved for manual handling"
+**Keep branches：** 报告 "Branches preserved for manual handling"
 
 </step>
 
 <step name="git_tag">
 
-Create git tag:
+创建 git 标签：
 
 ```bash
 git tag -a v[X.Y] -m "v[X.Y] [Name]
@@ -664,11 +664,11 @@ Key accomplishments:
 See .planning/MILESTONES.md for full details."
 ```
 
-Confirm: "Tagged: v[X.Y]"
+确认："Tagged: v[X.Y]"
 
-Ask: "Push tag to remote? (y/n)"
+询问："Push tag to remote? (y/n)"
 
-If yes:
+如果 yes：
 ```bash
 git push origin v[X.Y]
 ```
@@ -677,14 +677,14 @@ git push origin v[X.Y]
 
 <step name="git_commit_milestone">
 
-Commit milestone completion.
+提交里程碑完成。
 
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "chore: complete v[X.Y] milestone" --files .planning/milestones/v[X.Y]-ROADMAP.md .planning/milestones/v[X.Y]-REQUIREMENTS.md .planning/milestones/v[X.Y]-MILESTONE-AUDIT.md .planning/MILESTONES.md .planning/PROJECT.md .planning/STATE.md
 ```
 ```
 
-Confirm: "Committed: chore: complete v[X.Y] milestone"
+确认："Committed: chore: complete v[X.Y] milestone"
 
 </step>
 
@@ -723,45 +723,45 @@ Tag: v[X.Y]
 
 <milestone_naming>
 
-**Version conventions:**
-- **v1.0** — Initial MVP
-- **v1.1, v1.2** — Minor updates, new features, fixes
-- **v2.0, v3.0** — Major rewrites, breaking changes, new direction
+**版本命名约定：**
+- **v1.0** — 初始 MVP
+- **v1.1, v1.2** — 小版本更新、新功能、修复
+- **v2.0, v3.0** — 大版本重写、破坏性变更、新方向
 
-**Names:** Short 1-2 words (v1.0 MVP, v1.1 Security, v1.2 Performance, v2.0 Redesign).
+**名称：** 简短的 1-2 个词（v1.0 MVP、v1.1 Security、v1.2 Performance、v2.0 Redesign）。
 
 </milestone_naming>
 
 <what_qualifies>
 
-**Create milestones for:** Initial release, public releases, major feature sets shipped, before archiving planning.
+**为以下情况创建里程碑：** 初始发布、公开发布、主要功能集发布、归档规划之前。
 
-**Don't create milestones for:** Every phase completion (too granular), work in progress, internal dev iterations (unless truly shipped).
+**不要为以下情况创建里程碑：** 每个阶段完成（粒度太细）、进行中的工作、内部开发迭代（除非真正发布了）。
 
-Heuristic: "Is this deployed/usable/shipped?" If yes → milestone. If no → keep working.
+启发式规则："这个已经部署/可用/发布了吗？" 如果是 → 里程碑。如果否 → 继续工作。
 
 </what_qualifies>
 
 <success_criteria>
 
-Milestone completion is successful when:
+里程碑完成成功的标准：
 
-- [ ] MILESTONES.md entry created with stats and accomplishments
-- [ ] PROJECT.md full evolution review completed
-- [ ] All shipped requirements moved to Validated in PROJECT.md
-- [ ] Key Decisions updated with outcomes
-- [ ] ROADMAP.md reorganized with milestone grouping
-- [ ] Roadmap archive created (milestones/v[X.Y]-ROADMAP.md)
-- [ ] Requirements archive created (milestones/v[X.Y]-REQUIREMENTS.md)
-- [ ] REQUIREMENTS.md deleted (fresh for next milestone)
-- [ ] STATE.md updated with fresh project reference
-- [ ] Git tag created (v[X.Y])
-- [ ] Milestone commit made (includes archive files and deletion)
-- [ ] Requirements completion checked against REQUIREMENTS.md traceability table
-- [ ] Incomplete requirements surfaced with proceed/audit/abort options
-- [ ] Known gaps recorded in MILESTONES.md if user proceeded with incomplete requirements
-- [ ] RETROSPECTIVE.md updated with milestone section
-- [ ] Cross-milestone trends updated
-- [ ] User knows next step (/gsd:new-milestone)
+- [ ] MILESTONES.md 条目已创建，包含统计数据和成就
+- [ ] PROJECT.md 完整演进审查已完成
+- [ ] 所有已发布的需求在 PROJECT.md 中移到 Validated
+- [ ] Key Decisions 已更新结果
+- [ ] ROADMAP.md 已使用里程碑分组重新组织
+- [ ] 路线图归档已创建（milestones/v[X.Y]-ROADMAP.md）
+- [ ] 需求归档已创建（milestones/v[X.Y]-REQUIREMENTS.md）
+- [ ] REQUIREMENTS.md 已删除（为下一个里程碑准备新的）
+- [ ] STATE.md 已更新为新的项目参考
+- [ ] Git 标签已创建（v[X.Y]）
+- [ ] 里程碑提交已完成（包含归档文件和删除操作）
+- [ ] 已根据 REQUIREMENTS.md 可追溯性表格检查需求完成情况
+- [ ] 未完成的需求已展示 proceed/audit/abort 选项
+- [ ] 如果用户选择带未完成需求继续，已知缺口已记录在 MILESTONES.md 中
+- [ ] RETROSPECTIVE.md 已更新里程碑部分
+- [ ] 跨里程碑趋势已更新
+- [ ] 用户知道下一步（/gsd:new-milestone）
 
 </success_criteria>

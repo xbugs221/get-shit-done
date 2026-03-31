@@ -1,115 +1,115 @@
-# Milestone Entry Template
+# 里程碑条目模板
 
-Add this entry to `.planning/MILESTONES.md` when completing a milestone:
+完成里程碑时将此条目添加到 `.planning/MILESTONES.md`：
 
 ```markdown
-## v[X.Y] [Name] (Shipped: YYYY-MM-DD)
+## v[X.Y] [名称]（发布日期：YYYY-MM-DD）
 
-**Delivered:** [One sentence describing what shipped]
+**交付内容：** [一句话描述发布了什么]
 
-**Phases completed:** [X-Y] ([Z] plans total)
+**完成的阶段：** [X-Y]（共 [Z] 个计划）
 
-**Key accomplishments:**
-- [Major achievement 1]
-- [Major achievement 2]
-- [Major achievement 3]
-- [Major achievement 4]
+**关键成果：**
+- [主要成就 1]
+- [主要成就 2]
+- [主要成就 3]
+- [主要成就 4]
 
-**Stats:**
-- [X] files created/modified
-- [Y] lines of code (primary language)
-- [Z] phases, [N] plans, [M] tasks
-- [D] days from start to ship (or milestone to milestone)
+**统计数据：**
+- [X] 个文件创建/修改
+- [Y] 行代码（主要语言）
+- [Z] 个阶段，[N] 个计划，[M] 个任务
+- 从开始到发布 [D] 天（或里程碑到里程碑）
 
-**Git range:** `feat(XX-XX)` → `feat(YY-YY)`
+**Git 范围：** `feat(XX-XX)` → `feat(YY-YY)`
 
-**What's next:** [Brief description of next milestone goals, or "Project complete"]
+**下一步：** [下一个里程碑目标的简要描述，或 "Project complete"]
 
 ---
 ```
 
 <structure>
-If MILESTONES.md doesn't exist, create it with header:
+如果 MILESTONES.md 不存在，创建时使用以下头部：
 
 ```markdown
-# Project Milestones: [Project Name]
+# 项目里程碑：[项目名称]
 
-[Entries in reverse chronological order - newest first]
+[条目按逆序时间排列 - 最新的在前]
 ```
 </structure>
 
 <guidelines>
-**When to create milestones:**
-- Initial v1.0 MVP shipped
-- Major version releases (v2.0, v3.0)
-- Significant feature milestones (v1.1, v1.2)
-- Before archiving planning (capture what was shipped)
+**何时创建里程碑：**
+- 初始 v1.0 MVP 发布
+- 主要版本发布（v2.0、v3.0）
+- 重要功能里程碑（v1.1、v1.2）
+- 归档规划之前（记录发布了什么）
 
-**Don't create milestones for:**
-- Individual phase completions (normal workflow)
-- Work in progress (wait until shipped)
-- Minor bug fixes that don't constitute a release
+**不要为以下情况创建里程碑：**
+- 单个阶段完成（正常工作流）
+- 进行中的工作（等到发布时再创建）
+- 不构成正式发布的小型 bug 修复
 
-**Stats to include:**
-- Count modified files: `git diff --stat feat(XX-XX)..feat(YY-YY) | tail -1`
-- Count LOC: `find . -name "*.swift" -o -name "*.ts" | xargs wc -l` (or relevant extension)
-- Phase/plan/task counts from ROADMAP
-- Timeline from first phase commit to last phase commit
+**要包含的统计数据：**
+- 统计修改的文件：`git diff --stat feat(XX-XX)..feat(YY-YY) | tail -1`
+- 统计代码行数：`find . -name "*.swift" -o -name "*.ts" | xargs wc -l`（或相关扩展名）
+- 从 ROADMAP 获取阶段/计划/任务数量
+- 从第一个阶段提交到最后一个阶段提交的时间线
 
-**Git range format:**
-- First commit of milestone → last commit of milestone
-- Example: `feat(01-01)` → `feat(04-01)` for phases 1-4
+**Git 范围格式：**
+- 里程碑的第一个提交 → 最后一个提交
+- 示例：`feat(01-01)` → `feat(04-01)` 对应阶段 1-4
 </guidelines>
 
 <example>
 ```markdown
-# Project Milestones: WeatherBar
+# 项目里程碑：WeatherBar
 
-## v1.1 Security & Polish (Shipped: 2025-12-10)
+## v1.1 安全与打磨（发布日期：2025-12-10）
 
-**Delivered:** Security hardening with Keychain integration and comprehensive error handling
+**交付内容：** 通过 Keychain 集成进行安全加固并完善错误处理
 
-**Phases completed:** 5-6 (3 plans total)
+**完成的阶段：** 5-6（共 3 个计划）
 
-**Key accomplishments:**
-- Migrated API key storage from plaintext to macOS Keychain
-- Implemented comprehensive error handling for network failures
-- Added Sentry crash reporting integration
-- Fixed memory leak in auto-refresh timer
+**关键成果：**
+- 将 API 密钥存储从明文迁移到 macOS Keychain
+- 实现了网络故障的全面错误处理
+- 集成了 Sentry 崩溃报告
+- 修复了自动刷新计时器中的内存泄漏
 
-**Stats:**
-- 23 files modified
-- 650 lines of Swift added
-- 2 phases, 3 plans, 12 tasks
-- 8 days from v1.0 to v1.1
+**统计数据：**
+- 23 个文件修改
+- 新增 650 行 Swift 代码
+- 2 个阶段，3 个计划，12 个任务
+- 从 v1.0 到 v1.1 历时 8 天
 
-**Git range:** `feat(05-01)` → `feat(06-02)`
+**Git 范围：** `feat(05-01)` → `feat(06-02)`
 
-**What's next:** v2.0 SwiftUI redesign with widget support
+**下一步：** v2.0 使用 SwiftUI 重新设计并支持小组件
 
 ---
 
-## v1.0 MVP (Shipped: 2025-11-25)
+## v1.0 MVP（发布日期：2025-11-25）
 
-**Delivered:** Menu bar weather app with current conditions and 3-day forecast
+**交付内容：** 菜单栏天气应用，显示当前天气和 3 天预报
 
-**Phases completed:** 1-4 (7 plans total)
+**完成的阶段：** 1-4（共 7 个计划）
 
-**Key accomplishments:**
-- Menu bar app with popover UI (AppKit)
-- OpenWeather API integration with auto-refresh
-- Current weather display with conditions icon
-- 3-day forecast list with high/low temperatures
-- Code signed and notarized for distribution
+**关键成果：**
+- 带弹出界面的菜单栏应用（AppKit）
+- OpenWeather API 集成和自动刷新
+- 当前天气显示及天气图标
+- 3 天预报列表，含最高/最低温度
+- 代码签名并公证，可分发
 
-**Stats:**
-- 47 files created
-- 2,450 lines of Swift
-- 4 phases, 7 plans, 28 tasks
-- 12 days from start to ship
+**统计数据：**
+- 47 个文件创建
+- 2,450 行 Swift 代码
+- 4 个阶段，7 个计划，28 个任务
+- 从开始到发布历时 12 天
 
-**Git range:** `feat(01-01)` → `feat(04-01)`
+**Git 范围：** `feat(01-01)` → `feat(04-01)`
 
-**What's next:** Security audit and hardening for v1.1
+**下一步：** v1.1 安全审计与加固
 ```
 </example>

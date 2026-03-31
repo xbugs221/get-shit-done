@@ -1,13 +1,13 @@
 ---
 name: gsd:session-report
-description: Generate a session report with token usage estimates, work summary, and outcomes
+description: 生成包含 token 用量估算、工作摘要和成果的会话报告
 allowed-tools:
   - Read
   - Bash
   - Write
 ---
 <objective>
-Generate a structured SESSION_REPORT.md document capturing session outcomes, work performed, and estimated resource usage. Provides a shareable artifact for post-session review.
+生成结构化的 SESSION_REPORT.md，记录会话成果、已完成工作和估算的资源用量，用于会话后回顾。
 </objective>
 
 <execution_context>
@@ -15,5 +15,5 @@ Generate a structured SESSION_REPORT.md document capturing session outcomes, wor
 </execution_context>
 
 <process>
-Execute the session-report workflow from @~/.claude/get-shit-done/workflows/session-report.md end-to-end.
+从头到尾执行 @~/.claude/get-shit-done/workflows/session-report.md 中的 session-report 工作流。
 </process>

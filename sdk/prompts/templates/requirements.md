@@ -1,231 +1,231 @@
-# Requirements Template
+# 需求模板
 
-Template for `.planning/REQUIREMENTS.md` — checkable requirements that define "done."
+`.planning/REQUIREMENTS.md` 的模板 — 可检查的需求，定义"完成"的标准。
 
 <template>
 
 ```markdown
-# Requirements: [Project Name]
+# 需求：[项目名称]
 
-**Defined:** [date]
-**Core Value:** [from PROJECT.md]
+**定义日期：**[日期]
+**核心价值：**[来自 PROJECT.md]
 
-## v1 Requirements
+## v1 需求
 
-Requirements for initial release. Each maps to roadmap phases.
+初始发布的需求。每项对应路线图中的阶段。
 
-### Authentication
+### 认证
 
-- [ ] **AUTH-01**: User can sign up with email and password
-- [ ] **AUTH-02**: User receives email verification after signup
-- [ ] **AUTH-03**: User can reset password via email link
-- [ ] **AUTH-04**: User session persists across browser refresh
+- [ ] **AUTH-01**: 用户可以使用邮箱和密码注册
+- [ ] **AUTH-02**: 用户注册后收到邮箱验证
+- [ ] **AUTH-03**: 用户可以通过邮件链接重置密码
+- [ ] **AUTH-04**: 用户会话在浏览器刷新后保持
 
-### [Category 2]
+### [类别 2]
 
-- [ ] **[CAT]-01**: [Requirement description]
-- [ ] **[CAT]-02**: [Requirement description]
-- [ ] **[CAT]-03**: [Requirement description]
+- [ ] **[CAT]-01**: [需求描述]
+- [ ] **[CAT]-02**: [需求描述]
+- [ ] **[CAT]-03**: [需求描述]
 
-### [Category 3]
+### [类别 3]
 
-- [ ] **[CAT]-01**: [Requirement description]
-- [ ] **[CAT]-02**: [Requirement description]
+- [ ] **[CAT]-01**: [需求描述]
+- [ ] **[CAT]-02**: [需求描述]
 
-## v2 Requirements
+## v2 需求
 
-Deferred to future release. Tracked but not in current roadmap.
+推迟到未来版本。已记录但不在当前路线图中。
 
-### [Category]
+### [类别]
 
-- **[CAT]-01**: [Requirement description]
-- **[CAT]-02**: [Requirement description]
+- **[CAT]-01**: [需求描述]
+- **[CAT]-02**: [需求描述]
 
-## Out of Scope
+## 不在范围内
 
-Explicitly excluded. Documented to prevent scope creep.
+明确排除的项目。记录以防止范围蔓延。
 
-| Feature | Reason |
-|---------|--------|
-| [Feature] | [Why excluded] |
-| [Feature] | [Why excluded] |
+| 功能 | 原因 |
+|------|------|
+| [功能] | [排除原因] |
+| [功能] | [排除原因] |
 
-## Traceability
+## 可追溯性
 
-Which phases cover which requirements. Updated during roadmap creation.
+哪些阶段覆盖哪些需求。在路线图创建期间更新。
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| [REQ-ID] | Phase [N] | Pending |
+| 需求 | 阶段 | 状态 |
+|------|------|------|
+| AUTH-01 | 阶段 1 | 待开始 |
+| AUTH-02 | 阶段 1 | 待开始 |
+| AUTH-03 | 阶段 1 | 待开始 |
+| AUTH-04 | 阶段 1 | 待开始 |
+| [REQ-ID] | 阶段 [N] | 待开始 |
 
-**Coverage:**
-- v1 requirements: [X] total
-- Mapped to phases: [Y]
-- Unmapped: [Z] ⚠️
+**覆盖率：**
+- v1 需求：共 [X] 项
+- 已映射到阶段：[Y]
+- 未映射：[Z] ⚠️
 
 ---
-*Requirements defined: [date]*
-*Last updated: [date] after [trigger]*
+*需求定义日期：[日期]*
+*最后更新：[日期] 触发原因 [触发事件]*
 ```
 
 </template>
 
 <guidelines>
 
-**Requirement Format:**
-- ID: `[CATEGORY]-[NUMBER]` (AUTH-01, CONTENT-02, SOCIAL-03)
-- Description: User-centric, testable, atomic
-- Checkbox: Only for v1 requirements (v2 are not yet actionable)
+**需求格式：**
+- ID：`[类别]-[编号]`（AUTH-01、CONTENT-02、SOCIAL-03）
+- 描述：以用户为中心、可测试、原子化
+- 复选框：仅用于 v1 需求（v2 尚不可执行）
 
-**Categories:**
-- Derive from research FEATURES.md categories
-- Keep consistent with domain conventions
-- Typical: Authentication, Content, Social, Notifications, Moderation, Payments, Admin
+**类别：**
+- 从调研 FEATURES.md 的类别中派生
+- 与领域惯例保持一致
+- 典型类别：认证、内容、社交、通知、审核、支付、管理
 
-**v1 vs v2:**
-- v1: Committed scope, will be in roadmap phases
-- v2: Acknowledged but deferred, not in current roadmap
-- Moving v2 → v1 requires roadmap update
+**v1 与 v2：**
+- v1：承诺范围，将纳入路线图阶段
+- v2：已确认但推迟，不在当前路线图中
+- 将 v2 移至 v1 需要更新路线图
 
-**Out of Scope:**
-- Explicit exclusions with reasoning
-- Prevents "why didn't you include X?" later
-- Anti-features from research belong here with warnings
+**不在范围内：**
+- 附带理由的明确排除项
+- 防止后续出现"为什么没有包含 X？"的问题
+- 调研中的反模式功能应带警告放在这里
 
-**Traceability:**
-- Empty initially, populated during roadmap creation
-- Each requirement maps to exactly one phase
-- Unmapped requirements = roadmap gap
+**可追溯性：**
+- 初始为空，在路线图创建期间填充
+- 每个需求精确映射到一个阶段
+- 未映射的需求 = 路线图缺口
 
-**Status Values:**
-- Pending: Not started
-- In Progress: Phase is active
-- Complete: Requirement verified
-- Blocked: Waiting on external factor
+**状态值：**
+- 待开始：尚未启动
+- 进行中：阶段正在进行
+- 已完成：需求已验证
+- 受阻：等待外部因素
 
 </guidelines>
 
 <evolution>
 
-**After each phase completes:**
-1. Mark covered requirements as Complete
-2. Update traceability status
-3. Note any requirements that changed scope
+**每个阶段完成后：**
+1. 将覆盖的需求标记为已完成
+2. 更新可追溯性状态
+3. 记录任何范围变更的需求
 
-**After roadmap updates:**
-1. Verify all v1 requirements still mapped
-2. Add new requirements if scope expanded
-3. Move requirements to v2/out of scope if descoped
+**路线图更新后：**
+1. 验证所有 v1 需求是否仍有映射
+2. 如果范围扩大，添加新需求
+3. 如果缩减范围，将需求移至 v2 或不在范围内
 
-**Requirement completion criteria:**
-- Requirement is "Complete" when:
-  - Feature is implemented
-  - Feature is verified (tests pass, manual check done)
-  - Feature is committed
+**需求完成标准：**
+- 需求在以下情况下标记为"已完成"：
+  - 功能已实现
+  - 功能已验证（测试通过，手动检查完成）
+  - 功能已提交
 
 </evolution>
 
 <example>
 
 ```markdown
-# Requirements: CommunityApp
+# 需求：CommunityApp
 
-**Defined:** 2025-01-14
-**Core Value:** Users can share and discuss content with people who share their interests
+**定义日期：**2025-01-14
+**核心价值：**用户可以与志同道合的人分享和讨论内容
 
-## v1 Requirements
+## v1 需求
 
-### Authentication
+### 认证
 
-- [ ] **AUTH-01**: User can sign up with email and password
-- [ ] **AUTH-02**: User receives email verification after signup
-- [ ] **AUTH-03**: User can reset password via email link
-- [ ] **AUTH-04**: User session persists across browser refresh
+- [ ] **AUTH-01**: 用户可以使用邮箱和密码注册
+- [ ] **AUTH-02**: 用户注册后收到邮箱验证
+- [ ] **AUTH-03**: 用户可以通过邮件链接重置密码
+- [ ] **AUTH-04**: 用户会话在浏览器刷新后保持
 
-### Profiles
+### 个人资料
 
-- [ ] **PROF-01**: User can create profile with display name
-- [ ] **PROF-02**: User can upload avatar image
-- [ ] **PROF-03**: User can write bio (max 500 chars)
-- [ ] **PROF-04**: User can view other users' profiles
+- [ ] **PROF-01**: 用户可以创建带有显示名称的个人资料
+- [ ] **PROF-02**: 用户可以上传头像
+- [ ] **PROF-03**: 用户可以撰写个人简介（最多 500 字符）
+- [ ] **PROF-04**: 用户可以查看其他用户的个人资料
 
-### Content
+### 内容
 
-- [ ] **CONT-01**: User can create text post
-- [ ] **CONT-02**: User can upload image with post
-- [ ] **CONT-03**: User can edit own posts
-- [ ] **CONT-04**: User can delete own posts
-- [ ] **CONT-05**: User can view feed of posts
+- [ ] **CONT-01**: 用户可以创建文本帖子
+- [ ] **CONT-02**: 用户可以在帖子中上传图片
+- [ ] **CONT-03**: 用户可以编辑自己的帖子
+- [ ] **CONT-04**: 用户可以删除自己的帖子
+- [ ] **CONT-05**: 用户可以查看帖子信息流
 
-### Social
+### 社交
 
-- [ ] **SOCL-01**: User can follow other users
-- [ ] **SOCL-02**: User can unfollow users
-- [ ] **SOCL-03**: User can like posts
-- [ ] **SOCL-04**: User can comment on posts
-- [ ] **SOCL-05**: User can view activity feed (followed users' posts)
+- [ ] **SOCL-01**: 用户可以关注其他用户
+- [ ] **SOCL-02**: 用户可以取消关注
+- [ ] **SOCL-03**: 用户可以点赞帖子
+- [ ] **SOCL-04**: 用户可以评论帖子
+- [ ] **SOCL-05**: 用户可以查看动态信息流（已关注用户的帖子）
 
-## v2 Requirements
+## v2 需求
 
-### Notifications
+### 通知
 
-- **NOTF-01**: User receives in-app notifications
-- **NOTF-02**: User receives email for new followers
-- **NOTF-03**: User receives email for comments on own posts
-- **NOTF-04**: User can configure notification preferences
+- **NOTF-01**: 用户收到应用内通知
+- **NOTF-02**: 用户在有新关注者时收到邮件通知
+- **NOTF-03**: 用户在自己的帖子被评论时收到邮件通知
+- **NOTF-04**: 用户可以配置通知偏好
 
-### Moderation
+### 审核
 
-- **MODR-01**: User can report content
-- **MODR-02**: User can block other users
-- **MODR-03**: Admin can view reported content
-- **MODR-04**: Admin can remove content
-- **MODR-05**: Admin can ban users
+- **MODR-01**: 用户可以举报内容
+- **MODR-02**: 用户可以屏蔽其他用户
+- **MODR-03**: 管理员可以查看被举报的内容
+- **MODR-04**: 管理员可以移除内容
+- **MODR-05**: 管理员可以封禁用户
 
-## Out of Scope
+## 不在范围内
 
-| Feature | Reason |
-|---------|--------|
-| Real-time chat | High complexity, not core to community value |
-| Video posts | Storage/bandwidth costs, defer to v2+ |
-| OAuth login | Email/password sufficient for v1 |
-| Mobile app | Web-first, mobile later |
+| 功能 | 原因 |
+|------|------|
+| 实时聊天 | 复杂度高，不是社区核心价值 |
+| 视频帖子 | 存储/带宽成本高，推迟到 v2+ |
+| OAuth 登录 | 邮箱/密码对 v1 已够用 |
+| 移动应用 | 先做 Web，之后再做移动端 |
 
-## Traceability
+## 可追溯性
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| PROF-01 | Phase 2 | Pending |
-| PROF-02 | Phase 2 | Pending |
-| PROF-03 | Phase 2 | Pending |
-| PROF-04 | Phase 2 | Pending |
-| CONT-01 | Phase 3 | Pending |
-| CONT-02 | Phase 3 | Pending |
-| CONT-03 | Phase 3 | Pending |
-| CONT-04 | Phase 3 | Pending |
-| CONT-05 | Phase 3 | Pending |
-| SOCL-01 | Phase 4 | Pending |
-| SOCL-02 | Phase 4 | Pending |
-| SOCL-03 | Phase 4 | Pending |
-| SOCL-04 | Phase 4 | Pending |
-| SOCL-05 | Phase 4 | Pending |
+| 需求 | 阶段 | 状态 |
+|------|------|------|
+| AUTH-01 | 阶段 1 | 待开始 |
+| AUTH-02 | 阶段 1 | 待开始 |
+| AUTH-03 | 阶段 1 | 待开始 |
+| AUTH-04 | 阶段 1 | 待开始 |
+| PROF-01 | 阶段 2 | 待开始 |
+| PROF-02 | 阶段 2 | 待开始 |
+| PROF-03 | 阶段 2 | 待开始 |
+| PROF-04 | 阶段 2 | 待开始 |
+| CONT-01 | 阶段 3 | 待开始 |
+| CONT-02 | 阶段 3 | 待开始 |
+| CONT-03 | 阶段 3 | 待开始 |
+| CONT-04 | 阶段 3 | 待开始 |
+| CONT-05 | 阶段 3 | 待开始 |
+| SOCL-01 | 阶段 4 | 待开始 |
+| SOCL-02 | 阶段 4 | 待开始 |
+| SOCL-03 | 阶段 4 | 待开始 |
+| SOCL-04 | 阶段 4 | 待开始 |
+| SOCL-05 | 阶段 4 | 待开始 |
 
-**Coverage:**
-- v1 requirements: 18 total
-- Mapped to phases: 18
-- Unmapped: 0 ✓
+**覆盖率：**
+- v1 需求：共 18 项
+- 已映射到阶段：18
+- 未映射：0 ✓
 
 ---
-*Requirements defined: 2025-01-14*
-*Last updated: 2025-01-14 after initial definition*
+*需求定义日期：2025-01-14*
+*最后更新：2025-01-14 初始定义后*
 ```
 
 </example>

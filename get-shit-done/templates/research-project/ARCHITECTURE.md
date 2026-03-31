@@ -1,204 +1,204 @@
-# Architecture Research Template
+# 架构研究模板
 
-Template for `.planning/research/ARCHITECTURE.md` — system structure patterns for the project domain.
+`.planning/research/ARCHITECTURE.md` 的模板 — 项目领域的系统结构模式。
 
 <template>
 
 ```markdown
-# Architecture Research
+# 架构研究
 
-**Domain:** [domain type]
-**Researched:** [date]
-**Confidence:** [HIGH/MEDIUM/LOW]
+**领域：** [领域类型]
+**研究日期：** [日期]
+**置信度：** [HIGH/MEDIUM/LOW]
 
-## Standard Architecture
+## 标准架构
 
-### System Overview
+### 系统概览
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        [Layer Name]                          │
+│                        [层名称]                              │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐        │
-│  │ [Comp]  │  │ [Comp]  │  │ [Comp]  │  │ [Comp]  │        │
+│  │ [组件]  │  │ [组件]  │  │ [组件]  │  │ [组件]  │        │
 │  └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘        │
 │       │            │            │            │              │
 ├───────┴────────────┴────────────┴────────────┴──────────────┤
-│                        [Layer Name]                          │
+│                        [层名称]                              │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────────────────────────────────────────────┐    │
-│  │                    [Component]                       │    │
+│  │                    [组件]                             │    │
 │  └─────────────────────────────────────────────────────┘    │
 ├─────────────────────────────────────────────────────────────┤
-│                        [Layer Name]                          │
+│                        [层名称]                              │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐                   │
-│  │ [Store]  │  │ [Store]  │  │ [Store]  │                   │
+│  │ [存储]   │  │ [存储]   │  │ [存储]   │                   │
 │  └──────────┘  └──────────┘  └──────────┘                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Component Responsibilities
+### 组件职责
 
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| [name] | [what it owns] | [how it's usually built] |
-| [name] | [what it owns] | [how it's usually built] |
-| [name] | [what it owns] | [how it's usually built] |
+| 组件 | 职责 | 典型实现方式 |
+|------|------|-------------|
+| [名称] | [负责什么] | [通常如何构建] |
+| [名称] | [负责什么] | [通常如何构建] |
+| [名称] | [负责什么] | [通常如何构建] |
 
-## Recommended Project Structure
+## 推荐项目结构
 
 ```
 src/
-├── [folder]/           # [purpose]
-│   ├── [subfolder]/    # [purpose]
-│   └── [file].ts       # [purpose]
-├── [folder]/           # [purpose]
-│   ├── [subfolder]/    # [purpose]
-│   └── [file].ts       # [purpose]
-├── [folder]/           # [purpose]
-└── [folder]/           # [purpose]
+├── [文件夹]/           # [用途]
+│   ├── [子文件夹]/    # [用途]
+│   └── [文件].ts       # [用途]
+├── [文件夹]/           # [用途]
+│   ├── [子文件夹]/    # [用途]
+│   └── [文件].ts       # [用途]
+├── [文件夹]/           # [用途]
+└── [文件夹]/           # [用途]
 ```
 
-### Structure Rationale
+### 结构依据
 
-- **[folder]/:** [why organized this way]
-- **[folder]/:** [why organized this way]
+- **[文件夹]/：** [为何如此组织]
+- **[文件夹]/：** [为何如此组织]
 
-## Architectural Patterns
+## 架构模式
 
-### Pattern 1: [Pattern Name]
+### 模式 1：[模式名称]
 
-**What:** [description]
-**When to use:** [conditions]
-**Trade-offs:** [pros and cons]
+**是什么：** [描述]
+**何时使用：** [条件]
+**权衡：** [优缺点]
 
-**Example:**
+**示例：**
 ```typescript
-// [Brief code example showing the pattern]
+// [展示该模式的简要代码示例]
 ```
 
-### Pattern 2: [Pattern Name]
+### 模式 2：[模式名称]
 
-**What:** [description]
-**When to use:** [conditions]
-**Trade-offs:** [pros and cons]
+**是什么：** [描述]
+**何时使用：** [条件]
+**权衡：** [优缺点]
 
-**Example:**
+**示例：**
 ```typescript
-// [Brief code example showing the pattern]
+// [展示该模式的简要代码示例]
 ```
 
-### Pattern 3: [Pattern Name]
+### 模式 3：[模式名称]
 
-**What:** [description]
-**When to use:** [conditions]
-**Trade-offs:** [pros and cons]
+**是什么：** [描述]
+**何时使用：** [条件]
+**权衡：** [优缺点]
 
-## Data Flow
+## 数据流
 
-### Request Flow
+### 请求流程
 
 ```
-[User Action]
+[用户操作]
     ↓
-[Component] → [Handler] → [Service] → [Data Store]
-    ↓              ↓           ↓            ↓
-[Response] ← [Transform] ← [Query] ← [Database]
+[组件] → [处理器] → [服务] → [数据存储]
+    ↓           ↓          ↓         ↓
+[响应] ← [转换] ← [查询] ← [数据库]
 ```
 
-### State Management
+### 状态管理
 
 ```
-[State Store]
-    ↓ (subscribe)
-[Components] ←→ [Actions] → [Reducers/Mutations] → [State Store]
+[状态存储]
+    ↓ (订阅)
+[组件] ←→ [操作] → [Reducer/Mutation] → [状态存储]
 ```
 
-### Key Data Flows
+### 关键数据流
 
-1. **[Flow name]:** [description of how data moves]
-2. **[Flow name]:** [description of how data moves]
+1. **[流程名称]：** [数据如何流动的描述]
+2. **[流程名称]：** [数据如何流动的描述]
 
-## Scaling Considerations
+## 扩展性考量
 
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| 0-1k users | [approach — usually monolith is fine] |
-| 1k-100k users | [approach — what to optimize first] |
-| 100k+ users | [approach — when to consider splitting] |
+| 规模 | 架构调整 |
+|------|----------|
+| 0-1k 用户 | [方案 — 通常单体架构即可] |
+| 1k-100k 用户 | [方案 — 首先优化什么] |
+| 100k+ 用户 | [方案 — 何时考虑拆分] |
 
-### Scaling Priorities
+### 扩展优先级
 
-1. **First bottleneck:** [what breaks first, how to fix]
-2. **Second bottleneck:** [what breaks next, how to fix]
+1. **第一个瓶颈：** [什么先崩溃，如何修复]
+2. **第二个瓶颈：** [接下来什么崩溃，如何修复]
 
-## Anti-Patterns
+## 反模式
 
-### Anti-Pattern 1: [Name]
+### 反模式 1：[名称]
 
-**What people do:** [the mistake]
-**Why it's wrong:** [the problem it causes]
-**Do this instead:** [the correct approach]
+**人们怎么做的：** [错误做法]
+**为什么是错的：** [导致的问题]
+**正确做法：** [正确的方案]
 
-### Anti-Pattern 2: [Name]
+### 反模式 2：[名称]
 
-**What people do:** [the mistake]
-**Why it's wrong:** [the problem it causes]
-**Do this instead:** [the correct approach]
+**人们怎么做的：** [错误做法]
+**为什么是错的：** [导致的问题]
+**正确做法：** [正确的方案]
 
-## Integration Points
+## 集成点
 
-### External Services
+### 外部服务
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| [service] | [how to connect] | [gotchas] |
-| [service] | [how to connect] | [gotchas] |
+| 服务 | 集成模式 | 备注 |
+|------|----------|------|
+| [服务] | [如何连接] | [注意事项] |
+| [服务] | [如何连接] | [注意事项] |
 
-### Internal Boundaries
+### 内部边界
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| [module A ↔ module B] | [API/events/direct] | [considerations] |
+| 边界 | 通信方式 | 备注 |
+|------|----------|------|
+| [模块 A ↔ 模块 B] | [API/事件/直接调用] | [注意事项] |
 
-## Sources
+## 来源
 
-- [Architecture references]
-- [Official documentation]
-- [Case studies]
+- [架构参考资料]
+- [官方文档]
+- [案例研究]
 
 ---
-*Architecture research for: [domain]*
-*Researched: [date]*
+*架构研究领域：[领域]*
+*研究日期：[日期]*
 ```
 
 </template>
 
 <guidelines>
 
-**System Overview:**
-- Use ASCII box-drawing diagrams for clarity (├── └── │ ─ for structure visualization only)
-- Show major components and their relationships
-- Don't over-detail — this is conceptual, not implementation
+**系统概览：**
+- 使用 ASCII 方框字符绘制图表以提高清晰度（├── └── │ ─ 仅用于结构可视化）
+- 展示主要组件及其关系
+- 不要过度详细 — 这是概念性的，不是实现细节
 
-**Project Structure:**
-- Be specific about folder organization
-- Explain the rationale for grouping
-- Match conventions of the chosen stack
+**项目结构：**
+- 具体说明文件夹组织方式
+- 解释分组的依据
+- 匹配所选技术栈的惯例
 
-**Patterns:**
-- Include code examples where helpful
-- Explain trade-offs honestly
-- Note when patterns are overkill for small projects
+**模式：**
+- 在有帮助的地方包含代码示例
+- 诚实地解释权衡
+- 注明何时模式对小项目来说过于复杂
 
-**Scaling Considerations:**
-- Be realistic — most projects don't need to scale to millions
-- Focus on "what breaks first" not theoretical limits
-- Avoid premature optimization recommendations
+**扩展性考量：**
+- 要现实 — 大多数项目不需要扩展到数百万用户
+- 聚焦于"什么先崩溃"而非理论极限
+- 避免过早优化的建议
 
-**Anti-Patterns:**
-- Specific to this domain
-- Include what to do instead
-- Helps prevent common mistakes during implementation
+**反模式：**
+- 特定于此领域
+- 包含应该怎么做
+- 帮助防止实现过程中的常见错误
 
 </guidelines>

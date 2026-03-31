@@ -1,90 +1,91 @@
 <purpose>
-Remove a GSD workspace, cleaning up git worktrees and deleting the workspace directory.
+移除 GSD 工作区，清理 git worktree 并删除工作区目录。
 </purpose>
 
 <required_reading>
-Read all files referenced by the invoking prompt's execution_context before starting.
+在开始之前，阅读调用提示的 execution_context 中引用的所有文件。
 </required_reading>
 
 <process>
 
-## 1. Setup
+## 1. 设置
 
-Extract workspace name from $ARGUMENTS.
+从 $ARGUMENTS 提取工作区名称。
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init remove-workspace "$WORKSPACE_NAME")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Parse JSON for: `workspace_name`, `workspace_path`, `has_manifest`, `strategy`, `repos`, `repo_count`, `dirty_repos`, `has_dirty_repos`.
+解析 JSON 获取：`workspace_name`、`workspace_path`、`has_manifest`、`strategy`、`repos`、`repo_count`、`dirty_repos`、`has_dirty_repos`。
 
-**If no workspace name provided:**
+**如果未提供工作区名称：**
 
-First run `/gsd:list-workspaces` to show available workspaces, then ask:
+先运行 `/gsd:list-workspaces` 显示可用的工作区，然后询问：
 
-Use AskUserQuestion:
-- header: "Remove Workspace"
-- question: "Which workspace do you want to remove?"
+使用 AskUserQuestion：
+- header: "移除工作区"
+- question: "你想移除哪个工作区？"
 - requireAnswer: true
 
-Re-run init with the provided name.
+使用提供的名称重新运行初始化。
 
-## 2. Safety Checks
+## 2. 安全检查
 
-**If `has_dirty_repos` is true:**
+**如果 `has_dirty_repos` 为 true：**
 
 ```
-Cannot remove workspace "$WORKSPACE_NAME" — the following repos have uncommitted changes:
+无法移除工作区 "$WORKSPACE_NAME"——以下仓库有未提交的更改：
 
   - repo1
   - repo2
 
-Commit or stash changes in these repos before removing the workspace:
+请在移除工作区之前提交或暂存这些仓库的更改：
   cd $WORKSPACE_PATH/repo1
-  git stash   # or git commit
+  git stash   # 或 git commit
 ```
 
-Exit. Do NOT proceed.
+退出。不要继续。
 
-## 3. Confirm Removal
+## 3. 确认移除
 
-Use AskUserQuestion:
-- header: "Confirm Removal"
-- question: "Remove workspace '$WORKSPACE_NAME' at $WORKSPACE_PATH? This will delete all files in the workspace directory. Type the workspace name to confirm:"
+使用 AskUserQuestion：
+- header: "确认移除"
+- question: "移除工作区 '$WORKSPACE_NAME'（位于 $WORKSPACE_PATH）？这将删除工作区目录中的所有文件。输入工作区名称以确认："
 - requireAnswer: true
 
-**If answer does not match `$WORKSPACE_NAME`:** Exit with "Removal cancelled."
+**如果回答与 `$WORKSPACE_NAME` 不匹配：**以"移除已取消。"退出
 
-## 4. Clean Up Worktrees
+## 4. 清理 Worktree
 
-**If strategy is `worktree`:**
+**如果策略为 `worktree`：**
 
-For each repo in the workspace:
+对于工作区中的每个仓库：
 
 ```bash
 cd "$SOURCE_REPO_PATH"
 git worktree remove "$WORKSPACE_PATH/$REPO_NAME" 2>&1 || true
 ```
 
-If `git worktree remove` fails, warn but continue:
+如果 `git worktree remove` 失败，发出警告但继续：
 ```
-Warning: Could not remove worktree for $REPO_NAME — source repo may have been moved or deleted.
+警告：无法移除 $REPO_NAME 的 worktree——源仓库可能已被移动或删除。
 ```
 
-## 5. Delete Workspace Directory
+## 5. 删除工作区目录
 
 ```bash
 rm -rf "$WORKSPACE_PATH"
 ```
 
-## 6. Report
+## 6. 报告
 
 ```
-Workspace "$WORKSPACE_NAME" removed.
+工作区 "$WORKSPACE_NAME" 已移除。
 
-  Path: $WORKSPACE_PATH (deleted)
-  Repos: $REPO_COUNT worktrees cleaned up
+  路径：$WORKSPACE_PATH（已删除）
+  仓库：已清理 $REPO_COUNT 个 worktree
 ```
 
 </process>
+</output>

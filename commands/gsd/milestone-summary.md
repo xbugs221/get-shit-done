@@ -1,7 +1,7 @@
 ---
 type: prompt
 name: gsd:milestone-summary
-description: Generate a comprehensive project summary from milestone artifacts for team onboarding and review
+description: 从里程碑产物生成全面的项目总结，用于团队入职和评审
 argument-hint: "[version]"
 allowed-tools:
   - Read
@@ -12,10 +12,10 @@ allowed-tools:
 ---
 
 <objective>
-Generate a structured milestone summary for team onboarding and project review. Reads completed milestone artifacts (ROADMAP, REQUIREMENTS, CONTEXT, SUMMARY, VERIFICATION files) and produces a human-friendly overview of what was built, how, and why.
+为团队入职和项目评审生成结构化里程碑总结。读取已完成的里程碑产物（ROADMAP、REQUIREMENTS、CONTEXT、SUMMARY、VERIFICATION），生成概览：构建了什么、如何构建以及为什么。
 
-Purpose: Enable new team members to understand a completed project by reading one document and asking follow-up questions.
-Output: MILESTONE_SUMMARY written to `.planning/reports/`, presented inline, optional interactive Q&A.
+目的：使新成员通过一份文档理解已完成的项目。
+输出：MILESTONE_SUMMARY 写入 `.planning/reports/`，内联展示，可选交互式问答。
 </objective>
 
 <execution_context>
@@ -23,29 +23,24 @@ Output: MILESTONE_SUMMARY written to `.planning/reports/`, presented inline, opt
 </execution_context>
 
 <context>
-**Project files:**
-- `.planning/ROADMAP.md`
-- `.planning/PROJECT.md`
-- `.planning/STATE.md`
-- `.planning/RETROSPECTIVE.md`
-- `.planning/milestones/v{version}-ROADMAP.md` (if archived)
-- `.planning/milestones/v{version}-REQUIREMENTS.md` (if archived)
-- `.planning/phases/*-*/` (SUMMARY.md, VERIFICATION.md, CONTEXT.md, RESEARCH.md)
+**项目文件：**
+- `.planning/ROADMAP.md`、`PROJECT.md`、`STATE.md`、`RETROSPECTIVE.md`
+- `.planning/milestones/v{version}-ROADMAP.md`（如已归档）
+- `.planning/milestones/v{version}-REQUIREMENTS.md`（如已归档）
+- `.planning/phases/*-*/`（SUMMARY.md、VERIFICATION.md、CONTEXT.md、RESEARCH.md）
 
-**User input:**
-- Version: $ARGUMENTS (optional — defaults to current/latest milestone)
+**用户输入：** 版本：$ARGUMENTS（可选 — 默认为当前/最新里程碑）
 </context>
 
 <process>
-Read and execute the milestone-summary workflow from @~/.claude/get-shit-done/workflows/milestone-summary.md end-to-end.
+端到端执行 @~/.claude/get-shit-done/workflows/milestone-summary.md 里程碑总结工作流。
 </process>
 
 <success_criteria>
-- Milestone version resolved (from args, STATE.md, or archive scan)
-- All available artifacts read (ROADMAP, REQUIREMENTS, CONTEXT, SUMMARY, VERIFICATION, RESEARCH, RETROSPECTIVE)
-- Summary document written to `.planning/reports/MILESTONE_SUMMARY-v{version}.md`
-- All 7 sections generated (Overview, Architecture, Phases, Decisions, Requirements, Tech Debt, Getting Started)
-- Summary presented inline to user
-- Interactive Q&A offered
-- STATE.md updated
+- 里程碑版本已解析（来自参数、STATE.md 或归档扫描）
+- 已读取所有可用产物
+- 总结写入 `.planning/reports/MILESTONE_SUMMARY-v{version}.md`
+- 7 个章节已生成（概述、架构、阶段、决策、需求、技术债务、入门指南）
+- 总结已内联展示并提供交互式问答
+- STATE.md 已更新
 </success_criteria>

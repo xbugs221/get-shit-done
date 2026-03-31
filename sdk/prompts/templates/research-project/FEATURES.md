@@ -1,147 +1,147 @@
-# Features Research Template
+# 功能调研模板
 
-Template for `.planning/research/FEATURES.md` — feature landscape for the project domain.
+`.planning/research/FEATURES.md` 的模板 — 项目领域的功能全景。
 
 <template>
 
 ```markdown
-# Feature Research
+# 功能调研
 
-**Domain:** [domain type]
-**Researched:** [date]
-**Confidence:** [HIGH/MEDIUM/LOW]
+**领域：**[领域类型]
+**调研日期：**[日期]
+**置信度：**[高/中/低]
 
-## Feature Landscape
+## 功能全景
 
-### Table Stakes (Users Expect These)
+### 基本功能（用户期望的标配）
 
-Features users assume exist. Missing these = product feels incomplete.
+用户默认认为会有的功能。缺少这些 = 产品给人感觉不完整。
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| [feature] | [user expectation] | LOW/MEDIUM/HIGH | [implementation notes] |
-| [feature] | [user expectation] | LOW/MEDIUM/HIGH | [implementation notes] |
-| [feature] | [user expectation] | LOW/MEDIUM/HIGH | [implementation notes] |
+| 功能 | 为什么是标配 | 复杂度 | 备注 |
+|------|------------|--------|------|
+| [功能] | [用户期望] | 低/中/高 | [实现备注] |
+| [功能] | [用户期望] | 低/中/高 | [实现备注] |
+| [功能] | [用户期望] | 低/中/高 | [实现备注] |
 
-### Differentiators (Competitive Advantage)
+### 差异化功能（竞争优势）
 
-Features that set the product apart. Not required, but valuable.
+让产品脱颖而出的功能。不是必需的，但有价值。
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| [feature] | [why it matters] | LOW/MEDIUM/HIGH | [implementation notes] |
-| [feature] | [why it matters] | LOW/MEDIUM/HIGH | [implementation notes] |
-| [feature] | [why it matters] | LOW/MEDIUM/HIGH | [implementation notes] |
+| 功能 | 价值主张 | 复杂度 | 备注 |
+|------|---------|--------|------|
+| [功能] | [为什么重要] | 低/中/高 | [实现备注] |
+| [功能] | [为什么重要] | 低/中/高 | [实现备注] |
+| [功能] | [为什么重要] | 低/中/高 | [实现备注] |
 
-### Anti-Features (Commonly Requested, Often Problematic)
+### 反模式功能（经常被要求但往往有问题）
 
-Features that seem good but create problems.
+看起来不错但会带来问题的功能。
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| [feature] | [surface appeal] | [actual problems] | [better approach] |
-| [feature] | [surface appeal] | [actual problems] | [better approach] |
+| 功能 | 为什么被要求 | 为什么有问题 | 替代方案 |
+|------|------------|-------------|---------|
+| [功能] | [表面吸引力] | [实际问题] | [更好的方案] |
+| [功能] | [表面吸引力] | [实际问题] | [更好的方案] |
 
-## Feature Dependencies
+## 功能依赖
 
 ```
-[Feature A]
-    └──requires──> [Feature B]
-                       └──requires──> [Feature C]
+[功能 A]
+    └──依赖──> [功能 B]
+                    └──依赖──> [功能 C]
 
-[Feature D] ──enhances──> [Feature A]
+[功能 D] ──增强──> [功能 A]
 
-[Feature E] ──conflicts──> [Feature F]
+[功能 E] ──冲突──> [功能 F]
 ```
 
-### Dependency Notes
+### 依赖说明
 
-- **[Feature A] requires [Feature B]:** [why the dependency exists]
-- **[Feature D] enhances [Feature A]:** [how they work together]
-- **[Feature E] conflicts with [Feature F]:** [why they're incompatible]
+- **[功能 A] 依赖 [功能 B]：**[依赖存在的原因]
+- **[功能 D] 增强 [功能 A]：**[它们如何协同工作]
+- **[功能 E] 与 [功能 F] 冲突：**[为什么不兼容]
 
-## MVP Definition
+## MVP 定义
 
-### Launch With (v1)
+### 首发功能（v1）
 
-Minimum viable product — what's needed to validate the concept.
+最小可行产品 — 验证概念所需的最少功能。
 
-- [ ] [Feature] — [why essential]
-- [ ] [Feature] — [why essential]
-- [ ] [Feature] — [why essential]
+- [ ] [功能] — [为什么必需]
+- [ ] [功能] — [为什么必需]
+- [ ] [功能] — [为什么必需]
 
-### Add After Validation (v1.x)
+### 验证后添加（v1.x）
 
-Features to add once core is working.
+核心功能运行后添加的功能。
 
-- [ ] [Feature] — [trigger for adding]
-- [ ] [Feature] — [trigger for adding]
+- [ ] [功能] — [添加的触发条件]
+- [ ] [功能] — [添加的触发条件]
 
-### Future Consideration (v2+)
+### 未来考虑（v2+）
 
-Features to defer until product-market fit is established.
+推迟到产品市场契合度确立之后的功能。
 
-- [ ] [Feature] — [why defer]
-- [ ] [Feature] — [why defer]
+- [ ] [功能] — [推迟原因]
+- [ ] [功能] — [推迟原因]
 
-## Feature Prioritization Matrix
+## 功能优先级矩阵
 
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| [feature] | HIGH/MEDIUM/LOW | HIGH/MEDIUM/LOW | P1/P2/P3 |
-| [feature] | HIGH/MEDIUM/LOW | HIGH/MEDIUM/LOW | P1/P2/P3 |
-| [feature] | HIGH/MEDIUM/LOW | HIGH/MEDIUM/LOW | P1/P2/P3 |
+| 功能 | 用户价值 | 实现成本 | 优先级 |
+|------|---------|---------|--------|
+| [功能] | 高/中/低 | 高/中/低 | P1/P2/P3 |
+| [功能] | 高/中/低 | 高/中/低 | P1/P2/P3 |
+| [功能] | 高/中/低 | 高/中/低 | P1/P2/P3 |
 
-**Priority key:**
-- P1: Must have for launch
-- P2: Should have, add when possible
-- P3: Nice to have, future consideration
+**优先级说明：**
+- P1：发布前必须有
+- P2：应该有，有条件时添加
+- P3：有则更好，未来考虑
 
-## Competitor Feature Analysis
+## 竞品功能分析
 
-| Feature | Competitor A | Competitor B | Our Approach |
-|---------|--------------|--------------|--------------|
-| [feature] | [how they do it] | [how they do it] | [our plan] |
-| [feature] | [how they do it] | [how they do it] | [our plan] |
+| 功能 | 竞品 A | 竞品 B | 我们的方案 |
+|------|--------|--------|-----------|
+| [功能] | [他们怎么做的] | [他们怎么做的] | [我们的计划] |
+| [功能] | [他们怎么做的] | [他们怎么做的] | [我们的计划] |
 
-## Sources
+## 参考来源
 
-- [Competitor products analyzed]
-- [User research or feedback sources]
-- [Industry standards referenced]
+- [分析的竞品]
+- [用户调研或反馈来源]
+- [参考的行业标准]
 
 ---
-*Feature research for: [domain]*
-*Researched: [date]*
+*功能调研领域：[领域]*
+*调研日期：[日期]*
 ```
 
 </template>
 
 <guidelines>
 
-**Table Stakes:**
-- These are non-negotiable for launch
-- Users don't give credit for having them, but penalize for missing them
-- Example: A community platform without user profiles is broken
+**基本功能：**
+- 这些是发布时不可商量的
+- 用户不会因为有这些而给好评，但会因为缺少而扣分
+- 示例：一个没有用户资料的社区平台是残缺的
 
-**Differentiators:**
-- These are where you compete
-- Should align with the Core Value from PROJECT.md
-- Don't try to differentiate on everything
+**差异化功能：**
+- 这些是你竞争的战场
+- 应与 PROJECT.md 中的核心价值一致
+- 不要试图在所有方面都做差异化
 
-**Anti-Features:**
-- Prevent scope creep by documenting what seems good but isn't
-- Include the alternative approach
-- Example: "Real-time everything" often creates complexity without value
+**反模式功能：**
+- 通过记录看起来不错但实际不好的功能来防止范围蔓延
+- 包含替代方案
+- 示例："所有功能都实时"通常会增加复杂度而没有实际价值
 
-**Feature Dependencies:**
-- Critical for roadmap phase ordering
-- If A requires B, B must be in an earlier phase
-- Conflicts inform what NOT to combine in same phase
+**功能依赖：**
+- 对路线图阶段排序至关重要
+- 如果 A 依赖 B，则 B 必须在更早的阶段
+- 冲突关系指导不要在同一阶段组合哪些功能
 
-**MVP Definition:**
-- Be ruthless about what's truly minimum
-- "Nice to have" is not MVP
-- Launch with less, validate, then expand
+**MVP 定义：**
+- 对什么是真正的最小化要毫不留情
+- "有则更好"不是 MVP
+- 用更少的功能发布，验证，然后扩展
 
 </guidelines>

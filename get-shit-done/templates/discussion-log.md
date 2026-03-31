@@ -1,63 +1,63 @@
-# Discussion Log Template
+# 讨论日志模板
 
-Template for `.planning/phases/XX-name/{phase_num}-DISCUSSION-LOG.md` — audit trail of discuss-phase Q&A sessions.
+`.planning/phases/XX-name/{phase_num}-DISCUSSION-LOG.md` 的模板——discuss-phase 问答会话的审计跟踪。
 
-**Purpose:** Software audit trail for decision-making. Captures all options considered, not just the selected one. Separate from CONTEXT.md which is the implementation artifact consumed by downstream agents.
+**目的：** 软件决策制定的审计跟踪。记录所有考虑过的选项，而不仅仅是被选中的那个。与 CONTEXT.md 分开，后者是供下游 agent 使用的实现产物。
 
-**NOT for LLM consumption.** This file should never be referenced in `<files_to_read>` blocks or agent prompts.
+**不供 LLM 使用。** 此文件不应在 `<files_to_read>` 块或 agent 提示中引用。
 
-## Format
+## 格式
 
 ```markdown
-# Phase [X]: [Name] - Discussion Log
+# 阶段 [X]：[名称] - 讨论日志
 
-> **Audit trail only.** Do not use as input to planning, research, or execution agents.
-> Decisions are captured in CONTEXT.md — this log preserves the alternatives considered.
+> **仅作审计跟踪。** 不要用作规划、研究或执行 agent 的输入。
+> 决策记录在 CONTEXT.md 中——此日志保留所考虑的备选方案。
 
-**Date:** [ISO date]
-**Phase:** [phase number]-[phase name]
-**Areas discussed:** [comma-separated list]
-
----
-
-## [Area 1 Name]
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| [Option 1] | [Brief description] | |
-| [Option 2] | [Brief description] | ✓ |
-| [Option 3] | [Brief description] | |
-
-**User's choice:** [Selected option or verbatim free-text response]
-**Notes:** [Any clarifications or rationale provided during discussion]
+**日期：** [ISO 日期]
+**阶段：** [阶段编号]-[阶段名称]
+**讨论领域：** [逗号分隔的列表]
 
 ---
 
-## [Area 2 Name]
+## [领域 1 名称]
+
+| 选项 | 描述 | 已选择 |
+|------|------|--------|
+| [选项 1] | [简要描述] | |
+| [选项 2] | [简要描述] | ✓ |
+| [选项 3] | [简要描述] | |
+
+**用户的选择：** [选中的选项或逐字记录的自由文本回复]
+**备注：** [讨论过程中提供的任何澄清或理由]
+
+---
+
+## [领域 2 名称]
 
 ...
 
 ---
 
-## Claude's Discretion
+## Claude 自行决定
 
-[Areas delegated to Claude's judgment — list what was deferred and why]
+[委托给 Claude 判断的领域——列出被推迟的内容及原因]
 
-## Deferred Ideas
+## 延后的想法
 
-[Ideas mentioned but not in scope for this phase]
+[提到但不在本阶段范围内的想法]
 
 ---
 
-*Phase: XX-name*
-*Discussion log generated: [date]*
+*阶段：XX-name*
+*讨论日志生成时间：[日期]*
 ```
 
-## Rules
+## 规则
 
-- Generated automatically at end of every discuss-phase session
-- Includes ALL options considered, not just the selected one
-- Includes user's freeform notes and clarifications
-- Clearly marked as audit-only, not an implementation artifact
-- Does NOT interfere with CONTEXT.md generation or downstream agent behavior
-- Committed alongside CONTEXT.md in the same git commit
+- 在每次 discuss-phase 会话结束时自动生成
+- 包含所有考虑过的选项，而不仅仅是被选中的那个
+- 包含用户的自由格式笔记和澄清
+- 明确标记为仅供审计，不是实现产物
+- 不干扰 CONTEXT.md 的生成或下游 agent 的行为
+- 与 CONTEXT.md 在同一个 git commit 中提交

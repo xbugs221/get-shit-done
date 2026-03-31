@@ -1,123 +1,123 @@
-# Milestone Archive Template
+# 里程碑归档模板
 
-This template is used by the complete-milestone workflow to create archive files in `.planning/milestones/`.
+此模板由 complete-milestone 工作流使用，在 `.planning/milestones/` 中创建归档文件。
 
 ---
 
-## File Template
+## 文件模板
 
-# Milestone v{{VERSION}}: {{MILESTONE_NAME}}
+# 里程碑 v{{VERSION}}：{{MILESTONE_NAME}}
 
-**Status:** ✅ SHIPPED {{DATE}}
-**Phases:** {{PHASE_START}}-{{PHASE_END}}
-**Total Plans:** {{TOTAL_PLANS}}
+**状态：** ✅ 已发布 {{DATE}}
+**阶段：** {{PHASE_START}}-{{PHASE_END}}
+**总计划数：** {{TOTAL_PLANS}}
 
-## Overview
+## 概述
 
 {{MILESTONE_DESCRIPTION}}
 
-## Phases
+## 阶段
 
 {{PHASES_SECTION}}
 
-[For each phase in this milestone, include:]
+[对于此里程碑中的每个阶段，包含：]
 
-### Phase {{PHASE_NUM}}: {{PHASE_NAME}}
+### 阶段 {{PHASE_NUM}}：{{PHASE_NAME}}
 
-**Goal**: {{PHASE_GOAL}}
-**Depends on**: {{DEPENDS_ON}}
-**Plans**: {{PLAN_COUNT}} plans
+**目标**：{{PHASE_GOAL}}
+**依赖**：{{DEPENDS_ON}}
+**计划**：{{PLAN_COUNT}} plans
 
 Plans:
 
 - [x] {{PHASE}}-01: {{PLAN_DESCRIPTION}}
 - [x] {{PHASE}}-02: {{PLAN_DESCRIPTION}}
-      [... all plans ...]
+      [... 所有计划 ...]
 
-**Details:**
+**详情：**
 {{PHASE_DETAILS_FROM_ROADMAP}}
 
-**For decimal phases, include (INSERTED) marker:**
+**对于小数阶段，包含 (INSERTED) 标记：**
 
-### Phase 2.1: Critical Security Patch (INSERTED)
+### 阶段 2.1：紧急安全补丁（INSERTED）
 
-**Goal**: Fix authentication bypass vulnerability
-**Depends on**: Phase 2
-**Plans**: 1 plan
+**目标**：修复认证绕过漏洞
+**依赖**：阶段 2
+**计划**：1 plan
 
 Plans:
 
-- [x] 02.1-01: Patch auth vulnerability
+- [x] 02.1-01: 修补认证漏洞
 
-**Details:**
+**详情：**
 {{PHASE_DETAILS_FROM_ROADMAP}}
 
 ---
 
-## Milestone Summary
+## 里程碑总结
 
-**Decimal Phases:**
+**小数阶段：**
 
-- Phase 2.1: Critical Security Patch (inserted after Phase 2 for urgent fix)
-- Phase 5.1: Performance Hotfix (inserted after Phase 5 for production issue)
+- 阶段 2.1：紧急安全补丁（在阶段 2 之后插入用于紧急修复）
+- 阶段 5.1：性能热修复（在阶段 5 之后插入用于生产问题）
 
-**Key Decisions:**
+**关键决策：**
 {{DECISIONS_FROM_PROJECT_STATE}}
-[Example:]
+[示例：]
 
-- Decision: Use ROADMAP.md split (Rationale: Constant context cost)
-- Decision: Decimal phase numbering (Rationale: Clear insertion semantics)
+- 决策：使用 ROADMAP.md 拆分（理由：恒定的上下文开销）
+- 决策：小数阶段编号（理由：清晰的插入语义）
 
-**Issues Resolved:**
+**已解决的问题：**
 {{ISSUES_RESOLVED_DURING_MILESTONE}}
-[Example:]
+[示例：]
 
-- Fixed context overflow at 100+ phases
-- Resolved phase insertion confusion
+- 修复了 100+ 阶段时的上下文溢出
+- 解决了阶段插入混乱问题
 
-**Issues Deferred:**
+**延后的问题：**
 {{ISSUES_DEFERRED_TO_LATER}}
-[Example:]
+[示例：]
 
-- PROJECT-STATE.md tiering (deferred until decisions > 300)
+- PROJECT-STATE.md 分层（延后到决策数超过 300 时）
 
-**Technical Debt Incurred:**
+**产生的技术债务：**
 {{SHORTCUTS_NEEDING_FUTURE_WORK}}
-[Example:]
+[示例：]
 
-- Some workflows still have hardcoded paths (fix in Phase 5)
-
----
-
-_For current project status, see .planning/ROADMAP.md_
+- 一些工作流仍有硬编码路径（在阶段 5 修复）
 
 ---
 
-## Usage Guidelines
+_当前项目状态请查看 .planning/ROADMAP.md_
+
+---
+
+## 使用指南
 
 <guidelines>
-**When to create milestone archives:**
-- After completing all phases in a milestone (v1.0, v1.1, v2.0, etc.)
-- Triggered by complete-milestone workflow
-- Before planning next milestone work
+**何时创建里程碑归档：**
+- 完成里程碑中的所有阶段后（v1.0、v1.1、v2.0 等）
+- 由 complete-milestone 工作流触发
+- 在规划下一个里程碑工作之前
 
-**How to fill template:**
+**如何填写模板：**
 
-- Replace {{PLACEHOLDERS}} with actual values
-- Extract phase details from ROADMAP.md
-- Document decimal phases with (INSERTED) marker
-- Include key decisions from PROJECT-STATE.md or SUMMARY files
-- List issues resolved vs deferred
-- Capture technical debt for future reference
+- 将 {{PLACEHOLDERS}} 替换为实际值
+- 从 ROADMAP.md 提取阶段详情
+- 使用 (INSERTED) 标记记录小数阶段
+- 从 PROJECT-STATE.md 或 SUMMARY 文件中包含关键决策
+- 列出已解决与延后的问题
+- 记录技术债务以供将来参考
 
-**Archive location:**
+**归档位置：**
 
-- Save to `.planning/milestones/v{VERSION}-{NAME}.md`
-- Example: `.planning/milestones/v1.0-mvp.md`
+- 保存到 `.planning/milestones/v{VERSION}-{NAME}.md`
+- 示例：`.planning/milestones/v1.0-mvp.md`
 
-**After archiving:**
+**归档之后：**
 
-- Update ROADMAP.md to collapse completed milestone in `<details>` tag
-- Update PROJECT.md to brownfield format with Current State section
-- Continue phase numbering in next milestone (never restart at 01)
+- 更新 ROADMAP.md，将已完成的里程碑折叠到 `<details>` 标签中
+- 将 PROJECT.md 更新为包含"当前状态"部分的棕地格式
+- 在下一个里程碑中继续阶段编号（永远不要从 01 重新开始）
   </guidelines>

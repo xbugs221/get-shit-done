@@ -1,6 +1,6 @@
 ---
 name: gsd:plan-milestone-gaps
-description: Create phases to close all gaps identified by milestone audit
+description: 创建阶段以关闭里程碑审计中识别的所有差距
 allowed-tools:
   - Read
   - Write
@@ -10,11 +10,9 @@ allowed-tools:
   - AskUserQuestion
 ---
 <objective>
-Create all phases necessary to close gaps identified by `/gsd:audit-milestone`.
+创建所有必要的阶段以关闭 `/gsd:audit-milestone` 识别的差距。
 
-Reads MILESTONE-AUDIT.md, groups gaps into logical phases, creates phase entries in ROADMAP.md, and offers to plan each phase.
-
-One command creates all fix phases — no manual `/gsd:add-phase` per gap.
+读取 MILESTONE-AUDIT.md，将差距分组为逻辑阶段，在 ROADMAP.md 中创建条目，并提供规划每个阶段的选项。一个命令创建所有修复阶段，无需为每个差距手动执行 `/gsd:add-phase`。
 </objective>
 
 <execution_context>
@@ -22,13 +20,13 @@ One command creates all fix phases — no manual `/gsd:add-phase` per gap.
 </execution_context>
 
 <context>
-**Audit results:**
-Glob: .planning/v*-MILESTONE-AUDIT.md (use most recent)
+**审计结果：**
+Glob: .planning/v*-MILESTONE-AUDIT.md（使用最新的）
 
-Original intent and current planning state are loaded on demand inside the workflow.
+原始意图和当前规划状态在工作流内按需加载。
 </context>
 
 <process>
-Execute the plan-milestone-gaps workflow from @~/.claude/get-shit-done/workflows/plan-milestone-gaps.md end-to-end.
-Preserve all workflow gates (audit loading, prioritization, phase grouping, user confirmation, roadmap updates).
+从头到尾执行 @~/.claude/get-shit-done/workflows/plan-milestone-gaps.md 中的工作流。
+保留所有门控（审计加载、优先级排序、阶段分组、用户确认、路线图更新）。
 </process>

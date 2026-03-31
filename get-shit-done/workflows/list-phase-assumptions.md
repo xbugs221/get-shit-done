@@ -1,178 +1,179 @@
 <purpose>
-Surface Claude's assumptions about a phase before planning, enabling users to correct misconceptions early.
+在规划之前呈现 Claude 对某个阶段的假设，让用户能够尽早纠正误解。
 
-Key difference from discuss-phase: This is ANALYSIS of what Claude thinks, not INTAKE of what user knows. No file output - purely conversational to prompt discussion.
+与 discuss-phase 的关键区别：这是对 Claude 认知的分析，而不是对用户知识的采集。不输出文件——纯粹是对话式的，旨在引发讨论。
 </purpose>
 
 <process>
 
 <step name="validate_phase" priority="first">
-Phase number: $ARGUMENTS (required)
+阶段编号：$ARGUMENTS（必需）
 
-**If argument missing:**
+**如果缺少参数：**
 
 ```
-Error: Phase number required.
+错误：需要阶段编号。
 
-Usage: /gsd:list-phase-assumptions [phase-number]
-Example: /gsd:list-phase-assumptions 3
+用法：/gsd:list-phase-assumptions [phase-number]
+示例：/gsd:list-phase-assumptions 3
 ```
 
-Exit workflow.
+退出工作流。
 
-**If argument provided:**
-Validate phase exists in roadmap:
+**如果提供了参数：**
+验证路线图中是否存在该阶段：
 
 ```bash
 cat .planning/ROADMAP.md | grep -i "Phase ${PHASE}"
 ```
 
-**If phase not found:**
+**如果未找到阶段：**
 
 ```
-Error: Phase ${PHASE} not found in roadmap.
+错误：路线图中未找到阶段 ${PHASE}。
 
-Available phases:
-[list phases from roadmap]
+可用阶段：
+[列出路线图中的阶段]
 ```
 
-Exit workflow.
+退出工作流。
 
-**If phase found:**
-Parse phase details from roadmap:
+**如果找到阶段：**
+从路线图中解析阶段详情：
 
-- Phase number
-- Phase name
-- Phase description/goal
-- Any scope details mentioned
+- 阶段编号
+- 阶段名称
+- 阶段描述/目标
+- 提到的任何范围细节
 
-Continue to analyze_phase.
+继续到 analyze_phase。
 </step>
 
 <step name="analyze_phase">
-Based on roadmap description and project context, identify assumptions across five areas:
+基于路线图描述和项目上下文，识别五个方面的假设：
 
-**1. Technical Approach:**
-What libraries, frameworks, patterns, or tools would Claude use?
-- "I'd use X library because..."
-- "I'd follow Y pattern because..."
-- "I'd structure this as Z because..."
+**1. 技术方案：**
+Claude 会使用哪些库、框架、模式或工具？
+- "我会使用 X 库，因为..."
+- "我会遵循 Y 模式，因为..."
+- "我会将其构建为 Z，因为..."
 
-**2. Implementation Order:**
-What would Claude build first, second, third?
-- "I'd start with X because it's foundational"
-- "Then Y because it depends on X"
-- "Finally Z because..."
+**2. 实现顺序：**
+Claude 会先构建什么、其次是什么、第三是什么？
+- "我会先从 X 开始，因为它是基础"
+- "然后是 Y，因为它依赖于 X"
+- "最后是 Z，因为..."
 
-**3. Scope Boundaries:**
-What's included vs excluded in Claude's interpretation?
-- "This phase includes: A, B, C"
-- "This phase does NOT include: D, E, F"
-- "Boundary ambiguities: G could go either way"
+**3. 范围边界：**
+在 Claude 的理解中，哪些包含在内，哪些排除在外？
+- "此阶段包括：A、B、C"
+- "此阶段不包括：D、E、F"
+- "边界模糊的部分：G 可能归属任一方"
 
-**4. Risk Areas:**
-Where does Claude expect complexity or challenges?
-- "The tricky part is X because..."
-- "Potential issues: Y, Z"
-- "I'd watch out for..."
+**4. 风险领域：**
+Claude 预期在哪些方面会有复杂性或挑战？
+- "棘手的部分是 X，因为..."
+- "潜在问题：Y、Z"
+- "我会注意..."
 
-**5. Dependencies:**
-What does Claude assume exists or needs to be in place?
-- "This assumes X from previous phases"
-- "External dependencies: Y, Z"
-- "This will be consumed by..."
+**5. 依赖关系：**
+Claude 假设哪些内容已存在或需要就位？
+- "这假设前面阶段有 X"
+- "外部依赖：Y、Z"
+- "这将被...消费"
 
-Be honest about uncertainty. Mark assumptions with confidence levels:
-- "Fairly confident: ..." (clear from roadmap)
-- "Assuming: ..." (reasonable inference)
-- "Unclear: ..." (could go multiple ways)
+坦诚面对不确定性。用置信度标记假设：
+- "相当有把握：..."（从路线图中明确可知）
+- "假设：..."（合理推断）
+- "不确定：..."（可能有多种情况）
 </step>
 
 <step name="present_assumptions">
-Present assumptions in a clear, scannable format:
+以清晰、易扫描的格式呈现假设：
 
 ```
-## My Assumptions for Phase ${PHASE}: ${PHASE_NAME}
+## 我对阶段 ${PHASE}: ${PHASE_NAME} 的假设
 
-### Technical Approach
-[List assumptions about how to implement]
+### 技术方案
+[列出关于如何实现的假设]
 
-### Implementation Order
-[List assumptions about sequencing]
+### 实现顺序
+[列出关于排序的假设]
 
-### Scope Boundaries
-**In scope:** [what's included]
-**Out of scope:** [what's excluded]
-**Ambiguous:** [what could go either way]
+### 范围边界
+**范围内：**[包含的内容]
+**范围外：**[排除的内容]
+**模糊地带：**[可能归属任一方的内容]
 
-### Risk Areas
-[List anticipated challenges]
+### 风险领域
+[列出预期的挑战]
 
-### Dependencies
-**From prior phases:** [what's needed]
-**External:** [third-party needs]
-**Feeds into:** [what future phases need from this]
+### 依赖关系
+**来自前序阶段：**[需要的内容]
+**外部依赖：**[第三方需求]
+**输出到：**[后续阶段从此阶段需要什么]
 
 ---
 
-**What do you think?**
+**你怎么看？**
 
-Are these assumptions accurate? Let me know:
-- What I got right
-- What I got wrong
-- What I'm missing
+这些假设准确吗？请告诉我：
+- 我说对了什么
+- 我说错了什么
+- 我遗漏了什么
 ```
 
-Wait for user response.
+等待用户回复。
 </step>
 
 <step name="gather_feedback">
-**If user provides corrections:**
+**如果用户提供了修正：**
 
-Acknowledge the corrections:
-
-```
-Key corrections:
-- [correction 1]
-- [correction 2]
-
-This changes my understanding significantly. [Summarize new understanding]
-```
-
-**If user confirms assumptions:**
+确认修正：
 
 ```
-Assumptions validated.
+关键修正：
+- [修正 1]
+- [修正 2]
+
+这显著改变了我的理解。[总结新的理解]
 ```
 
-Continue to offer_next.
+**如果用户确认了假设：**
+
+```
+假设已验证。
+```
+
+继续到 offer_next。
 </step>
 
 <step name="offer_next">
-Present next steps:
+展示下一步：
 
 ```
-What's next?
-1. Discuss context (/gsd:discuss-phase ${PHASE}) - Let me ask you questions to build comprehensive context
-2. Plan this phase (/gsd:plan-phase ${PHASE}) - Create detailed execution plans
-3. Re-examine assumptions - I'll analyze again with your corrections
-4. Done for now
+接下来做什么？
+1. 讨论上下文（/gsd:discuss-phase ${PHASE}）- 让我问你问题以构建全面的上下文
+2. 规划此阶段（/gsd:plan-phase ${PHASE}）- 创建详细的执行计划
+3. 重新审视假设 - 我将根据你的修正重新分析
+4. 暂时到此为止
 ```
 
-Wait for user selection.
+等待用户选择。
 
-If "Discuss context": Note that CONTEXT.md will incorporate any corrections discussed here
-If "Plan this phase": Proceed knowing assumptions are understood
-If "Re-examine": Return to analyze_phase with updated understanding
+如果选择"讨论上下文"：注意 CONTEXT.md 将纳入此处讨论的任何修正
+如果选择"规划此阶段"：在了解假设的基础上继续
+如果选择"重新审视"：带着更新后的理解返回 analyze_phase
 </step>
 
 </process>
 
 <success_criteria>
-- Phase number validated against roadmap
-- Assumptions surfaced across five areas: technical approach, implementation order, scope, risks, dependencies
-- Confidence levels marked where appropriate
-- "What do you think?" prompt presented
-- User feedback acknowledged
-- Clear next steps offered
+- 阶段编号已根据路线图验证
+- 五个方面的假设已呈现：技术方案、实现顺序、范围、风险、依赖关系
+- 适当标记了置信度
+- 展示了"你怎么看？"提示
+- 确认了用户反馈
+- 提供了清晰的下一步
 </success_criteria>
+</output>

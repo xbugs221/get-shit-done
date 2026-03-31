@@ -1,60 +1,60 @@
 <purpose>
-Initialize a new project through unified flow: questioning, research (optional), requirements, roadmap. This is the most leveraged moment in any project — deep questioning here means better plans, better execution, better outcomes. One workflow takes you from idea to ready-for-planning.
+通过统一流程初始化新项目：提问、研究（可选）、需求、路线图。这是任何项目中最有杠杆效应的时刻——在此阶段深入提问意味着更好的计划、更好的执行、更好的成果。一个工作流带你从想法到准备规划。
 </purpose>
 
 <required_reading>
-Read all files referenced by the invoking prompt's execution_context before starting.
+在开始之前，阅读调用提示的 execution_context 中引用的所有文件。
 </required_reading>
 
 <available_agent_types>
-Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
-- gsd-project-researcher — Researches project-level technical decisions
-- gsd-research-synthesizer — Synthesizes findings from parallel research agents
-- gsd-roadmapper — Creates phased execution roadmaps
+有效的 GSD 子代理类型（使用精确名称——不要回退到 'general-purpose'）：
+- gsd-project-researcher — 研究项目级技术决策
+- gsd-research-synthesizer — 综合并行研究代理的发现
+- gsd-roadmapper — 创建分阶段执行路线图
 </available_agent_types>
 
 <auto_mode>
 
-## Auto Mode Detection
+## 自动模式检测
 
-Check if `--auto` flag is present in $ARGUMENTS.
+检查 $ARGUMENTS 中是否存在 `--auto` 标志。
 
-**If auto mode:**
+**如果是自动模式：**
 
-- Skip brownfield mapping offer (assume greenfield)
-- Skip deep questioning (extract context from provided document)
-- Config: YOLO mode is implicit (skip that question), but ask granularity/git/agents FIRST (Step 2a)
-- After config: run Steps 6-9 automatically with smart defaults:
-  - Research: Always yes
-  - Requirements: Include all table stakes + features from provided document
-  - Requirements approval: Auto-approve
-  - Roadmap approval: Auto-approve
+- 跳过棕地映射提议（假设为绿地项目）
+- 跳过深度提问（从提供的文档中提取上下文）
+- 配置：YOLO 模式为隐含的（跳过该问题），但先询问粒度/git/代理（步骤 2a）
+- 配置完成后：使用智能默认值自动运行步骤 6-9：
+  - 研究：始终进行
+  - 需求：包含提供文档中的所有基本功能和特性
+  - 需求审批：自动批准
+  - 路线图审批：自动批准
 
-**Document requirement:**
-Auto mode requires an idea document — either:
+**文档要求：**
+自动模式需要一个想法文档——可以是：
 
-- File reference: `/gsd:new-project --auto @prd.md`
-- Pasted/written text in the prompt
+- 文件引用：`/gsd:new-project --auto @prd.md`
+- 在提示中粘贴/撰写的文本
 
-If no document content provided, error:
+如果未提供文档内容，报错：
 
 ```
-Error: --auto requires an idea document.
+错误：--auto 需要一个想法文档。
 
-Usage:
+用法：
   /gsd:new-project --auto @your-idea.md
-  /gsd:new-project --auto [paste or write your idea here]
+  /gsd:new-project --auto [在此粘贴或撰写你的想法]
 
-The document should describe what you want to build.
+该文档应描述你想要构建的内容。
 ```
 
 </auto_mode>
 
 <process>
 
-## 1. Setup
+## 1. 设置
 
-**MANDATORY FIRST STEP — Execute these checks before ANY user interaction:**
+**必须的第一步——在任何用户交互之前执行这些检查：**
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init new-project)
@@ -64,723 +64,723 @@ AGENT_SKILLS_SYNTHESIZER=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" 
 AGENT_SKILLS_ROADMAPPER=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" agent-skills gsd-roadmapper 2>/dev/null)
 ```
 
-Parse JSON for: `researcher_model`, `synthesizer_model`, `roadmapper_model`, `commit_docs`, `project_exists`, `has_codebase_map`, `planning_exists`, `has_existing_code`, `has_package_file`, `is_brownfield`, `needs_codebase_map`, `has_git`, `project_path`.
+从 JSON 中解析以下字段：`researcher_model`、`synthesizer_model`、`roadmapper_model`、`commit_docs`、`project_exists`、`has_codebase_map`、`planning_exists`、`has_existing_code`、`has_package_file`、`is_brownfield`、`needs_codebase_map`、`has_git`、`project_path`。
 
-**If `project_exists` is true:** Error — project already initialized. Use `/gsd:progress`.
+**如果 `project_exists` 为 true：**报错——项目已初始化。请使用 `/gsd:progress`。
 
-**If `has_git` is false:** Initialize git:
+**如果 `has_git` 为 false：**初始化 git：
 
 ```bash
 git init
 ```
 
-## 2. Brownfield Offer
+## 2. 棕地提议
 
-**If auto mode:** Skip to Step 4 (assume greenfield, synthesize PROJECT.md from provided document).
+**如果是自动模式：**跳至步骤 4（假设为绿地项目，从提供的文档中合成 PROJECT.md）。
 
-**If `needs_codebase_map` is true** (from init — existing code detected but no codebase map):
+**如果 `needs_codebase_map` 为 true**（来自 init——检测到现有代码但没有代码库映射）：
 
-Use AskUserQuestion:
+使用 AskUserQuestion：
 
-- header: "Codebase"
-- question: "I detected existing code in this directory. Would you like to map the codebase first?"
-- options:
-  - "Map codebase first" — Run /gsd:map-codebase to understand existing architecture (Recommended)
-  - "Skip mapping" — Proceed with project initialization
+- header："代码库"
+- question："我检测到此目录中有现有代码。你想先映射代码库吗？"
+- options：
+  - "先映射代码库" — 运行 /gsd:map-codebase 了解现有架构（推荐）
+  - "跳过映射" — 继续项目初始化
 
-**If "Map codebase first":**
+**如果选择"先映射代码库"：**
 
 ```
-Run `/gsd:map-codebase` first, then return to `/gsd:new-project`
+先运行 `/gsd:map-codebase`，然后返回 `/gsd:new-project`
 ```
 
-Exit command.
+退出命令。
 
-**If "Skip mapping" OR `needs_codebase_map` is false:** Continue to Step 3.
+**如果选择"跳过映射"或 `needs_codebase_map` 为 false：**继续步骤 3。
 
-## 2a. Auto Mode Config (auto mode only)
+## 2a. 自动模式配置（仅自动模式）
 
-**If auto mode:** Collect config settings upfront before processing the idea document.
+**如果是自动模式：**在处理想法文档之前预先收集配置设置。
 
-YOLO mode is implicit (auto = YOLO). Ask remaining config questions:
+YOLO 模式是隐含的（auto = YOLO）。询问剩余的配置问题：
 
-**Round 1 — Core settings (3 questions, no Mode question):**
+**第 1 轮——核心设置（3 个问题，无模式问题）：**
 
 ```
 AskUserQuestion([
   {
-    header: "Granularity",
-    question: "How finely should scope be sliced into phases?",
+    header: "粒度",
+    question: "范围应该切分到多细的阶段？",
     multiSelect: false,
     options: [
-      { label: "Coarse (Recommended)", description: "Fewer, broader phases (3-5 phases, 1-3 plans each)" },
-      { label: "Standard", description: "Balanced phase size (5-8 phases, 3-5 plans each)" },
-      { label: "Fine", description: "Many focused phases (8-12 phases, 5-10 plans each)" }
+      { label: "粗粒度（推荐）", description: "更少、更宽泛的阶段（3-5 个阶段，每个 1-3 个计划）" },
+      { label: "标准", description: "均衡的阶段大小（5-8 个阶段，每个 3-5 个计划）" },
+      { label: "细粒度", description: "更多聚焦的阶段（8-12 个阶段，每个 5-10 个计划）" }
     ]
   },
   {
-    header: "Execution",
-    question: "Run plans in parallel?",
+    header: "执行方式",
+    question: "并行运行计划？",
     multiSelect: false,
     options: [
-      { label: "Parallel (Recommended)", description: "Independent plans run simultaneously" },
-      { label: "Sequential", description: "One plan at a time" }
+      { label: "并行（推荐）", description: "独立的计划同时运行" },
+      { label: "顺序", description: "一次运行一个计划" }
     ]
   },
   {
-    header: "Git Tracking",
-    question: "Commit planning docs to git?",
+    header: "Git 跟踪",
+    question: "将规划文档提交到 git？",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Planning docs tracked in version control" },
-      { label: "No", description: "Keep .planning/ local-only (add to .gitignore)" }
+      { label: "是（推荐）", description: "规划文档纳入版本控制" },
+      { label: "否", description: "保持 .planning/ 仅在本地（添加到 .gitignore）" }
     ]
   }
 ])
 ```
 
-**Round 2 — Workflow agents (same as Step 5):**
+**第 2 轮——工作流代理（与步骤 5 相同）：**
 
 ```
 AskUserQuestion([
   {
-    header: "Research",
-    question: "Research before planning each phase? (adds tokens/time)",
+    header: "研究",
+    question: "在规划每个阶段前进行研究？（增加 token/时间）",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Investigate domain, find patterns, surface gotchas" },
-      { label: "No", description: "Plan directly from requirements" }
+      { label: "是（推荐）", description: "调研领域、发现模式、发掘潜在问题" },
+      { label: "否", description: "直接从需求进行规划" }
     ]
   },
   {
-    header: "Plan Check",
-    question: "Verify plans will achieve their goals? (adds tokens/time)",
+    header: "计划检查",
+    question: "验证计划能否达成目标？（增加 token/时间）",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Catch gaps before execution starts" },
-      { label: "No", description: "Execute plans without verification" }
+      { label: "是（推荐）", description: "在执行开始前发现差距" },
+      { label: "否", description: "不验证直接执行计划" }
     ]
   },
   {
-    header: "Verifier",
-    question: "Verify work satisfies requirements after each phase? (adds tokens/time)",
+    header: "验证器",
+    question: "每个阶段后验证工作是否满足需求？（增加 token/时间）",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Confirm deliverables match phase goals" },
-      { label: "No", description: "Trust execution, skip verification" }
+      { label: "是（推荐）", description: "确认交付物与阶段目标匹配" },
+      { label: "否", description: "信任执行，跳过验证" }
     ]
   },
   {
-    header: "AI Models",
-    question: "Which AI models for planning agents?",
+    header: "AI 模型",
+    question: "规划代理使用哪些 AI 模型？",
     multiSelect: false,
     options: [
-      { label: "Balanced (Recommended)", description: "Sonnet for most agents — good quality/cost ratio" },
-      { label: "Quality", description: "Opus for research/roadmap — higher cost, deeper analysis" },
-      { label: "Budget", description: "Haiku where possible — fastest, lowest cost" },
-      { label: "Inherit", description: "Use the current session model for all agents (OpenCode /model)" }
+      { label: "均衡（推荐）", description: "大部分代理使用 Sonnet——质量/成本比佳" },
+      { label: "高质量", description: "研究/路线图使用 Opus——更高成本，更深分析" },
+      { label: "经济", description: "尽可能使用 Haiku——最快，成本最低" },
+      { label: "继承", description: "所有代理使用当前会话模型（OpenCode /model）" }
     ]
   }
 ])
 ```
 
-Create `.planning/config.json` with all settings (CLI fills in remaining defaults automatically):
+创建 `.planning/config.json` 包含所有设置（CLI 自动填充剩余默认值）：
 
 ```bash
 mkdir -p .planning
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-new-project '{"mode":"yolo","granularity":"[selected]","parallelization":true|false,"commit_docs":true|false,"model_profile":"quality|balanced|budget|inherit","workflow":{"research":true|false,"plan_check":true|false,"verifier":true|false,"nyquist_validation":true|false,"auto_advance":true}}'
 ```
 
-**If commit_docs = No:** Add `.planning/` to `.gitignore`.
+**如果 commit_docs = 否：**将 `.planning/` 添加到 `.gitignore`。
 
-**Commit config.json:**
+**提交 config.json：**
 
 ```bash
 mkdir -p .planning
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "chore: add project config" --files .planning/config.json
 ```
 
-**Persist auto-advance chain flag to config (survives context compaction):**
+**将自动推进链标志持久化到配置（在上下文压缩后仍然有效）：**
 
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-set workflow._auto_chain_active true
 ```
 
-Proceed to Step 4 (skip Steps 3 and 5).
+进入步骤 4（跳过步骤 3 和 5）。
 
-## 3. Deep Questioning
+## 3. 深度提问
 
-**If auto mode:** Skip (already handled in Step 2a). Extract project context from provided document instead and proceed to Step 4.
+**如果是自动模式：**跳过（已在步骤 2a 中处理）。改为从提供的文档中提取项目上下文并进入步骤 4。
 
-**Display stage banner:**
+**显示阶段横幅：**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► QUESTIONING
+ GSD ► 提问
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**Open the conversation:**
+**开启对话：**
 
-Ask inline (freeform, NOT AskUserQuestion):
+内联提问（自由形式，不使用 AskUserQuestion）：
 
-"What do you want to build?"
+"你想要构建什么？"
 
-Wait for their response. This gives you the context needed to ask intelligent follow-up questions.
+等待他们的回复。这为你提供了提出有针对性的后续问题所需的上下文。
 
-**Research-before-questions mode:** Check if `workflow.research_before_questions` is enabled in `.planning/config.json` (or the config from init context). When enabled, before asking follow-up questions about a topic area:
+**提问前研究模式：**检查 `.planning/config.json`（或 init 上下文中的配置）中是否启用了 `workflow.research_before_questions`。启用时，在就某个主题领域提问前：
 
-1. Do a brief web search for best practices related to what the user described
-2. Mention key findings naturally as you ask questions (e.g., "Most projects like this use X — is that what you're thinking, or something different?")
-3. This makes questions more informed without changing the conversational flow
+1. 对用户描述的内容进行简短的网络搜索以了解最佳实践
+2. 在提问时自然地提及关键发现（例如，"大多数类似项目使用 X——你也是这么想的，还是有不同的考虑？"）
+3. 这使问题更有见地，但不改变对话流程
 
-When disabled (default), ask questions directly as before.
+禁用时（默认），像之前一样直接提问。
 
-**Follow the thread:**
+**跟随话题线索：**
 
-Based on what they said, ask follow-up questions that dig into their response. Use AskUserQuestion with options that probe what they mentioned — interpretations, clarifications, concrete examples.
+根据他们的回答，提出深入挖掘其回答的后续问题。使用 AskUserQuestion 提供探究他们提到内容的选项——解释、澄清、具体示例。
 
-Keep following threads. Each answer opens new threads to explore. Ask about:
+持续跟进话题。每个答案都会打开新的话题线索。询问关于：
 
-- What excited them
-- What problem sparked this
-- What they mean by vague terms
-- What it would actually look like
-- What's already decided
+- 什么让他们兴奋
+- 什么问题触发了这个想法
+- 模糊术语的具体含义
+- 实际看起来是什么样的
+- 什么已经确定了
 
-Consult `questioning.md` for techniques:
+参考 `questioning.md` 中的技巧：
 
-- Challenge vagueness
-- Make abstract concrete
-- Surface assumptions
-- Find edges
-- Reveal motivation
+- 挑战模糊性
+- 将抽象变具体
+- 发现隐含假设
+- 找到边界情况
+- 揭示动机
 
-**Check context (background, not out loud):**
+**检查上下文（在脑中进行，不要说出来）：**
 
-As you go, mentally check the context checklist from `questioning.md`. If gaps remain, weave questions naturally. Don't suddenly switch to checklist mode.
+在提问过程中，默默检查 `questioning.md` 中的上下文清单。如果还有遗漏，自然地穿插问题。不要突然切换到清单模式。
 
-**Decision gate:**
+**决策关口：**
 
-When you could write a clear PROJECT.md, use AskUserQuestion:
+当你能写出清晰的 PROJECT.md 时，使用 AskUserQuestion：
 
-- header: "Ready?"
-- question: "I think I understand what you're after. Ready to create PROJECT.md?"
-- options:
-  - "Create PROJECT.md" — Let's move forward
-  - "Keep exploring" — I want to share more / ask me more
+- header："准备好了？"
+- question："我觉得我理解你想要的了。准备好创建 PROJECT.md 了吗？"
+- options：
+  - "创建 PROJECT.md" — 让我们继续
+  - "继续探讨" — 我想分享更多 / 多问我一些
 
-If "Keep exploring" — ask what they want to add, or identify gaps and probe naturally.
+如果选择"继续探讨"——询问他们想补充什么，或找到遗漏并自然地探究。
 
-Loop until "Create PROJECT.md" selected.
+循环直到选择"创建 PROJECT.md"。
 
-## 4. Write PROJECT.md
+## 4. 编写 PROJECT.md
 
-**If auto mode:** Synthesize from provided document. No "Ready?" gate was shown — proceed directly to commit.
+**如果是自动模式：**从提供的文档中合成。没有显示"准备好了？"关口——直接进行提交。
 
-Synthesize all context into `.planning/PROJECT.md` using the template from `templates/project.md`.
+将所有上下文综合到 `.planning/PROJECT.md`，使用 `templates/project.md` 中的模板。
 
-**For greenfield projects:**
+**对于绿地项目：**
 
-Initialize requirements as hypotheses:
-
-```markdown
-## Requirements
-
-### Validated
-
-(None yet — ship to validate)
-
-### Active
-
-- [ ] [Requirement 1]
-- [ ] [Requirement 2]
-- [ ] [Requirement 3]
-
-### Out of Scope
-
-- [Exclusion 1] — [why]
-- [Exclusion 2] — [why]
-```
-
-All Active requirements are hypotheses until shipped and validated.
-
-**For brownfield projects (codebase map exists):**
-
-Infer Validated requirements from existing code:
-
-1. Read `.planning/codebase/ARCHITECTURE.md` and `STACK.md`
-2. Identify what the codebase already does
-3. These become the initial Validated set
+将需求初始化为假设：
 
 ```markdown
-## Requirements
+## 需求
 
-### Validated
+### 已验证
 
-- ✓ [Existing capability 1] — existing
-- ✓ [Existing capability 2] — existing
-- ✓ [Existing capability 3] — existing
+（暂无——发布后验证）
 
-### Active
+### 活跃
 
-- [ ] [New requirement 1]
-- [ ] [New requirement 2]
+- [ ] [需求 1]
+- [ ] [需求 2]
+- [ ] [需求 3]
 
-### Out of Scope
+### 超出范围
 
-- [Exclusion 1] — [why]
+- [排除项 1] — [原因]
+- [排除项 2] — [原因]
 ```
 
-**Key Decisions:**
+所有活跃需求在发布并验证之前都是假设。
 
-Initialize with any decisions made during questioning:
+**对于棕地项目（代码库映射存在）：**
+
+从现有代码推断已验证的需求：
+
+1. 读取 `.planning/codebase/ARCHITECTURE.md` 和 `STACK.md`
+2. 识别代码库已有的功能
+3. 这些成为初始已验证集合
 
 ```markdown
-## Key Decisions
+## 需求
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| [Choice from questioning] | [Why] | — Pending |
+### 已验证
+
+- ✓ [现有功能 1] — 已存在
+- ✓ [现有功能 2] — 已存在
+- ✓ [现有功能 3] — 已存在
+
+### 活跃
+
+- [ ] [新需求 1]
+- [ ] [新需求 2]
+
+### 超出范围
+
+- [排除项 1] — [原因]
 ```
 
-**Last updated footer:**
+**关键决策：**
+
+用提问阶段做出的决策进行初始化：
+
+```markdown
+## 关键决策
+
+| 决策 | 理由 | 结果 |
+|------|------|------|
+| [提问中的选择] | [原因] | — 待定 |
+```
+
+**最后更新页脚：**
 
 ```markdown
 ---
-*Last updated: [date] after initialization*
+*最后更新：[日期] 初始化后*
 ```
 
-**Evolution section** (include at the end of PROJECT.md, before the footer):
+**演进部分**（包含在 PROJECT.md 末尾、页脚之前）：
 
 ```markdown
-## Evolution
+## 演进
 
-This document evolves at phase transitions and milestone boundaries.
+本文档在阶段转换和里程碑边界时更新。
 
-**After each phase transition** (via `/gsd:transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
+**每次阶段转换后**（通过 `/gsd:transition`）：
+1. 需求失效？→ 移至超出范围并注明原因
+2. 需求验证通过？→ 移至已验证并注明阶段引用
+3. 出现新需求？→ 添加到活跃
+4. 有决策要记录？→ 添加到关键决策
+5. "这是什么"仍然准确吗？→ 如有偏差则更新
 
-**After each milestone** (via `/gsd:complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
+**每个里程碑后**（通过 `/gsd:complete-milestone`）：
+1. 全面审查所有部分
+2. 核心价值检查——仍然是正确的优先级吗？
+3. 审计超出范围——原因仍然有效吗？
+4. 用当前状态更新上下文
 ```
 
-Do not compress. Capture everything gathered.
+不要压缩。捕获所有收集到的信息。
 
-**Commit PROJECT.md:**
+**提交 PROJECT.md：**
 
 ```bash
 mkdir -p .planning
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: initialize project" --files .planning/PROJECT.md
 ```
 
-## 5. Workflow Preferences
+## 5. 工作流偏好
 
-**If auto mode:** Skip — config was collected in Step 2a. Proceed to Step 5.5.
+**如果是自动模式：**跳过——配置已在步骤 2a 中收集。进入步骤 5.5。
 
-**Check for global defaults** at `~/.gsd/defaults.json`. If the file exists, offer to use saved defaults:
+**检查全局默认值**，位于 `~/.gsd/defaults.json`。如果文件存在，提供使用已保存默认值的选项：
 
 ```
 AskUserQuestion([
   {
-    question: "Use your saved default settings? (from ~/.gsd/defaults.json)",
-    header: "Defaults",
+    question: "使用你保存的默认设置？（来自 ~/.gsd/defaults.json）",
+    header: "默认值",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Use saved defaults, skip settings questions" },
-      { label: "No", description: "Configure settings manually" }
+      { label: "是（推荐）", description: "使用保存的默认值，跳过设置问题" },
+      { label: "否", description: "手动配置设置" }
     ]
   }
 ])
 ```
 
-If "Yes": read `~/.gsd/defaults.json`, use those values for config.json, and skip directly to **Commit config.json** below.
+如果选择"是"：读取 `~/.gsd/defaults.json`，使用这些值创建 config.json，直接跳至下方**提交 config.json**。
 
-If "No" or `~/.gsd/defaults.json` doesn't exist: proceed with the questions below.
+如果选择"否"或 `~/.gsd/defaults.json` 不存在：继续下面的问题。
 
-**Round 1 — Core workflow settings (4 questions):**
+**第 1 轮——核心工作流设置（4 个问题）：**
 
 ```
 questions: [
   {
-    header: "Mode",
-    question: "How do you want to work?",
+    header: "模式",
+    question: "你想要怎样的工作方式？",
     multiSelect: false,
     options: [
-      { label: "YOLO (Recommended)", description: "Auto-approve, just execute" },
-      { label: "Interactive", description: "Confirm at each step" }
+      { label: "YOLO（推荐）", description: "自动批准，直接执行" },
+      { label: "交互式", description: "每步确认" }
     ]
   },
   {
-    header: "Granularity",
-    question: "How finely should scope be sliced into phases?",
+    header: "粒度",
+    question: "范围应该切分到多细的阶段？",
     multiSelect: false,
     options: [
-      { label: "Coarse", description: "Fewer, broader phases (3-5 phases, 1-3 plans each)" },
-      { label: "Standard", description: "Balanced phase size (5-8 phases, 3-5 plans each)" },
-      { label: "Fine", description: "Many focused phases (8-12 phases, 5-10 plans each)" }
+      { label: "粗粒度", description: "更少、更宽泛的阶段（3-5 个阶段，每个 1-3 个计划）" },
+      { label: "标准", description: "均衡的阶段大小（5-8 个阶段，每个 3-5 个计划）" },
+      { label: "细粒度", description: "更多聚焦的阶段（8-12 个阶段，每个 5-10 个计划）" }
     ]
   },
   {
-    header: "Execution",
-    question: "Run plans in parallel?",
+    header: "执行方式",
+    question: "并行运行计划？",
     multiSelect: false,
     options: [
-      { label: "Parallel (Recommended)", description: "Independent plans run simultaneously" },
-      { label: "Sequential", description: "One plan at a time" }
+      { label: "并行（推荐）", description: "独立的计划同时运行" },
+      { label: "顺序", description: "一次运行一个计划" }
     ]
   },
   {
-    header: "Git Tracking",
-    question: "Commit planning docs to git?",
+    header: "Git 跟踪",
+    question: "将规划文档提交到 git？",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Planning docs tracked in version control" },
-      { label: "No", description: "Keep .planning/ local-only (add to .gitignore)" }
+      { label: "是（推荐）", description: "规划文档纳入版本控制" },
+      { label: "否", description: "保持 .planning/ 仅在本地（添加到 .gitignore）" }
     ]
   }
 ]
 ```
 
-**Round 2 — Workflow agents:**
+**第 2 轮——工作流代理：**
 
-These spawn additional agents during planning/execution. They add tokens and time but improve quality.
+这些会在规划/执行期间生成额外的代理。它们增加 token 和时间消耗，但提升质量。
 
-| Agent | When it runs | What it does |
-|-------|--------------|--------------|
-| **Researcher** | Before planning each phase | Investigates domain, finds patterns, surfaces gotchas |
-| **Plan Checker** | After plan is created | Verifies plan actually achieves the phase goal |
-| **Verifier** | After phase execution | Confirms must-haves were delivered |
+| 代理 | 运行时机 | 功能 |
+|------|----------|------|
+| **研究员** | 规划每个阶段前 | 调研领域、发现模式、发掘潜在问题 |
+| **计划检查器** | 计划创建后 | 验证计划是否确实能达成阶段目标 |
+| **验证器** | 阶段执行后 | 确认必要交付物已完成 |
 
-All recommended for important projects. Skip for quick experiments.
+对重要项目推荐全部启用。快速实验可以跳过。
 
 ```
 questions: [
   {
-    header: "Research",
-    question: "Research before planning each phase? (adds tokens/time)",
+    header: "研究",
+    question: "在规划每个阶段前进行研究？（增加 token/时间）",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Investigate domain, find patterns, surface gotchas" },
-      { label: "No", description: "Plan directly from requirements" }
+      { label: "是（推荐）", description: "调研领域、发现模式、发掘潜在问题" },
+      { label: "否", description: "直接从需求进行规划" }
     ]
   },
   {
-    header: "Plan Check",
-    question: "Verify plans will achieve their goals? (adds tokens/time)",
+    header: "计划检查",
+    question: "验证计划能否达成目标？（增加 token/时间）",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Catch gaps before execution starts" },
-      { label: "No", description: "Execute plans without verification" }
+      { label: "是（推荐）", description: "在执行开始前发现差距" },
+      { label: "否", description: "不验证直接执行计划" }
     ]
   },
   {
-    header: "Verifier",
-    question: "Verify work satisfies requirements after each phase? (adds tokens/time)",
+    header: "验证器",
+    question: "每个阶段后验证工作是否满足需求？（增加 token/时间）",
     multiSelect: false,
     options: [
-      { label: "Yes (Recommended)", description: "Confirm deliverables match phase goals" },
-      { label: "No", description: "Trust execution, skip verification" }
+      { label: "是（推荐）", description: "确认交付物与阶段目标匹配" },
+      { label: "否", description: "信任执行，跳过验证" }
     ]
   },
   {
-    header: "AI Models",
-    question: "Which AI models for planning agents?",
+    header: "AI 模型",
+    question: "规划代理使用哪些 AI 模型？",
     multiSelect: false,
     options: [
-      { label: "Balanced (Recommended)", description: "Sonnet for most agents — good quality/cost ratio" },
-      { label: "Quality", description: "Opus for research/roadmap — higher cost, deeper analysis" },
-      { label: "Budget", description: "Haiku where possible — fastest, lowest cost" },
-      { label: "Inherit", description: "Use the current session model for all agents (OpenCode /model)" }
+      { label: "均衡（推荐）", description: "大部分代理使用 Sonnet——质量/成本比佳" },
+      { label: "高质量", description: "研究/路线图使用 Opus——更高成本，更深分析" },
+      { label: "经济", description: "尽可能使用 Haiku——最快，成本最低" },
+      { label: "继承", description: "所有代理使用当前会话模型（OpenCode /model）" }
     ]
   }
 ]
 ```
 
-Create `.planning/config.json` with all settings (CLI fills in remaining defaults automatically):
+创建 `.planning/config.json` 包含所有设置（CLI 自动填充剩余默认值）：
 
 ```bash
 mkdir -p .planning
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-new-project '{"mode":"[yolo|interactive]","granularity":"[selected]","parallelization":true|false,"commit_docs":true|false,"model_profile":"quality|balanced|budget|inherit","workflow":{"research":true|false,"plan_check":true|false,"verifier":true|false,"nyquist_validation":[false if granularity=coarse, true otherwise]}}'
 ```
 
-**Note:** Run `/gsd:settings` anytime to update model profile, workflow agents, branching strategy, and other preferences.
+**注意：**随时运行 `/gsd:settings` 来更新模型配置、工作流代理、分支策略和其他偏好。
 
-**If commit_docs = No:**
+**如果 commit_docs = 否：**
 
-- Set `commit_docs: false` in config.json
-- Add `.planning/` to `.gitignore` (create if needed)
+- 在 config.json 中设置 `commit_docs: false`
+- 将 `.planning/` 添加到 `.gitignore`（如果不存在则创建）
 
-**If commit_docs = Yes:**
+**如果 commit_docs = 是：**
 
-- No additional gitignore entries needed
+- 无需额外的 gitignore 条目
 
-**Commit config.json:**
+**提交 config.json：**
 
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "chore: add project config" --files .planning/config.json
 ```
 
-## 5.1. Sub-Repo Detection
+## 5.1. 子仓库检测
 
-**Detect multi-repo workspace:**
+**检测多仓库工作区：**
 
-Check for directories with their own `.git` folders (separate repos within the workspace):
+检查是否有包含独立 `.git` 文件夹的目录（工作区内的独立仓库）：
 
 ```bash
 find . -maxdepth 1 -type d -not -name ".*" -not -name "node_modules" -exec test -d "{}/.git" \; -print
 ```
 
-**If sub-repos found:**
+**如果发现子仓库：**
 
-Strip the `./` prefix to get directory names (e.g., `./backend` → `backend`).
+去掉 `./` 前缀获取目录名（如 `./backend` → `backend`）。
 
-Use AskUserQuestion:
+使用 AskUserQuestion：
 
-- header: "Multi-Repo Workspace"
-- question: "I detected separate git repos in this workspace. Which directories contain code that GSD should commit to?"
+- header："多仓库工作区"
+- question："我检测到此工作区中有独立的 git 仓库。哪些目录包含 GSD 应该提交的代码？"
 - multiSelect: true
-- options: one option per detected directory
-  - "[directory name]" — Separate git repo
+- options：每个检测到的目录一个选项
+  - "[目录名]" — 独立 git 仓库
 
-**If user selects one or more directories:**
+**如果用户选择了一个或多个目录：**
 
-- Set `planning.sub_repos` in config.json to the selected directory names array (e.g., `["backend", "frontend"]`)
-- Auto-set `planning.commit_docs` to `false` (planning docs stay local in multi-repo workspaces)
-- Add `.planning/` to `.gitignore` if not already present
+- 在 config.json 中将 `planning.sub_repos` 设置为选定的目录名数组（如 `["backend", "frontend"]`）
+- 自动将 `planning.commit_docs` 设为 `false`（多仓库工作区中规划文档保留在本地）
+- 如果尚未添加，将 `.planning/` 添加到 `.gitignore`
 
-Config changes are saved locally — no commit needed since `commit_docs` is `false` in multi-repo mode.
+配置更改保存在本地——由于多仓库模式下 `commit_docs` 为 `false`，无需提交。
 
-**If no sub-repos found or user selects none:** Continue with no changes to config.
+**如果未发现子仓库或用户未选择：**继续，不更改配置。
 
-## 5.5. Resolve Model Profile
+## 5.5. 解析模型配置
 
-Use models from init: `researcher_model`, `synthesizer_model`, `roadmapper_model`.
+使用 init 中的模型：`researcher_model`、`synthesizer_model`、`roadmapper_model`。
 
-## 6. Research Decision
+## 6. 研究决策
 
-**If auto mode:** Default to "Research first" without asking.
+**如果是自动模式：**默认选择"先研究"，不询问。
 
-Use AskUserQuestion:
+使用 AskUserQuestion：
 
-- header: "Research"
-- question: "Research the domain ecosystem before defining requirements?"
-- options:
-  - "Research first (Recommended)" — Discover standard stacks, expected features, architecture patterns
-  - "Skip research" — I know this domain well, go straight to requirements
+- header："研究"
+- question："在定义需求之前研究领域生态系统？"
+- options：
+  - "先研究（推荐）" — 发现标准技术栈、预期功能、架构模式
+  - "跳过研究" — 我对这个领域很熟悉，直接进入需求
 
-**If "Research first":**
+**如果选择"先研究"：**
 
-Display stage banner:
+显示阶段横幅：
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► RESEARCHING
+ GSD ► 研究中
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Researching [domain] ecosystem...
+正在研究 [领域] 生态系统...
 ```
 
-Create research directory:
+创建研究目录：
 
 ```bash
 mkdir -p .planning/research
 ```
 
-**Determine milestone context:**
+**确定里程碑上下文：**
 
-Check if this is greenfield or subsequent milestone:
+检查这是绿地项目还是后续里程碑：
 
-- If no "Validated" requirements in PROJECT.md → Greenfield (building from scratch)
-- If "Validated" requirements exist → Subsequent milestone (adding to existing app)
+- 如果 PROJECT.md 中没有"已验证"需求 → 绿地项目（从零开始构建）
+- 如果存在"已验证"需求 → 后续里程碑（在现有应用上添加功能）
 
-Display spawning indicator:
+显示启动指示器：
 
 ```
-◆ Spawning 4 researchers in parallel...
-  → Stack research
-  → Features research
-  → Architecture research
-  → Pitfalls research
+◆ 正在并行启动 4 个研究员...
+  → 技术栈研究
+  → 功能研究
+  → 架构研究
+  → 常见陷阱研究
 ```
 
-Spawn 4 parallel gsd-project-researcher agents with path references:
+使用路径引用并行启动 4 个 gsd-project-researcher 代理：
 
 ```
 Task(prompt="<research_type>
-Project Research — Stack dimension for [domain].
+项目研究 — [领域]的技术栈维度。
 </research_type>
 
 <milestone_context>
-[greenfield OR subsequent]
+[绿地 或 后续]
 
-Greenfield: Research the standard stack for building [domain] from scratch.
-Subsequent: Research what's needed to add [target features] to an existing [domain] app. Don't re-research the existing system.
+绿地：研究从零构建 [领域] 的标准技术栈。
+后续：研究为现有 [领域] 应用添加 [目标功能] 所需的内容。不要重新研究现有系统。
 </milestone_context>
 
 <question>
-What's the standard 2025 stack for [domain]?
+[领域]的 2025 标准技术栈是什么？
 </question>
 
 <files_to_read>
-- {project_path} (Project context and goals)
+- {project_path}（项目上下文和目标）
 </files_to_read>
 
 ${AGENT_SKILLS_RESEARCHER}
 
 <downstream_consumer>
-Your STACK.md feeds into roadmap creation. Be prescriptive:
-- Specific libraries with versions
-- Clear rationale for each choice
-- What NOT to use and why
+你的 STACK.md 将输入到路线图创建中。请给出明确建议：
+- 具体的库及版本
+- 每个选择的清晰理由
+- 不应使用什么及原因
 </downstream_consumer>
 
 <quality_gate>
-- [ ] Versions are current (verify with Context7/official docs, not training data)
-- [ ] Rationale explains WHY, not just WHAT
-- [ ] Confidence levels assigned to each recommendation
+- [ ] 版本是最新的（通过 Context7/官方文档验证，而非训练数据）
+- [ ] 理由解释了"为什么"，而非仅仅是"是什么"
+- [ ] 每个建议都分配了置信度
 </quality_gate>
 
 <output>
-Write to: .planning/research/STACK.md
-Use template: ~/.claude/get-shit-done/templates/research-project/STACK.md
+写入：.planning/research/STACK.md
+使用模板：~/.claude/get-shit-done/templates/research-project/STACK.md
 </output>
-", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Stack research")
+", subagent_type="gsd-project-researcher", model="{researcher_model}", description="技术栈研究")
 
 Task(prompt="<research_type>
-Project Research — Features dimension for [domain].
+项目研究 — [领域]的功能维度。
 </research_type>
 
 <milestone_context>
-[greenfield OR subsequent]
+[绿地 或 后续]
 
-Greenfield: What features do [domain] products have? What's table stakes vs differentiating?
-Subsequent: How do [target features] typically work? What's expected behavior?
+绿地：[领域]产品有哪些功能？什么是基本功能，什么是差异化功能？
+后续：[目标功能]通常是如何工作的？预期行为是什么？
 </milestone_context>
 
 <question>
-What features do [domain] products have? What's table stakes vs differentiating?
+[领域]产品有哪些功能？什么是基本功能，什么是差异化功能？
 </question>
 
 <files_to_read>
-- {project_path} (Project context)
+- {project_path}（项目上下文）
 </files_to_read>
 
 ${AGENT_SKILLS_RESEARCHER}
 
 <downstream_consumer>
-Your FEATURES.md feeds into requirements definition. Categorize clearly:
-- Table stakes (must have or users leave)
-- Differentiators (competitive advantage)
-- Anti-features (things to deliberately NOT build)
+你的 FEATURES.md 将输入到需求定义中。请清晰分类：
+- 基本功能（必须有否则用户会离开）
+- 差异化功能（竞争优势）
+- 反功能（刻意不构建的东西）
 </downstream_consumer>
 
 <quality_gate>
-- [ ] Categories are clear (table stakes vs differentiators vs anti-features)
-- [ ] Complexity noted for each feature
-- [ ] Dependencies between features identified
+- [ ] 分类清晰（基本功能 vs 差异化功能 vs 反功能）
+- [ ] 标注了每个功能的复杂度
+- [ ] 识别了功能间的依赖关系
 </quality_gate>
 
 <output>
-Write to: .planning/research/FEATURES.md
-Use template: ~/.claude/get-shit-done/templates/research-project/FEATURES.md
+写入：.planning/research/FEATURES.md
+使用模板：~/.claude/get-shit-done/templates/research-project/FEATURES.md
 </output>
-", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Features research")
+", subagent_type="gsd-project-researcher", model="{researcher_model}", description="功能研究")
 
 Task(prompt="<research_type>
-Project Research — Architecture dimension for [domain].
+项目研究 — [领域]的架构维度。
 </research_type>
 
 <milestone_context>
-[greenfield OR subsequent]
+[绿地 或 后续]
 
-Greenfield: How are [domain] systems typically structured? What are major components?
-Subsequent: How do [target features] integrate with existing [domain] architecture?
+绿地：[领域]系统通常是如何构建的？主要组件有哪些？
+后续：[目标功能]如何与现有 [领域] 架构集成？
 </milestone_context>
 
 <question>
-How are [domain] systems typically structured? What are major components?
+[领域]系统通常是如何构建的？主要组件有哪些？
 </question>
 
 <files_to_read>
-- {project_path} (Project context)
+- {project_path}（项目上下文）
 </files_to_read>
 
 ${AGENT_SKILLS_RESEARCHER}
 
 <downstream_consumer>
-Your ARCHITECTURE.md informs phase structure in roadmap. Include:
-- Component boundaries (what talks to what)
-- Data flow (how information moves)
-- Suggested build order (dependencies between components)
+你的 ARCHITECTURE.md 为路线图中的阶段结构提供参考。请包含：
+- 组件边界（什么与什么通信）
+- 数据流（信息如何流动）
+- 建议的构建顺序（组件间的依赖关系）
 </downstream_consumer>
 
 <quality_gate>
-- [ ] Components clearly defined with boundaries
-- [ ] Data flow direction explicit
-- [ ] Build order implications noted
+- [ ] 组件边界定义清晰
+- [ ] 数据流方向明确
+- [ ] 标注了构建顺序的影响
 </quality_gate>
 
 <output>
-Write to: .planning/research/ARCHITECTURE.md
-Use template: ~/.claude/get-shit-done/templates/research-project/ARCHITECTURE.md
+写入：.planning/research/ARCHITECTURE.md
+使用模板：~/.claude/get-shit-done/templates/research-project/ARCHITECTURE.md
 </output>
-", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Architecture research")
+", subagent_type="gsd-project-researcher", model="{researcher_model}", description="架构研究")
 
 Task(prompt="<research_type>
-Project Research — Pitfalls dimension for [domain].
+项目研究 — [领域]的常见陷阱维度。
 </research_type>
 
 <milestone_context>
-[greenfield OR subsequent]
+[绿地 或 后续]
 
-Greenfield: What do [domain] projects commonly get wrong? Critical mistakes?
-Subsequent: What are common mistakes when adding [target features] to [domain]?
+绿地：[领域]项目常犯哪些错误？关键性失误有哪些？
+后续：为 [领域] 添加 [目标功能] 时常见的错误有哪些？
 </milestone_context>
 
 <question>
-What do [domain] projects commonly get wrong? Critical mistakes?
+[领域]项目常犯哪些错误？关键性失误有哪些？
 </question>
 
 <files_to_read>
-- {project_path} (Project context)
+- {project_path}（项目上下文）
 </files_to_read>
 
 ${AGENT_SKILLS_RESEARCHER}
 
 <downstream_consumer>
-Your PITFALLS.md prevents mistakes in roadmap/planning. For each pitfall:
-- Warning signs (how to detect early)
-- Prevention strategy (how to avoid)
-- Which phase should address it
+你的 PITFALLS.md 防止路线图/规划中的错误。对每个陷阱需要：
+- 预警信号（如何早期发现）
+- 预防策略（如何避免）
+- 应该由哪个阶段来解决
 </downstream_consumer>
 
 <quality_gate>
-- [ ] Pitfalls are specific to this domain (not generic advice)
-- [ ] Prevention strategies are actionable
-- [ ] Phase mapping included where relevant
+- [ ] 陷阱是特定于此领域的（非通用建议）
+- [ ] 预防策略可操作
+- [ ] 在相关处包含了阶段映射
 </quality_gate>
 
 <output>
-Write to: .planning/research/PITFALLS.md
-Use template: ~/.claude/get-shit-done/templates/research-project/PITFALLS.md
+写入：.planning/research/PITFALLS.md
+使用模板：~/.claude/get-shit-done/templates/research-project/PITFALLS.md
 </output>
-", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Pitfalls research")
+", subagent_type="gsd-project-researcher", model="{researcher_model}", description="常见陷阱研究")
 ```
 
-After all 4 agents complete, spawn synthesizer to create SUMMARY.md:
+所有 4 个代理完成后，启动合成器创建 SUMMARY.md：
 
 ```
 Task(prompt="
 <task>
-Synthesize research outputs into SUMMARY.md.
+将研究输出综合到 SUMMARY.md 中。
 </task>
 
 <files_to_read>
@@ -793,208 +793,208 @@ Synthesize research outputs into SUMMARY.md.
 ${AGENT_SKILLS_SYNTHESIZER}
 
 <output>
-Write to: .planning/research/SUMMARY.md
-Use template: ~/.claude/get-shit-done/templates/research-project/SUMMARY.md
-Commit after writing.
+写入：.planning/research/SUMMARY.md
+使用模板：~/.claude/get-shit-done/templates/research-project/SUMMARY.md
+写入后提交。
 </output>
-", subagent_type="gsd-research-synthesizer", model="{synthesizer_model}", description="Synthesize research")
+", subagent_type="gsd-research-synthesizer", model="{synthesizer_model}", description="综合研究")
 ```
 
-Display research complete banner and key findings:
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► RESEARCH COMPLETE ✓
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-## Key Findings
-
-**Stack:** [from SUMMARY.md]
-**Table Stakes:** [from SUMMARY.md]
-**Watch Out For:** [from SUMMARY.md]
-
-Files: `.planning/research/`
-```
-
-**If "Skip research":** Continue to Step 7.
-
-## 7. Define Requirements
-
-Display stage banner:
+显示研究完成横幅和关键发现：
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► DEFINING REQUIREMENTS
+ GSD ► 研究完成 ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## 关键发现
+
+**技术栈：**[来自 SUMMARY.md]
+**基本功能：**[来自 SUMMARY.md]
+**注意事项：**[来自 SUMMARY.md]
+
+文件：`.planning/research/`
+```
+
+**如果选择"跳过研究"：**继续步骤 7。
+
+## 7. 定义需求
+
+显示阶段横幅：
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► 定义需求
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**Load context:**
+**加载上下文：**
 
-Read PROJECT.md and extract:
+读取 PROJECT.md 并提取：
 
-- Core value (the ONE thing that must work)
-- Stated constraints (budget, timeline, tech limitations)
-- Any explicit scope boundaries
+- 核心价值（必须工作的那一件事）
+- 声明的约束（预算、时间线、技术限制）
+- 任何明确的范围边界
 
-**If research exists:** Read research/FEATURES.md and extract feature categories.
+**如果研究存在：**读取 research/FEATURES.md 并提取功能分类。
 
-**If auto mode:**
+**如果是自动模式：**
 
-- Auto-include all table stakes features (users expect these)
-- Include features explicitly mentioned in provided document
-- Auto-defer differentiators not mentioned in document
-- Skip per-category AskUserQuestion loops
-- Skip "Any additions?" question
-- Skip requirements approval gate
-- Generate REQUIREMENTS.md and commit directly
+- 自动包含所有基本功能（用户预期这些功能）
+- 包含提供文档中明确提到的功能
+- 自动推迟文档中未提及的差异化功能
+- 跳过按分类的 AskUserQuestion 循环
+- 跳过"还有补充吗？"问题
+- 跳过需求审批关口
+- 直接生成 REQUIREMENTS.md 并提交
 
-**Present features by category (interactive mode only):**
+**按分类呈现功能（仅交互模式）：**
 
 ```
-Here are the features for [domain]:
+以下是 [领域] 的功能：
 
-## Authentication
-**Table stakes:**
-- Sign up with email/password
-- Email verification
-- Password reset
-- Session management
+## 认证
+**基本功能：**
+- 邮箱/密码注册
+- 邮箱验证
+- 密码重置
+- 会话管理
 
-**Differentiators:**
-- Magic link login
-- OAuth (Google, GitHub)
-- 2FA
+**差异化功能：**
+- 魔术链接登录
+- OAuth（Google、GitHub）
+- 双因素认证
 
-**Research notes:** [any relevant notes]
+**研究笔记：**[任何相关笔记]
 
 ---
 
-## [Next Category]
+## [下一个分类]
 ...
 ```
 
-**If no research:** Gather requirements through conversation instead.
+**如果没有研究：**改为通过对话收集需求。
 
-Ask: "What are the main things users need to be able to do?"
+询问："用户需要能做的主要事情是什么？"
 
-For each capability mentioned:
+对每个提到的功能：
 
-- Ask clarifying questions to make it specific
-- Probe for related capabilities
-- Group into categories
+- 提出澄清问题使其具体化
+- 探究相关功能
+- 分组到各分类
 
-**Scope each category:**
+**确定每个分类的范围：**
 
-For each category, use AskUserQuestion:
+对每个分类，使用 AskUserQuestion：
 
-- header: "[Category]" (max 12 chars)
-- question: "Which [category] features are in v1?"
+- header："[分类]"（最多 12 个字符）
+- question："哪些 [分类] 功能属于 v1？"
 - multiSelect: true
-- options:
-  - "[Feature 1]" — [brief description]
-  - "[Feature 2]" — [brief description]
-  - "[Feature 3]" — [brief description]
-  - "None for v1" — Defer entire category
+- options：
+  - "[功能 1]" — [简要描述]
+  - "[功能 2]" — [简要描述]
+  - "[功能 3]" — [简要描述]
+  - "v1 不包含" — 推迟整个分类
 
-Track responses:
+跟踪响应：
 
-- Selected features → v1 requirements
-- Unselected table stakes → v2 (users expect these)
-- Unselected differentiators → out of scope
+- 选中的功能 → v1 需求
+- 未选中的基本功能 → v2（用户预期这些功能）
+- 未选中的差异化功能 → 超出范围
 
-**Identify gaps:**
+**识别遗漏：**
 
-Use AskUserQuestion:
+使用 AskUserQuestion：
 
-- header: "Additions"
-- question: "Any requirements research missed? (Features specific to your vision)"
-- options:
-  - "No, research covered it" — Proceed
-  - "Yes, let me add some" — Capture additions
+- header："补充"
+- question："有研究遗漏的需求吗？（你的特有功能）"
+- options：
+  - "没有，研究已覆盖" — 继续
+  - "有，让我补充一些" — 记录补充内容
 
-**Validate core value:**
+**验证核心价值：**
 
-Cross-check requirements against Core Value from PROJECT.md. If gaps detected, surface them.
+将需求与 PROJECT.md 中的核心价值进行交叉检查。如果发现差距，提出来。
 
-**Generate REQUIREMENTS.md:**
+**生成 REQUIREMENTS.md：**
 
-Create `.planning/REQUIREMENTS.md` with:
+创建 `.planning/REQUIREMENTS.md`，包含：
 
-- v1 Requirements grouped by category (checkboxes, REQ-IDs)
-- v2 Requirements (deferred)
-- Out of Scope (explicit exclusions with reasoning)
-- Traceability section (empty, filled by roadmap)
+- v1 需求按分类分组（复选框、REQ-ID）
+- v2 需求（推迟的）
+- 超出范围（明确排除并说明理由）
+- 可追溯性部分（空的，由路线图填充）
 
-**REQ-ID format:** `[CATEGORY]-[NUMBER]` (AUTH-01, CONTENT-02)
+**REQ-ID 格式：**`[分类]-[编号]`（AUTH-01、CONTENT-02）
 
-**Requirement quality criteria:**
+**需求质量标准：**
 
-Good requirements are:
+好的需求应当是：
 
-- **Specific and testable:** "User can reset password via email link" (not "Handle password reset")
-- **User-centric:** "User can X" (not "System does Y")
-- **Atomic:** One capability per requirement (not "User can login and manage profile")
-- **Independent:** Minimal dependencies on other requirements
+- **具体且可测试的：**"用户可以通过邮件链接重置密码"（而非"处理密码重置"）
+- **以用户为中心的：**"用户可以 X"（而非"系统做 Y"）
+- **原子的：**每个需求一个功能（而非"用户可以登录并管理个人资料"）
+- **独立的：**与其他需求的依赖最小化
 
-Reject vague requirements. Push for specificity:
+拒绝模糊的需求。追求具体性：
 
-- "Handle authentication" → "User can log in with email/password and stay logged in across sessions"
-- "Support sharing" → "User can share post via link that opens in recipient's browser"
+- "处理认证" → "用户可以使用邮箱/密码登录并保持跨会话登录状态"
+- "支持分享" → "用户可以通过链接分享帖子，链接在接收者的浏览器中打开"
 
-**Present full requirements list (interactive mode only):**
+**展示完整需求列表（仅交互模式）：**
 
-Show every requirement (not counts) for user confirmation:
+显示每个需求（而非数量统计）供用户确认：
 
 ```
-## v1 Requirements
+## v1 需求
 
-### Authentication
-- [ ] **AUTH-01**: User can create account with email/password
-- [ ] **AUTH-02**: User can log in and stay logged in across sessions
-- [ ] **AUTH-03**: User can log out from any page
+### 认证
+- [ ] **AUTH-01**：用户可以使用邮箱/密码创建账户
+- [ ] **AUTH-02**：用户可以登录并保持跨会话登录状态
+- [ ] **AUTH-03**：用户可以从任何页面登出
 
-### Content
-- [ ] **CONT-01**: User can create posts with text
-- [ ] **CONT-02**: User can edit their own posts
+### 内容
+- [ ] **CONT-01**：用户可以创建文本帖子
+- [ ] **CONT-02**：用户可以编辑自己的帖子
 
-[... full list ...]
+[... 完整列表 ...]
 
 ---
 
-Does this capture what you're building? (yes / adjust)
+这是否涵盖了你要构建的内容？（是 / 调整）
 ```
 
-If "adjust": Return to scoping.
+如果选择"调整"：返回范围确定。
 
-**Commit requirements:**
+**提交需求：**
 
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: define v1 requirements" --files .planning/REQUIREMENTS.md
 ```
 
-## 8. Create Roadmap
+## 8. 创建路线图
 
-Display stage banner:
+显示阶段横幅：
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► CREATING ROADMAP
+ GSD ► 创建路线图
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-◆ Spawning roadmapper...
+◆ 正在启动路线图规划器...
 ```
 
-Spawn gsd-roadmapper agent with path references:
+使用路径引用启动 gsd-roadmapper 代理：
 
 ```
 Task(prompt="
 <planning_context>
 
 <files_to_read>
-- .planning/PROJECT.md (Project context)
-- .planning/REQUIREMENTS.md (v1 Requirements)
-- .planning/research/SUMMARY.md (Research findings - if exists)
-- .planning/config.json (Granularity and mode settings)
+- .planning/PROJECT.md（项目上下文）
+- .planning/REQUIREMENTS.md（v1 需求）
+- .planning/research/SUMMARY.md（研究发现 - 如果存在）
+- .planning/config.json（粒度和模式设置）
 </files_to_read>
 
 ${AGENT_SKILLS_ROADMAPPER}
@@ -1002,205 +1002,205 @@ ${AGENT_SKILLS_ROADMAPPER}
 </planning_context>
 
 <instructions>
-Create roadmap:
-1. Derive phases from requirements (don't impose structure)
-2. Map every v1 requirement to exactly one phase
-3. Derive 2-5 success criteria per phase (observable user behaviors)
-4. Validate 100% coverage
-5. Write files immediately (ROADMAP.md, STATE.md, update REQUIREMENTS.md traceability)
-6. Return ROADMAP CREATED with summary
+创建路线图：
+1. 从需求推导阶段（不要强加结构）
+2. 将每个 v1 需求映射到恰好一个阶段
+3. 为每个阶段推导 2-5 个成功标准（可观察的用户行为）
+4. 验证 100% 覆盖率
+5. 立即写入文件（ROADMAP.md、STATE.md、更新 REQUIREMENTS.md 可追溯性）
+6. 返回 ROADMAP CREATED 及摘要
 
-Write files first, then return. This ensures artifacts persist even if context is lost.
+先写入文件，然后返回。这确保即使上下文丢失，产物也能持久化。
 </instructions>
-", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="Create roadmap")
+", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="创建路线图")
 ```
 
-**Handle roadmapper return:**
+**处理路线图规划器返回：**
 
-**If `## ROADMAP BLOCKED`:**
+**如果返回 `## ROADMAP BLOCKED`：**
 
-- Present blocker information
-- Work with user to resolve
-- Re-spawn when resolved
+- 展示阻塞信息
+- 与用户合作解决
+- 解决后重新启动
 
-**If `## ROADMAP CREATED`:**
+**如果返回 `## ROADMAP CREATED`：**
 
-Read the created ROADMAP.md and present it nicely inline:
+读取创建的 ROADMAP.md 并内联精美展示：
 
 ```
 ---
 
-## Proposed Roadmap
+## 提议的路线图
 
-**[N] phases** | **[X] requirements mapped** | All v1 requirements covered ✓
+**[N] 个阶段** | **[X] 个需求已映射** | 所有 v1 需求已覆盖 ✓
 
-| # | Phase | Goal | Requirements | Success Criteria |
-|---|-------|------|--------------|------------------|
-| 1 | [Name] | [Goal] | [REQ-IDs] | [count] |
-| 2 | [Name] | [Goal] | [REQ-IDs] | [count] |
-| 3 | [Name] | [Goal] | [REQ-IDs] | [count] |
+| # | 阶段 | 目标 | 需求 | 成功标准 |
+|---|------|------|------|----------|
+| 1 | [名称] | [目标] | [REQ-ID] | [数量] |
+| 2 | [名称] | [目标] | [REQ-ID] | [数量] |
+| 3 | [名称] | [目标] | [REQ-ID] | [数量] |
 ...
 
-### Phase Details
+### 阶段详情
 
-**Phase 1: [Name]**
-Goal: [goal]
-Requirements: [REQ-IDs]
-Success criteria:
-1. [criterion]
-2. [criterion]
-3. [criterion]
+**阶段 1：[名称]**
+目标：[目标]
+需求：[REQ-ID]
+成功标准：
+1. [标准]
+2. [标准]
+3. [标准]
 
-**Phase 2: [Name]**
-Goal: [goal]
-Requirements: [REQ-IDs]
-Success criteria:
-1. [criterion]
-2. [criterion]
+**阶段 2：[名称]**
+目标：[目标]
+需求：[REQ-ID]
+成功标准：
+1. [标准]
+2. [标准]
 
-[... continue for all phases ...]
+[... 继续列出所有阶段 ...]
 
 ---
 ```
 
-**If auto mode:** Skip approval gate — auto-approve and commit directly.
+**如果是自动模式：**跳过审批关口——自动批准并直接提交。
 
-**CRITICAL: Ask for approval before committing (interactive mode only):**
+**关键：提交前请求审批（仅交互模式）：**
 
-Use AskUserQuestion:
+使用 AskUserQuestion：
 
-- header: "Roadmap"
-- question: "Does this roadmap structure work for you?"
-- options:
-  - "Approve" — Commit and continue
-  - "Adjust phases" — Tell me what to change
-  - "Review full file" — Show raw ROADMAP.md
+- header："路线图"
+- question："这个路线图结构适合你吗？"
+- options：
+  - "批准" — 提交并继续
+  - "调整阶段" — 告诉我要改什么
+  - "查看完整文件" — 显示原始 ROADMAP.md
 
-**If "Approve":** Continue to commit.
+**如果选择"批准"：**继续提交。
 
-**If "Adjust phases":**
+**如果选择"调整阶段"：**
 
-- Get user's adjustment notes
-- Re-spawn roadmapper with revision context:
+- 获取用户的调整意见
+- 使用修订上下文重新启动路线图规划器：
 
   ```
   Task(prompt="
   <revision>
-  User feedback on roadmap:
-  [user's notes]
+  用户对路线图的反馈：
+  [用户的意见]
 
   <files_to_read>
-  - .planning/ROADMAP.md (Current roadmap to revise)
+  - .planning/ROADMAP.md（需要修订的当前路线图）
   </files_to_read>
 
   ${AGENT_SKILLS_ROADMAPPER}
 
-  Update the roadmap based on feedback. Edit files in place.
-  Return ROADMAP REVISED with changes made.
+  根据反馈更新路线图。就地编辑文件。
+  返回 ROADMAP REVISED 及所做的更改。
   </revision>
-  ", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="Revise roadmap")
+  ", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="修订路线图")
   ```
 
-- Present revised roadmap
-- Loop until user approves
+- 展示修订后的路线图
+- 循环直到用户批准
 
-**If "Review full file":** Display raw `cat .planning/ROADMAP.md`, then re-ask.
+**如果选择"查看完整文件"：**显示 `cat .planning/ROADMAP.md` 的原始内容，然后重新询问。
 
-**Generate or refresh project CLAUDE.md before final commit:**
+**在最终提交前生成或刷新项目 CLAUDE.md：**
 
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" generate-claude-md
 ```
 
-This ensures new projects get the default GSD workflow-enforcement guidance and current project context in `CLAUDE.md`.
+这确保新项目在 `CLAUDE.md` 中获得默认的 GSD 工作流执行指导和当前项目上下文。
 
-**Commit roadmap (after approval or auto mode):**
+**提交路线图（审批后或自动模式）：**
 
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: create roadmap ([N] phases)" --files .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md CLAUDE.md
 ```
 
-## 9. Done
+## 9. 完成
 
-Present completion summary:
+展示完成摘要：
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- GSD ► PROJECT INITIALIZED ✓
+ GSD ► 项目已初始化 ✓
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**[Project Name]**
+**[项目名称]**
 
-| Artifact       | Location                    |
+| 产物           | 位置                        |
 |----------------|-----------------------------|
-| Project        | `.planning/PROJECT.md`      |
-| Config         | `.planning/config.json`     |
-| Research       | `.planning/research/`       |
-| Requirements   | `.planning/REQUIREMENTS.md` |
-| Roadmap        | `.planning/ROADMAP.md`      |
-| Project guide  | `CLAUDE.md`                 |
+| 项目           | `.planning/PROJECT.md`      |
+| 配置           | `.planning/config.json`     |
+| 研究           | `.planning/research/`       |
+| 需求           | `.planning/REQUIREMENTS.md` |
+| 路线图         | `.planning/ROADMAP.md`      |
+| 项目指南       | `CLAUDE.md`                 |
 
-**[N] phases** | **[X] requirements** | Ready to build ✓
+**[N] 个阶段** | **[X] 个需求** | 准备开始构建 ✓
 ```
 
-**If auto mode:**
+**如果是自动模式：**
 
 ```
 ╔══════════════════════════════════════════╗
-║  AUTO-ADVANCING → DISCUSS PHASE 1        ║
+║  自动推进 → 讨论阶段 1                    ║
 ╚══════════════════════════════════════════╝
 ```
 
-Exit skill and invoke SlashCommand("/gsd:discuss-phase 1 --auto")
+退出技能并调用 SlashCommand("/gsd:discuss-phase 1 --auto")
 
-**If interactive mode:**
+**如果是交互模式：**
 
-Check if Phase 1 has UI indicators (look for `**UI hint**: yes` in Phase 1 detail section of ROADMAP.md):
+检查阶段 1 是否有 UI 指示（在 ROADMAP.md 的阶段 1 详细部分查找 `**UI hint**: yes`）：
 
 ```bash
 PHASE1_SECTION=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" roadmap get-phase 1 2>/dev/null)
 PHASE1_HAS_UI=$(echo "$PHASE1_SECTION" | grep -qi "UI hint.*yes" && echo "true" || echo "false")
 ```
 
-**If Phase 1 has UI (`PHASE1_HAS_UI` is `true`):**
+**如果阶段 1 有 UI（`PHASE1_HAS_UI` 为 `true`）：**
 
 ```
 ───────────────────────────────────────────────────────────────
 
-## ▶ Next Up
+## ▶ 下一步
 
-**Phase 1: [Phase Name]** — [Goal from ROADMAP.md]
+**阶段 1：[阶段名称]** — [来自 ROADMAP.md 的目标]
 
-/gsd:discuss-phase 1 — gather context and clarify approach
+/gsd:discuss-phase 1 — 收集上下文并明确方法
 
-<sub>/clear first → fresh context window</sub>
+<sub>/clear 先清理 → 全新上下文窗口</sub>
 
 ---
 
-**Also available:**
-- /gsd:ui-phase 1 — generate UI design contract (recommended for frontend phases)
-- /gsd:plan-phase 1 — skip discussion, plan directly
+**其他可选操作：**
+- /gsd:ui-phase 1 — 生成 UI 设计契约（推荐用于前端阶段）
+- /gsd:plan-phase 1 — 跳过讨论，直接规划
 
 ───────────────────────────────────────────────────────────────
 ```
 
-**If Phase 1 has no UI:**
+**如果阶段 1 没有 UI：**
 
 ```
 ───────────────────────────────────────────────────────────────
 
-## ▶ Next Up
+## ▶ 下一步
 
-**Phase 1: [Phase Name]** — [Goal from ROADMAP.md]
+**阶段 1：[阶段名称]** — [来自 ROADMAP.md 的目标]
 
-/gsd:discuss-phase 1 — gather context and clarify approach
+/gsd:discuss-phase 1 — 收集上下文并明确方法
 
-<sub>/clear first → fresh context window</sub>
+<sub>/clear 先清理 → 全新上下文窗口</sub>
 
 ---
 
-**Also available:**
-- /gsd:plan-phase 1 — skip discussion, plan directly
+**其他可选操作：**
+- /gsd:plan-phase 1 — 跳过讨论，直接规划
 
 ───────────────────────────────────────────────────────────────
 ```
@@ -1211,7 +1211,7 @@ PHASE1_HAS_UI=$(echo "$PHASE1_SECTION" | grep -qi "UI hint.*yes" && echo "true" 
 
 - `.planning/PROJECT.md`
 - `.planning/config.json`
-- `.planning/research/` (if research selected)
+- `.planning/research/`（如果选择了研究）
   - `STACK.md`
   - `FEATURES.md`
   - `ARCHITECTURE.md`
@@ -1226,25 +1226,26 @@ PHASE1_HAS_UI=$(echo "$PHASE1_SECTION" | grep -qi "UI hint.*yes" && echo "true" 
 
 <success_criteria>
 
-- [ ] .planning/ directory created
-- [ ] Git repo initialized
-- [ ] Brownfield detection completed
-- [ ] Deep questioning completed (threads followed, not rushed)
-- [ ] PROJECT.md captures full context → **committed**
-- [ ] config.json has workflow mode, granularity, parallelization → **committed**
-- [ ] Research completed (if selected) — 4 parallel agents spawned → **committed**
-- [ ] Requirements gathered (from research or conversation)
-- [ ] User scoped each category (v1/v2/out of scope)
-- [ ] REQUIREMENTS.md created with REQ-IDs → **committed**
-- [ ] gsd-roadmapper spawned with context
-- [ ] Roadmap files written immediately (not draft)
-- [ ] User feedback incorporated (if any)
-- [ ] ROADMAP.md created with phases, requirement mappings, success criteria
-- [ ] STATE.md initialized
-- [ ] REQUIREMENTS.md traceability updated
-- [ ] CLAUDE.md generated with GSD workflow guidance
-- [ ] User knows next step is `/gsd:discuss-phase 1`
+- [ ] 创建了 .planning/ 目录
+- [ ] 初始化了 Git 仓库
+- [ ] 完成了棕地检测
+- [ ] 完成了深度提问（跟随话题线索，不匆忙跳过）
+- [ ] PROJECT.md 捕获了完整上下文 → **已提交**
+- [ ] config.json 包含工作流模式、粒度、并行化设置 → **已提交**
+- [ ] 完成了研究（如果选择）——启动了 4 个并行代理 → **已提交**
+- [ ] 收集了需求（来自研究或对话）
+- [ ] 用户为每个分类确定了范围（v1/v2/超出范围）
+- [ ] 创建了带 REQ-ID 的 REQUIREMENTS.md → **已提交**
+- [ ] 启动了 gsd-roadmapper 并提供了上下文
+- [ ] 路线图文件立即写入（不是草稿）
+- [ ] 纳入了用户反馈（如果有）
+- [ ] 创建了包含阶段、需求映射、成功标准的 ROADMAP.md
+- [ ] 初始化了 STATE.md
+- [ ] 更新了 REQUIREMENTS.md 可追溯性
+- [ ] 生成了包含 GSD 工作流指导的 CLAUDE.md
+- [ ] 用户知道下一步是 `/gsd:discuss-phase 1`
 
-**Atomic commits:** Each phase commits its artifacts immediately. If context is lost, artifacts persist.
+**原子提交：**每个阶段立即提交其产物。如果上下文丢失，产物仍然持久化。
 
 </success_criteria>
+</output>

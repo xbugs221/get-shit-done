@@ -1,6 +1,6 @@
 ---
 name: gsd:health
-description: Diagnose planning directory health and optionally repair issues
+description: 诊断规划目录健康状态并可选修复问题
 argument-hint: [--repair]
 allowed-tools:
   - Read
@@ -9,7 +9,7 @@ allowed-tools:
   - AskUserQuestion
 ---
 <objective>
-Validate `.planning/` directory integrity and report actionable issues. Checks for missing files, invalid configurations, inconsistent state, and orphaned plans.
+验证 `.planning/` 目录完整性并报告可操作的问题。检查缺失文件、无效配置、不一致状态和孤立计划。
 </objective>
 
 <execution_context>
@@ -17,6 +17,7 @@ Validate `.planning/` directory integrity and report actionable issues. Checks f
 </execution_context>
 
 <process>
-Execute the health workflow from @~/.claude/get-shit-done/workflows/health.md end-to-end.
-Parse --repair flag from arguments and pass to workflow.
+执行 @~/.claude/get-shit-done/workflows/health.md 中的健康检查工作流。
+解析参数中的 --repair 标志并传递给工作流。
 </process>
+</output>

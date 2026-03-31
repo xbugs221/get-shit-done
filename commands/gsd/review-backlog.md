@@ -1,6 +1,6 @@
 ---
 name: gsd:review-backlog
-description: Review and promote backlog items to active milestone
+description: 审查待办事项并将其提升到活跃里程碑
 allowed-tools:
   - Read
   - Write
@@ -8,54 +8,52 @@ allowed-tools:
 ---
 
 <objective>
-Review all 999.x backlog items and optionally promote them into the active
-milestone sequence or remove stale entries.
+审查所有 999.x 待办事项，可选择将其提升到活跃里程碑序列中或移除过时条目。
 </objective>
 
 <process>
 
-1. **List backlog items:**
+1. **列出待办事项：**
    ```bash
    ls -d .planning/phases/999* 2>/dev/null || echo "No backlog items found"
    ```
 
-2. **Read ROADMAP.md** and extract all 999.x phase entries:
+2. **读取 ROADMAP.md** 并提取所有 999.x 阶段条目：
    ```bash
    cat .planning/ROADMAP.md
    ```
-   Show each backlog item with its description, any accumulated context (CONTEXT.md, RESEARCH.md), and creation date.
+   展示每个待办事项及其描述、已积累的上下文（CONTEXT.md、RESEARCH.md）和创建日期。
 
-3. **Present the list to the user** via AskUserQuestion:
-   - For each backlog item, show: phase number, description, accumulated artifacts
-   - Options per item: **Promote** (move to active), **Keep** (leave in backlog), **Remove** (delete)
+3. **向用户展示列表：**
+   - 对于每个待办事项展示：阶段编号、描述、已积累的产物
+   - 每项选项：**提升**（移至活跃）、**保留**（留在待办）、**移除**（删除）
 
-4. **For items to PROMOTE:**
-   - Find the next sequential phase number in the active milestone
-   - Rename the directory from `999.x-slug` to `{new_num}-slug`:
+4. **提升项目：**
+   - 找到下一个顺序阶段编号
+   - 重命名目录：
      ```bash
      NEW_NUM=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" phase add "${DESCRIPTION}" --raw)
      ```
-   - Move accumulated artifacts to the new phase directory
-   - Update ROADMAP.md: move the entry from `## Backlog` section to the active phase list
-   - Remove `(BACKLOG)` marker
-   - Add appropriate `**Depends on:**` field
+   - 将已积累的产物移至新的阶段目录
+   - 更新 ROADMAP.md：将条目从 `## Backlog` 移至活跃阶段列表
+   - 移除 `(BACKLOG)` 标记，添加 `**Depends on:**` 字段
 
-5. **For items to REMOVE:**
-   - Delete the phase directory
-   - Remove the entry from ROADMAP.md `## Backlog` section
+5. **移除项目：**
+   - 删除阶段目录
+   - 从 ROADMAP.md 的 `## Backlog` 部分移除条目
 
-6. **Commit changes:**
+6. **提交更改：**
    ```bash
    node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" commit "docs: review backlog — promoted N, removed M" --files .planning/ROADMAP.md
    ```
 
-7. **Report summary:**
+7. **报告摘要：**
    ```
-   ## 📋 Backlog Review Complete
+   ## 📋 待办审查完成
 
-   Promoted: {list of promoted items with new phase numbers}
-   Kept: {list of items remaining in backlog}
-   Removed: {list of deleted items}
+   已提升：{已提升项目及其新阶段编号的列表}
+   已保留：{仍在待办中的项目列表}
+   已移除：{已删除项目的列表}
    ```
 
 </process>

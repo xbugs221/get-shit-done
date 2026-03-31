@@ -1,23 +1,23 @@
 <purpose>
-Generate unit and E2E tests for a completed phase based on its SUMMARY.md, CONTEXT.md, and implementation. Classifies each changed file into TDD (unit), E2E (browser), or Skip categories, presents a test plan for user approval, then generates tests following RED-GREEN conventions.
+基于已完成阶段的 SUMMARY.md、CONTEXT.md 和实现代码，生成单元测试和端到端测试。将每个更改的文件分类为 TDD（单元）、E2E（浏览器）或 Skip 类别，向用户展示测试计划以获取批准，然后按照 RED-GREEN 惯例生成测试。
 
-Users currently hand-craft `/gsd:quick` prompts for test generation after each phase. This workflow standardizes the process with proper classification, quality gates, and gap reporting.
+用户目前在每个阶段后手动编写 `/gsd:quick` 提示来生成测试。此工作流通过适当的分类、质量门禁和缺口报告来标准化该过程。
 </purpose>
 
 <required_reading>
-Read all files referenced by the invoking prompt's execution_context before starting.
+在开始之前，读取调用提示的 execution_context 中引用的所有文件。
 </required_reading>
 
 <process>
 
 <step name="parse_arguments">
-Parse `$ARGUMENTS` for:
-- Phase number (integer, decimal, or letter-suffix) → store as `$PHASE_ARG`
-- Remaining text after phase number → store as `$EXTRA_INSTRUCTIONS` (optional)
+从 `$ARGUMENTS` 中解析：
+- 阶段编号（整数、小数或字母后缀）→ 存储为 `$PHASE_ARG`
+- 阶段编号之后的剩余文本 → 存储为 `$EXTRA_INSTRUCTIONS`（可选）
 
-Example: `/gsd:add-tests 12 focus on edge cases` → `$PHASE_ARG=12`, `$EXTRA_INSTRUCTIONS="focus on edge cases"`
+示例：`/gsd:add-tests 12 focus on edge cases` → `$PHASE_ARG=12`，`$EXTRA_INSTRUCTIONS="focus on edge cases"`
 
-If no phase argument provided:
+如果未提供阶段参数：
 
 ```
 ERROR: Phase number required
@@ -26,39 +26,39 @@ Example: /gsd:add-tests 12
 Example: /gsd:add-tests 12 focus on edge cases in the pricing module
 ```
 
-Exit.
+退出。
 </step>
 
 <step name="init_context">
-Load phase operation context:
+加载阶段操作上下文：
 
 ```bash
 INIT=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" init phase-op "${PHASE_ARG}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
-Extract from init JSON: `phase_dir`, `phase_number`, `phase_name`.
+从初始化 JSON 中提取：`phase_dir`、`phase_number`、`phase_name`。
 
-Verify the phase directory exists. If not:
+验证阶段目录是否存在。如果不存在：
 ```
 ERROR: Phase directory not found for phase ${PHASE_ARG}
 Ensure the phase exists in .planning/phases/
 ```
-Exit.
+退出。
 
-Read the phase artifacts (in order of priority):
-1. `${phase_dir}/*-SUMMARY.md` — what was implemented, files changed
-2. `${phase_dir}/CONTEXT.md` — acceptance criteria, decisions
-3. `${phase_dir}/*-VERIFICATION.md` — user-verified scenarios (if UAT was done)
+按优先级顺序读取阶段产物：
+1. `${phase_dir}/*-SUMMARY.md` — 实现了什么，更改了哪些文件
+2. `${phase_dir}/CONTEXT.md` — 验收标准，决策
+3. `${phase_dir}/*-VERIFICATION.md` — 用户验证的场景（如果做了 UAT）
 
-If no SUMMARY.md exists:
+如果没有 SUMMARY.md：
 ```
 ERROR: No SUMMARY.md found for phase ${PHASE_ARG}
 This command works on completed phases. Run /gsd:execute-phase first.
 ```
-Exit.
+退出。
 
-Present banner:
+展示横幅：
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► ADD TESTS — Phase ${phase_number}: ${phase_name}
@@ -67,46 +67,46 @@ Present banner:
 </step>
 
 <step name="analyze_implementation">
-Extract the list of files modified by the phase from SUMMARY.md ("Files Changed" or equivalent section).
+从 SUMMARY.md 的 "Files Changed" 或等效部分提取阶段修改的文件列表。
 
-For each file, classify into one of three categories:
+对于每个文件，分类为以下三个类别之一：
 
-| Category | Criteria | Test Type |
+| 类别 | 标准 | 测试类型 |
 |----------|----------|-----------|
-| **TDD** | Pure functions where `expect(fn(input)).toBe(output)` is writable | Unit tests |
-| **E2E** | UI behavior verifiable by browser automation | Playwright/E2E tests |
-| **Skip** | Not meaningfully testable or already covered | None |
+| **TDD** | 可以编写 `expect(fn(input)).toBe(output)` 的纯函数 | 单元测试 |
+| **E2E** | 可通过浏览器自动化验证的 UI 行为 | Playwright/E2E 测试 |
+| **Skip** | 无法有效测试或已被覆盖 | 无 |
 
-**TDD classification — apply when:**
-- Business logic: calculations, pricing, tax rules, validation
-- Data transformations: mapping, filtering, aggregation, formatting
-- Parsers: CSV, JSON, XML, custom format parsing
-- Validators: input validation, schema validation, business rules
-- State machines: status transitions, workflow steps
-- Utilities: string manipulation, date handling, number formatting
+**TDD 分类 — 适用于：**
+- 业务逻辑：计算、定价、税务规则、验证
+- 数据转换：映射、过滤、聚合、格式化
+- 解析器：CSV、JSON、XML、自定义格式解析
+- 验证器：输入验证、模式验证、业务规则
+- 状态机：状态转换、工作流步骤
+- 工具函数：字符串操作、日期处理、数字格式化
 
-**E2E classification — apply when:**
-- Keyboard shortcuts: key bindings, modifier keys, chord sequences
-- Navigation: page transitions, routing, breadcrumbs, back/forward
-- Form interactions: submit, validation errors, field focus, autocomplete
-- Selection: row selection, multi-select, shift-click ranges
-- Drag and drop: reordering, moving between containers
-- Modal dialogs: open, close, confirm, cancel
-- Data grids: sorting, filtering, inline editing, column resize
+**E2E 分类 — 适用于：**
+- 键盘快捷键：按键绑定、修饰键、组合键序列
+- 导航：页面转换、路由、面包屑、前进/后退
+- 表单交互：提交、验证错误、焦点、自动补全
+- 选择：行选择、多选、Shift 点击范围
+- 拖放：重新排序、在容器间移动
+- 模态对话框：打开、关闭、确认、取消
+- 数据网格：排序、过滤、内联编辑、列调整大小
 
-**Skip classification — apply when:**
-- UI layout/styling: CSS classes, visual appearance, responsive breakpoints
-- Configuration: config files, environment variables, feature flags
-- Glue code: dependency injection setup, middleware registration, routing tables
-- Migrations: database migrations, schema changes
-- Simple CRUD: basic create/read/update/delete with no business logic
-- Type definitions: records, DTOs, interfaces with no logic
+**Skip 分类 — 适用于：**
+- UI 布局/样式：CSS 类、视觉外观、响应式断点
+- 配置：配置文件、环境变量、功能开关
+- 胶水代码：依赖注入设置、中间件注册、路由表
+- 迁移：数据库迁移、模式变更
+- 简单 CRUD：没有业务逻辑的基本创建/读取/更新/删除
+- 类型定义：没有逻辑的记录、DTO、接口
 
-Read each file to verify classification. Don't classify based on filename alone.
+读取每个文件以验证分类。不要仅根据文件名分类。
 </step>
 
 <step name="present_classification">
-Present the classification to the user for confirmation before proceeding:
+在继续之前向用户展示分类以获取确认：
 
 ```
 AskUserQuestion(
@@ -133,29 +133,29 @@ AskUserQuestion(
 )
 ```
 
-If user selects "Adjust classification": apply their changes and re-present.
-If user selects "Cancel": exit gracefully.
+如果用户选择 "Adjust classification"：应用其更改并重新展示。
+如果用户选择 "Cancel"：优雅退出。
 </step>
 
 <step name="discover_test_structure">
-Before generating the test plan, discover the project's existing test structure:
+在生成测试计划之前，发现项目的现有测试结构：
 
 ```bash
-# Find existing test directories
+# 查找现有测试目录
 find . -type d -name "*test*" -o -name "*spec*" -o -name "*__tests__*" 2>/dev/null | head -20
-# Find existing test files for convention matching
+# 查找现有测试文件以匹配命名约定
 find . -type f \( -name "*.test.*" -o -name "*.spec.*" -o -name "*Tests.fs" -o -name "*Test.fs" \) 2>/dev/null | head -20
-# Check for test runners
+# 检查测试运行器
 ls package.json *.sln 2>/dev/null || true
 ```
 
-Identify:
-- Test directory structure (where unit tests live, where E2E tests live)
-- Naming conventions (`.test.ts`, `.spec.ts`, `*Tests.fs`, etc.)
-- Test runner commands (how to execute unit tests, how to execute E2E tests)
-- Test framework (xUnit, NUnit, Jest, Playwright, etc.)
+识别：
+- 测试目录结构（单元测试在哪里，E2E 测试在哪里）
+- 命名约定（`.test.ts`、`.spec.ts`、`*Tests.fs` 等）
+- 测试运行器命令（如何执行单元测试，如何执行 E2E 测试）
+- 测试框架（xUnit、NUnit、Jest、Playwright 等）
 
-If test structure is ambiguous, ask the user:
+如果测试结构不明确，询问用户：
 ```
 AskUserQuestion(
   header: "Test Structure",
@@ -166,19 +166,19 @@ AskUserQuestion(
 </step>
 
 <step name="generate_test_plan">
-For each approved file, create a detailed test plan.
+为每个已批准的文件创建详细的测试计划。
 
-**For TDD files**, plan tests following RED-GREEN-REFACTOR:
-1. Identify testable functions/methods in the file
-2. For each function: list input scenarios, expected outputs, edge cases
-3. Note: since code already exists, tests may pass immediately — that's OK, but verify they test the RIGHT behavior
+**对于 TDD 文件**，按照 RED-GREEN-REFACTOR 规划测试：
+1. 识别文件中可测试的函数/方法
+2. 对于每个函数：列出输入场景、预期输出、边界情况
+3. 注意：由于代码已存在，测试可能会立即通过 — 这没问题，但要验证它们测试的是正确的行为
 
-**For E2E files**, plan tests following RED-GREEN gates:
-1. Identify user scenarios from CONTEXT.md/VERIFICATION.md
-2. For each scenario: describe the user action, expected outcome, assertions
-3. Note: RED gate means confirming the test would fail if the feature were broken
+**对于 E2E 文件**，按照 RED-GREEN 门禁规划测试：
+1. 从 CONTEXT.md/VERIFICATION.md 识别用户场景
+2. 对于每个场景：描述用户操作、预期结果、断言
+3. 注意：RED 门禁意味着确认如果功能被破坏测试将会失败
 
-Present the complete test plan:
+展示完整的测试计划：
 
 ```
 AskUserQuestion(
@@ -204,74 +204,74 @@ AskUserQuestion(
 )
 ```
 
-If "Cherry-pick": ask user which tests to include.
-If "Adjust plan": apply changes and re-present.
+如果 "Cherry-pick"：询问用户要包含哪些测试。
+如果 "Adjust plan"：应用更改并重新展示。
 </step>
 
 <step name="execute_tdd_generation">
-For each approved TDD test:
+对于每个已批准的 TDD 测试：
 
-1. **Create test file** following discovered project conventions (directory, naming, imports)
+1. **创建测试文件**，遵循发现的项目约定（目录、命名、导入）
 
-2. **Write test** with clear arrange/act/assert structure:
+2. **编写测试**，使用清晰的 arrange/act/assert 结构：
    ```
-   // Arrange — set up inputs and expected outputs
-   // Act — call the function under test
-   // Assert — verify the output matches expectations
+   // Arrange — 设置输入和预期输出
+   // Act — 调用被测函数
+   // Assert — 验证输出匹配预期
    ```
 
-3. **Run the test**:
+3. **运行测试**：
    ```bash
    {discovered test command}
    ```
 
-4. **Evaluate result:**
-   - **Test passes**: Good — the implementation satisfies the test. Verify the test checks meaningful behavior (not just that it compiles).
-   - **Test fails with assertion error**: This may be a genuine bug discovered by the test. Flag it:
+4. **评估结果：**
+   - **测试通过**：好 — 实现满足测试。验证测试检查的是有意义的行为（而不仅仅是能编译）。
+   - **测试因断言错误失败**：这可能是测试发现的真正 bug。标记它：
      ```
      ⚠️ Potential bug found: {test name}
      Expected: {expected}
      Actual: {actual}
      File: {implementation file}
      ```
-     Do NOT fix the implementation — this is a test-generation command, not a fix command. Record the finding.
-   - **Test fails with error (import, syntax, etc.)**: This is a test error. Fix the test and re-run.
+     不要修复实现 — 这是测试生成命令，不是修复命令。记录发现。
+   - **测试因错误失败（导入、语法等）**：这是测试错误。修复测试并重新运行。
 </step>
 
 <step name="execute_e2e_generation">
-For each approved E2E test:
+对于每个已批准的 E2E 测试：
 
-1. **Check for existing tests** covering the same scenario:
+1. **检查是否已有测试**覆盖相同场景：
    ```bash
    grep -r "{scenario keyword}" {e2e test directory} 2>/dev/null || true
    ```
-   If found, extend rather than duplicate.
+   如果找到，扩展而不是复制。
 
-2. **Create test file** targeting the user scenario from CONTEXT.md/VERIFICATION.md
+2. **创建测试文件**，针对 CONTEXT.md/VERIFICATION.md 中的用户场景
 
-3. **Run the E2E test**:
+3. **运行 E2E 测试**：
    ```bash
    {discovered e2e command}
    ```
 
-4. **Evaluate result:**
-   - **GREEN (passes)**: Record success
-   - **RED (fails)**: Determine if it's a test issue or a genuine application bug. Flag bugs:
+4. **评估结果：**
+   - **GREEN（通过）**：记录成功
+   - **RED（失败）**：确定是测试问题还是真正的应用 bug。标记 bug：
      ```
      ⚠️ E2E failure: {test name}
      Scenario: {description}
      Error: {error message}
      ```
-   - **Cannot run**: Report blocker. Do NOT mark as complete.
+   - **无法运行**：报告阻塞因素。不要标记为完成。
      ```
      🛑 E2E blocker: {reason tests cannot run}
      ```
 
-**No-skip rule:** If E2E tests cannot execute (missing dependencies, environment issues), report the blocker and mark the test as incomplete. Never mark success without actually running the test.
+**不可跳过规则：** 如果 E2E 测试无法执行（缺少依赖、环境问题），报告阻塞因素并将测试标记为未完成。永远不要在没有实际运行测试的情况下标记成功。
 </step>
 
 <step name="summary_and_commit">
-Create a test coverage report and present to user:
+创建测试覆盖报告并展示给用户：
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -295,19 +295,19 @@ Create a test coverage report and present to user:
 {any assertion failures that indicate implementation bugs}
 ```
 
-Record test generation in project state:
+在项目状态中记录测试生成：
 ```bash
 node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" state-snapshot
 ```
 
-If there are passing tests to commit:
+如果有通过的测试要提交：
 
 ```bash
 git add {test files}
 git commit -m "test(phase-${phase_number}): add unit and E2E tests from add-tests command"
 ```
 
-Present next steps:
+展示下一步操作：
 
 ```
 ---
@@ -336,16 +336,16 @@ Present next steps:
 </process>
 
 <success_criteria>
-- [ ] Phase artifacts loaded (SUMMARY.md, CONTEXT.md, optionally VERIFICATION.md)
-- [ ] All changed files classified into TDD/E2E/Skip categories
-- [ ] Classification presented to user and approved
-- [ ] Project test structure discovered (directories, conventions, runners)
-- [ ] Test plan presented to user and approved
-- [ ] TDD tests generated with arrange/act/assert structure
-- [ ] E2E tests generated targeting user scenarios
-- [ ] All tests executed — no untested tests marked as passing
-- [ ] Bugs discovered by tests flagged (not fixed)
-- [ ] Test files committed with proper message
-- [ ] Coverage gaps documented
-- [ ] Next steps presented to user
+- [ ] 阶段产物已加载（SUMMARY.md、CONTEXT.md，可选 VERIFICATION.md）
+- [ ] 所有更改的文件已分类为 TDD/E2E/Skip 类别
+- [ ] 分类已展示给用户并获得批准
+- [ ] 已发现项目测试结构（目录、约定、运行器）
+- [ ] 测试计划已展示给用户并获得批准
+- [ ] TDD 测试已按 arrange/act/assert 结构生成
+- [ ] E2E 测试已针对用户场景生成
+- [ ] 所有测试已执行 — 没有未运行的测试被标记为通过
+- [ ] 测试发现的 bug 已标记（未修复）
+- [ ] 测试文件已使用正确的消息提交
+- [ ] 覆盖缺口已记录
+- [ ] 下一步操作已展示给用户
 </success_criteria>

@@ -1,6 +1,6 @@
 ---
 name: gsd:ship
-description: Create PR, run review, and prepare for merge after verification passes
+description: 创建 PR、运行评审，并在验证通过后准备合并
 argument-hint: "[phase number or milestone, e.g., '4' or 'v1.0']"
 allowed-tools:
   - Read
@@ -11,13 +11,13 @@ allowed-tools:
   - AskUserQuestion
 ---
 <objective>
-Bridge local completion → merged PR. After /gsd:verify-work passes, ship the work: push branch, create PR with auto-generated body, optionally trigger review, and track the merge.
-
-Closes the plan → execute → verify → ship loop.
+连接本地完成 → 已合并 PR。在 /gsd:verify-work 通过后，推送分支、创建 PR、可选触发评审并跟踪合并。关闭 计划 → 执行 → 验证 → 交付 的循环。
 </objective>
 
 <execution_context>
 @~/.claude/get-shit-done/workflows/ship.md
 </execution_context>
 
-Execute the ship workflow from @~/.claude/get-shit-done/workflows/ship.md end-to-end.
+<process>
+从头到尾执行 @~/.claude/get-shit-done/workflows/ship.md 中的 ship 工作流。
+</process>

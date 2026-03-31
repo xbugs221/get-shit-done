@@ -1,6 +1,6 @@
 ---
 name: gsd:review
-description: Request cross-AI peer review of phase plans from external AI CLIs
+description: 请求外部 AI CLI 对阶段计划进行跨 AI 同行评审
 argument-hint: "--phase N [--gemini] [--claude] [--codex] [--all]"
 allowed-tools:
   - Read
@@ -11,11 +11,8 @@ allowed-tools:
 ---
 
 <objective>
-Invoke external AI CLIs (Gemini, Claude, Codex) to independently review phase plans.
-Produces a structured REVIEWS.md with per-reviewer feedback that can be fed back into
-planning via /gsd:plan-phase --reviews.
-
-**Flow:** Detect CLIs → Build review prompt → Invoke each CLI → Collect responses → Write REVIEWS.md
+调用外部 AI CLI（Gemini、Claude、Codex）独立评审阶段计划。
+生成结构化 REVIEWS.md，可通过 /gsd:plan-phase --reviews 反馈到规划中。
 </objective>
 
 <execution_context>
@@ -23,15 +20,15 @@ planning via /gsd:plan-phase --reviews.
 </execution_context>
 
 <context>
-Phase number: extracted from $ARGUMENTS (required)
+阶段编号：从 $ARGUMENTS 中提取（必需）
 
-**Flags:**
-- `--gemini` — Include Gemini CLI review
-- `--claude` — Include Claude CLI review (uses separate session)
-- `--codex` — Include Codex CLI review
-- `--all` — Include all available CLIs
+**标志：**
+- `--gemini` — Gemini CLI 评审
+- `--claude` — Claude CLI 评审（独立会话）
+- `--codex` — Codex CLI 评审
+- `--all` — 所有可用 CLI
 </context>
 
 <process>
-Execute the review workflow from @~/.claude/get-shit-done/workflows/review.md end-to-end.
+从头到尾执行 @~/.claude/get-shit-done/workflows/review.md 中的评审工作流。
 </process>

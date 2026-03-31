@@ -1,6 +1,6 @@
 ---
 name: gsd:add-todo
-description: Capture idea or task as todo from current conversation context
+description: 从当前对话上下文中捕获想法或任务作为待办
 argument-hint: [optional description]
 allowed-tools:
   - Read
@@ -10,16 +10,9 @@ allowed-tools:
 ---
 
 <objective>
-Capture an idea, task, or issue that surfaces during a GSD session as a structured todo for later work.
+将 GSD 会话中浮现的想法、任务或问题捕获为结构化待办事项，以便后续处理。
 
-Routes to the add-todo workflow which handles:
-- Directory structure creation
-- Content extraction from arguments or conversation
-- Area inference from file paths
-- Duplicate detection and resolution
-- Todo file creation with frontmatter
-- STATE.md updates
-- Git commits
+路由到 add-todo 工作流，处理目录创建、内容提取、领域推断、重复检测、待办文件创建、STATE.md 更新和 Git 提交。
 </objective>
 
 <execution_context>
@@ -27,21 +20,13 @@ Routes to the add-todo workflow which handles:
 </execution_context>
 
 <context>
-Arguments: $ARGUMENTS (optional todo description)
+参数：$ARGUMENTS（可选的待办描述）
 
-State is resolved in-workflow via `init todos` and targeted reads.
+状态在工作流内通过 `init todos` 和目标读取解析。
 </context>
 
 <process>
-**Follow the add-todo workflow** from `@~/.claude/get-shit-done/workflows/add-todo.md`.
+**遵循 add-todo 工作流**，来自 `@~/.claude/get-shit-done/workflows/add-todo.md`。
 
-The workflow handles all logic including:
-1. Directory ensuring
-2. Existing area checking
-3. Content extraction (arguments or conversation)
-4. Area inference
-5. Duplicate checking
-6. File creation with slug generation
-7. STATE.md updates
-8. Git commits
+工作流处理：目录检查 → 领域检查 → 内容提取（参数或对话）→ 领域推断 → 重复检查 → slug 文件创建 → STATE.md 更新 → Git 提交。
 </process>
