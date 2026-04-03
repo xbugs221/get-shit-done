@@ -15,9 +15,10 @@ allowed-tools:
 ---
 
 <objective>
-提取下游代理所需的实现决策 — 研究员和规划器将使用 CONTEXT.md 来了解需要调查什么以及哪些选择已确定。
+给出 CONTEXT.md 确保下游能理解需要调查什么以及哪些选择已确定。
 
 **工作原理：**
+
 1. 加载先前上下文（PROJECT.md、REQUIREMENTS.md、STATE.md、之前的 CONTEXT.md）
 2. 扫描代码库中可复用的资产和模式
 3. 分析阶段 — 跳过之前已决定的灰色地带
@@ -54,6 +55,7 @@ DISCUSS_MODE=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get w
 </process>
 
 <success_criteria>
+
 - 先前上下文已加载（不重复询问已决定的问题）
 - 通过智能分析识别灰色地带
 - 用户选择了要讨论的领域

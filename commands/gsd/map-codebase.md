@@ -14,7 +14,7 @@ allowed-tools:
 <objective>
 使用并行的 gsd-codebase-mapper agent 分析现有代码库，生成结构化文档。
 
-每个映射 agent 探索一个关注领域并**直接写入** `.planning/codebase/`。编排器仅接收确认信息，保持上下文最小化。
+每个 agent 探索一个关注领域并**直接写入** `.planning/codebase/`。编排器仅接收确认信息，保持上下文最小化。
 
 输出：`.planning/codebase/` 文件夹，包含 7 个代码库状态文档。
 </objective>
@@ -29,6 +29,7 @@ allowed-tools:
 **如果存在则加载项目状态：** 检查 .planning/STATE.md，已初始化则加载上下文。
 
 **适用时机：**
+
 - 初始化前的棕地项目（先理解现有代码）
 - 重大变更后刷新代码库映射
 - 熟悉陌生的代码库
@@ -47,14 +48,13 @@ allowed-tools:
    - Agent 4：关切关注 → CONCERNS.md
 4. 等待完成，收集确认信息
 5. 验证所有 7 个文档存在且有行数统计
-6. 提交代码库映射
-7. 提供后续步骤（通常：/gsd:new-project 或 /gsd:plan-phase）
+6. git提交
 </process>
 
 <success_criteria>
+
 - [ ] .planning/codebase/ 目录已创建
 - [ ] 所有 7 个文档已由映射 agent 写入
 - [ ] 文档遵循模板结构
 - [ ] 并行 agent 无错误完成
-- [ ] 用户知道后续步骤
 </success_criteria>
