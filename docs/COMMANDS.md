@@ -114,6 +114,29 @@ Capture implementation decisions before planning.
 
 ---
 
+### `/gsd:spec-fix`
+
+Run the fixed six-pane small-fix workflow with deterministic stage gates.
+
+| Subcommand | Description |
+|------|-------------|
+| `start --mux <zellij\|tmux> --problem "..."` | Create `.planning/fixes/<id>/`, capture the problem, and persist the fixed pane layout |
+| `status [<id>]` | Show current stage, review attempts, auto-accept-on-round-3 state, commits, mux metadata, and provider mapping |
+| `complete-stage <id> --stage <name>` | Run the stage completion hook: validate artifacts, commit the stage, persist workflow state, and unlock the next stage |
+
+**Fixed pane order:** `lazygit`, `analysis`, `proposal-review`, `coding`, `code-review`, `archive`
+
+**Config:** `.planning/config.json > workflow.spec_fix_agent_providers`
+
+```bash
+/gsd:spec-fix start --mux zellij --problem "Login loop on callback"
+/gsd:spec-fix status fix-001
+/gsd:spec-fix complete-stage fix-001 --stage analysis
+/gsd:spec-fix complete-stage fix-001 --stage code-review --review-outcome changes_requested
+```
+
+---
+
 ### `/gsd:ui-phase`
 
 Generate UI design contract for frontend phases.

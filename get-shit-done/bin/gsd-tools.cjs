@@ -31,6 +31,7 @@
  *   summary-extract <path> [--fields]  Extract structured data from SUMMARY.md
  *   state-snapshot                     Structured parse of STATE.md
  *   phase-plan-index <phase>           Index plans with waves and status
+ *   status                             Show latest git subject and active spec-fix run
  *   websearch <query>                  Search web via Brave API (if configured)
  *     [--limit N] [--freshness day|week|month]
  *
@@ -133,6 +134,11 @@
  *   init milestone-op                  All context for milestone operations
  *   init map-codebase                  All context for map-codebase workflow
  *   init progress                      All context for progress workflow
+ *
+ * Fixed Spec-Fix Runner:
+ *   spec-fix start --mux M --problem P [--change C]
+ *   spec-fix status [<id>]
+ *   spec-fix complete-stage <id> --stage S [--review-outcome accepted|changes_requested]
  */
 
 const fs = require('fs');
@@ -152,6 +158,7 @@ const frontmatter = require('./lib/frontmatter.cjs');
 const profilePipeline = require('./lib/profile-pipeline.cjs');
 const profileOutput = require('./lib/profile-output.cjs');
 const workstream = require('./lib/workstream.cjs');
+const specFix = require('./lib/spec-fix.cjs');
 
 // ─── Arg parsing helpers ──────────────────────────────────────────────────────
 
@@ -274,7 +281,7 @@ async function main() {
   const command = args[0];
 
   if (!command) {
-    error('Usage: gsd-tools <command> [args] [--raw] [--pick <field>] [--cwd <path>] [--ws <name>]\nCommands: state, resolve-model, find-phase, commit, verify-summary, verify, frontmatter, template, generate-slug, current-timestamp, list-todos, verify-path-exists, config-ensure-section, config-new-project, init, workstream');
+    error('Usage: gsd-tools <command> [args] [--raw] [--pick <field>] [--cwd <path>] [--ws <name>]\nCommands: state, resolve-model, find-phase, commit, verify-summary, verify, frontmatter, template, generate-slug, current-timestamp, list-todos, verify-path-exists, config-ensure-section, config-new-project, init, workstream, spec-fix, status');
   }
 
   // Multi-repo guard: resolve project root for commands that read/write .planning/.
@@ -771,6 +778,11 @@ async function runCommand(command, args, cwd, raw) {
       break;
     }
 
+    case 'status': {
+      specFix.cmdStatusOverview(cwd, raw);
+      break;
+    }
+
     case 'state-snapshot': {
       state.cmdStateSnapshot(cwd, raw);
       break;
@@ -906,6 +918,26 @@ async function runCommand(command, args, cwd, raw) {
         workstream.cmdWorkstreamProgress(cwd, raw);
       } else {
         error('Unknown workstream subcommand. Available: create, list, status, complete, set, get, progress');
+      }
+      break;
+    }
+
+    case 'spec-fix': {
+      const subcommand = args[1];
+      if (subcommand === 'start') {
+        const options = parseNamedArgs(args, ['mux', 'problem', 'change']);
+        specFix.cmdSpecFixStart(cwd, options, raw);
+      } else if (subcommand === 'status') {
+        specFix.cmdSpecFixStatus(cwd, args[2] || null, raw);
+      } else if (subcommand === 'complete-stage') {
+        const options = parseNamedArgs(args, ['stage', 'review-outcome', 'feedback-file']);
+        specFix.cmdSpecFixCompleteStage(cwd, args[2], {
+          stage: options.stage,
+          reviewOutcome: options['review-outcome'],
+          feedbackFile: options['feedback-file'],
+        }, raw);
+      } else {
+        error('Unknown spec-fix subcommand. Available: start, status, complete-stage');
       }
       break;
     }

@@ -213,6 +213,7 @@ function loadConfig(cwd) {
     firecrawl: false,
     exa_search: false,
     text_mode: false, // when true, use plain-text numbered lists instead of AskUserQuestion menus
+    spec_fix_agent_providers: {},
     sub_repos: [],
     resolve_model_ids: false, // false: return alias as-is | true: map to full Claude model ID | "omit": return '' (runtime uses its default)
     context_window: 200000, // default 200k; set to 1000000 for Opus/Sonnet 4.6 1M models
@@ -304,6 +305,7 @@ function loadConfig(cwd) {
       firecrawl: get('firecrawl') ?? defaults.firecrawl,
       exa_search: get('exa_search') ?? defaults.exa_search,
       text_mode: get('text_mode', { section: 'workflow', field: 'text_mode' }) ?? defaults.text_mode,
+      spec_fix_agent_providers: get('spec_fix_agent_providers', { section: 'workflow', field: 'spec_fix_agent_providers' }) ?? defaults.spec_fix_agent_providers,
       sub_repos: get('sub_repos', { section: 'planning', field: 'sub_repos' }) ?? defaults.sub_repos,
       resolve_model_ids: get('resolve_model_ids') ?? defaults.resolve_model_ids,
       context_window: get('context_window') ?? defaults.context_window,

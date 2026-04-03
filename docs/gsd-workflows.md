@@ -97,6 +97,28 @@ flowchart TD
     style CommitC fill:#4CAF50,color:#fff
 ```
 
+### 需要固定审查闸门的小修复
+
+当问题不大，但又必须保留证据、提案审查、代码回看和归档记录时，走固定的 `spec-fix` runner。
+
+```mermaid
+flowchart TD
+    Start([有个小问题但不能直接改]) --> Capture[spec-fix start]
+    Capture --> Analysis[analysis]
+    Analysis --> Proposal[proposal-review]
+    Proposal --> Coding[coding]
+    Coding --> Review[code-review]
+    Review -->|通过| Archive[archive]
+    Review -->|前两轮不通过| Redo[coding redo]
+    Redo --> Review
+    Review -->|第 3 轮后自动通过| Archive
+    Archive --> Done([归档完成])
+
+    style Start fill:#8BC34A,color:#000
+    style Review fill:#FFB74D,color:#000
+    style Archive fill:#4CAF50,color:#fff
+```
+
 ## 场景四：全自动少问模式
 
 不想被问问题，让 AI 自己决定一切。
