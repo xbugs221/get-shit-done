@@ -97,7 +97,7 @@ function cleanupMuxSession(workflow) {
   }
 }
 
-const hasZellijStack = hasCommand('zellij') && hasCommand('script') && hasCommand('lazygit');
+const hasZellijStack = hasCommand('zellij') && hasCommand('lazygit');
 const hasTmuxStack = hasCommand('tmux') && hasCommand('lazygit');
 
 (hasZellijStack ? test : test.skip)('spec-fix start creates a fixed zellij run with lazygit in pane 1 and resolves per-agent providers from config', () => {
@@ -154,6 +154,8 @@ const hasTmuxStack = hasCommand('tmux') && hasCommand('lazygit');
     assert.equal(workflow.review_attempt, 0);
     assert.equal(workflow.mux_metadata.launched, true);
     assert.ok(workflow.mux_metadata.session_name, 'expected zellij session name');
+    assert.match(workflow.mux_metadata.launch_commands[0], /zellij.*attach.*--create-background.*--default-layout/);
+    assert.ok(workflow.mux_metadata.layout_path, 'expected zellij layout path to be persisted');
     assert.match(workflow.commits.problem || '', /^[0-9a-f]+$/i);
     assert.equal(workflow.change_name, 'callback-login-loop');
     assert.equal(workflow.openspec.state_root, '.planning/openspec');
@@ -177,6 +179,28 @@ const hasTmuxStack = hasCommand('tmux') && hasCommand('lazygit');
       sessions.includes(workflow.mux_metadata.session_name),
       `expected zellij session ${workflow.mux_metadata.session_name} to exist`
     );
+    const layoutPath = path.join(cwd, workflow.mux_metadata.layout_path);
+    assert.equal(fs.existsSync(layoutPath), true, 'expected zellij layout file to exist');
+
+    const tabNames = stripAnsi(execSync(
+      `zellij --session "${workflow.mux_metadata.session_name}" action query-tab-names`,
+      { encoding: 'utf8', stdio: 'pipe' }
+    ));
+    assert.equal(tabNames.trim(), 'spec-fix');
+
+    const liveLayout = stripAnsi(execSync(
+      `zellij --session "${workflow.mux_metadata.session_name}" action dump-layout`,
+      { encoding: 'utf8', stdio: 'pipe' }
+    ));
+    assert.match(liveLayout, /tab name="spec-fix"/);
+    assert.equal(
+      (liveLayout.match(/pane size="33%" split_direction="vertical"/g) || []).length,
+      3,
+      'expected three equal-width zellij columns'
+    );
+    for (const name of ['lazygit', 'analysis', 'proposal-review', 'coding', 'code-review', 'archive']) {
+      assert.match(liveLayout, new RegExp(`name="${name}"`));
+    }
 
     const log = runGsdTools(['status'], cwd, { HOME: cwd });
     assert.equal(log.success, true, normalizeOutput(log.error));

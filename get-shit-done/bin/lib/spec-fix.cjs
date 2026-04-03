@@ -11,7 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { spawn, spawnSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const {
   output,
   error,
@@ -67,6 +67,16 @@ function toRelativePosix(fromDir, toPath) {
  */
 function shellQuote(value) {
   return `'${String(value).replace(/'/g, `'\\''`)}'`;
+}
+
+/**
+ * Quote one string for a KDL layout document.
+ *
+ * @param {string} value - Raw string content.
+ * @returns {string} JSON-style quoted string accepted by KDL.
+ */
+function kdlQuote(value) {
+  return JSON.stringify(String(value));
 }
 
 /**
@@ -400,26 +410,22 @@ function buildPaneDefinitions({ fixId, fixDir, mux, agentProviders, providerReso
  * @param {Array<object>} panes - Fixed pane definitions.
  * @returns {object} Mux metadata persisted in `workflow.json`.
  */
-function buildMuxMetadata(cwd, mux, fixId, panes) {
+function buildMuxMetadata(cwd, mux, fixId, panes, fixDir) {
   const sessionName = buildMuxSessionName(cwd, fixId);
 
   if (mux === 'zellij') {
+    const layoutPath = path.join(fixDir, 'mux', 'zellij-layout.kdl');
     return {
       type: 'zellij',
       adapter_contract: 'fixed-six-pane-v1',
       session_name: sessionName,
       pane_order: FIX_PANE_ROLES,
       lazygit_pane: '1',
+      layout_path: toRelativePosix(cwd, layoutPath),
       launched: false,
       reason: 'layout_defined_for_runner',
       launch_commands: [
-        formatCommand('script', ['-q', '-c', `zellij --session ${sessionName}`, '/dev/null']),
-        formatCommand('zellij', ['--session', sessionName, 'action', 'rename-pane', panes[0].role]),
-        formatCommand('zellij', ['--session', sessionName, 'action', 'write-chars', panes[0].injected_command]),
-        formatCommand('zellij', ['--session', sessionName, 'action', 'write', '10']),
-        ...panes.slice(1).map(pane =>
-          formatCommand('zellij', ['--session', sessionName, 'action', 'new-pane', '--name', pane.role, '--cwd', cwd, '--', 'sh', '-lc', pane.injected_command])
-        ),
+        formatCommand('zellij', ['attach', sessionName, '--create-background', 'options', '--default-layout', layoutPath]),
       ],
     };
   }
@@ -473,6 +479,57 @@ function buildPaneShellCommand(cwd, promptPath, role, providerResolution) {
     'printf \'\\n\'',
     'exec "${SHELL:-/bin/sh}" -l',
   ].join(' && ');
+}
+
+/**
+ * Render one zellij pane node that executes the pane's injected shell command.
+ *
+ * @param {object} pane - Persisted pane definition.
+ * @param {boolean} focused - Whether this pane should receive initial focus.
+ * @returns {string[]} KDL lines for the leaf pane.
+ */
+function buildZellijLeafPaneLines(pane, focused) {
+  const lines = [
+    `            pane name=${kdlQuote(pane.role)} size="50%" command="sh" {`,
+    `                args "-lc" ${kdlQuote(pane.injected_command)}`,
+  ];
+  if (focused) {
+    lines.push('                focus true');
+  }
+  lines.push('            }');
+  return lines;
+}
+
+/**
+ * Build a fixed 2x3 zellij layout for the six spec-fix panes.
+ *
+ * Top row: lazygit | analysis | proposal-review
+ * Bottom row: coding | code-review | archive
+ *
+ * @param {object} workflow - Current workflow state.
+ * @returns {string} KDL document for zellij default_layout.
+ */
+function buildZellijLayout(workflow) {
+  const columns = [
+    [workflow.panes[0], workflow.panes[3]],
+    [workflow.panes[1], workflow.panes[4]],
+    [workflow.panes[2], workflow.panes[5]],
+  ];
+  const lines = [
+    'layout {',
+    '    tab name="spec-fix" split_direction="horizontal" {',
+  ];
+
+  for (const [topPane, bottomPane] of columns) {
+    lines.push('        pane size="33%" split_direction="vertical" {');
+    lines.push(...buildZellijLeafPaneLines(topPane, false));
+    lines.push(...buildZellijLeafPaneLines(bottomPane, bottomPane.role === 'archive'));
+    lines.push('        }');
+  }
+
+  lines.push('    }');
+  lines.push('}');
+  return `${lines.join('\n')}\n`;
 }
 
 /**
@@ -635,7 +692,7 @@ function launchTmuxSession(cwd, fixDir, workflow) {
 }
 
 /**
- * Launch a detached zellij session with the fixed six-pane workflow layout.
+ * Launch a detached zellij session with a fixed 2x3 six-pane layout.
  *
  * @param {string} cwd - Project root.
  * @param {string} fixDir - Fix workspace directory.
@@ -646,77 +703,40 @@ function launchZellijSession(cwd, fixDir, workflow) {
   if (!commandExists('zellij')) {
     throw new Error('zellij is not installed or not available on PATH');
   }
-  if (!commandExists('script')) {
-    throw new Error('script is required to start a detached zellij session');
-  }
   if (!commandExists('lazygit')) {
     throw new Error('lazygit is not installed or not available on PATH');
   }
 
   const sessionName = workflow.mux_metadata.session_name;
   const createdAt = new Date().toISOString();
-  const launcherLog = path.join(fixDir, 'mux', 'zellij-launch.log');
-  ensureDir(path.dirname(launcherLog));
+  const layoutPath = path.join(cwd, workflow.mux_metadata.layout_path || toRelativePosix(cwd, path.join(fixDir, 'mux', 'zellij-layout.kdl')));
+  ensureDir(path.dirname(layoutPath));
   if (zellijSessionExists(cwd, sessionName)) {
     throw new Error(`Failed to create zellij session ${sessionName}: duplicate session`);
   }
 
-  let launcher = null;
-  let createdSession = false;
   const launchCommands = [];
 
   try {
-    const startArgs = ['-q', '-c', `zellij --session ${sessionName}`, '/dev/null'];
-    launchCommands.push(formatCommand('script', startArgs));
-    launcher = spawn('script', startArgs, {
-      cwd,
-      detached: true,
-      stdio: ['ignore', fs.openSync(launcherLog, 'a'), fs.openSync(launcherLog, 'a')],
-    });
-    launcher.unref();
-
+    fs.writeFileSync(layoutPath, buildZellijLayout(workflow), 'utf8');
+    const startArgs = ['attach', sessionName, '--create-background', 'options', '--default-layout', layoutPath];
+    launchCommands.push(formatCommand('zellij', startArgs));
+    const startResult = runProcess('zellij', startArgs, cwd);
+    if (startResult.exitCode !== 0) {
+      throw new Error(startResult.stderr || startResult.stdout || `Failed to create zellij session ${sessionName}`);
+    }
     waitFor(() => zellijSessionExists(cwd, sessionName), 5000, `Timed out waiting for zellij session ${sessionName}`);
-    createdSession = true;
-
-    const actionBase = ['--session', sessionName, 'action'];
-    const renameArgs = [...actionBase, 'rename-pane', workflow.panes[0].role];
-    launchCommands.push(formatCommand('zellij', renameArgs));
-    const renameResult = runProcess('zellij', renameArgs, cwd);
-    if (renameResult.exitCode !== 0) {
-      throw new Error(renameResult.stderr || renameResult.stdout || `Failed to rename zellij pane for ${sessionName}`);
-    }
-
-    const writeCharsArgs = [...actionBase, 'write-chars', workflow.panes[0].injected_command];
-    launchCommands.push(formatCommand('zellij', writeCharsArgs));
-    runProcess('zellij', writeCharsArgs, cwd);
-
-    const writeArgs = [...actionBase, 'write', '10'];
-    launchCommands.push(formatCommand('zellij', writeArgs));
-    runProcess('zellij', writeArgs, cwd);
-
-    for (let index = 1; index < workflow.panes.length; index += 1) {
-      const pane = workflow.panes[index];
-      const paneArgs = [...actionBase, 'new-pane', '--name', pane.role, '--cwd', cwd, '--', 'sh', '-lc', pane.injected_command];
-      launchCommands.push(formatCommand('zellij', paneArgs));
-      const paneResult = runProcess('zellij', paneArgs, cwd);
-      if (paneResult.exitCode !== 0) {
-        throw new Error(paneResult.stderr || paneResult.stdout || `Failed to create zellij pane for ${pane.role}`);
-      }
-      pane.pane_id = String(index + 1);
-    }
 
     return {
       ...workflow.mux_metadata,
       launched: true,
       reason: 'session_started',
       launched_at: createdAt,
-      launcher_pid: launcher.pid,
-      launcher_log: toRelativePosix(cwd, launcherLog),
       pane_ids: workflow.panes.map(pane => pane.pane_id),
       launch_commands: launchCommands,
     };
   } catch (err) {
-    if (createdSession) {
+    if (zellijSessionExists(cwd, sessionName)) {
       killMuxSession({ type: 'zellij', session_name: sessionName }, cwd);
     }
     throw err;
@@ -936,7 +956,7 @@ function buildInitialWorkflow(options) {
     problem_path: 'PROBLEM.md',
     workflow_schema: 'fixed-spec-fix-runner/v1',
     panes,
-    mux_metadata: buildMuxMetadata(cwd, mux, fixId, panes),
+    mux_metadata: buildMuxMetadata(cwd, mux, fixId, panes, fixDir),
     agent_providers: agentProviders,
     provider_resolutions: providerResolutions,
     openspec: {
