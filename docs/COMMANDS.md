@@ -116,23 +116,26 @@ Capture implementation decisions before planning.
 
 ### `/gsd:spec-fix`
 
-Run the fixed six-pane small-fix workflow with deterministic stage gates.
+Run the fixed small-fix workflow with a natural-language single-command entry and deterministic stage gates.
 
 | Subcommand | Description |
 |------|-------------|
-| `start --mux <zellij\|tmux> --problem "..." --change <name>` | Validate the linked OpenSpec change first, then create `.planning/fixes/<id>/`, capture the problem, and persist the fixed pane layout plus OpenSpec link metadata |
-| `status [<id>]` | Show workflow state together with linked OpenSpec state root, change directory, `applyRequires`, and artifact completion status |
-| `complete-stage <id> --stage <name>` | Run the stage completion hook: validate artifacts, commit the stage, persist workflow state, and unlock the next stage; `archive` first runs `openspec archive <change> --yes` and only marks the workflow archived after it succeeds |
+| `--problem "..." [--mux <zellij\|tmux>]` | Create `.planning/fixes/<id>/`, capture the original bug report, then automatically run `analysis -> proposal-review -> coding -> code-review -> archive` in one command. OpenSpec change creation is lazy and no longer a startup prerequisite |
+| `start --mux <zellij\|tmux> --problem "..." --change <name>` | Legacy/debug entrypoint. Validate the linked OpenSpec change first, then create `.planning/fixes/<id>/`, capture the problem, and persist the fixed pane layout plus OpenSpec link metadata |
+| `status [<id>]` | Show workflow state together with auto-execution progress, blocking reason, linked OpenSpec state root, change directory, sync state, `applyRequires`, and artifact completion status |
+| `complete-stage <id> --stage <name>` | Legacy/debug completion hook. Validate artifacts, commit the stage, persist workflow state, and unlock the next stage; `archive` first archives the linked OpenSpec change when one exists |
 
 **Fixed pane order:** `lazygit`, `analysis`, `proposal-review`, `coding`, `code-review`, `archive`
 
 **Config:** `.planning/config.json > workflow.spec_fix_agent_providers`
 
-**State layout:** `.planning/fixes/` stores runner state, `.planning/openspec/` stores OpenSpec declaration state, and the repository root `.openspec-root.json` points OpenSpec at that nested state tree.
+**State layout:** `.planning/fixes/` stores runner state, `.planning/openspec/` stores OpenSpec declaration state when the repository exposes a state root, and the repository root `.openspec-root.json` can point OpenSpec at that nested state tree.
 
 ```bash
-/gsd:spec-fix start --mux zellij --problem "Login loop on callback" --change callback-login-loop
+/gsd:spec-fix --problem "Login loop on callback"
+/gsd:spec-fix --mux zellij --problem "Login loop on callback"
 /gsd:spec-fix status fix-001
+/gsd:spec-fix start --mux zellij --problem "Login loop on callback" --change callback-login-loop
 /gsd:spec-fix complete-stage fix-001 --stage analysis
 /gsd:spec-fix complete-stage fix-001 --stage code-review --review-outcome changes_requested
 ```

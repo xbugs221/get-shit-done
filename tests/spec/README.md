@@ -10,3 +10,4 @@
 当前变更：
 - `linear-spec-fix-runner`：确定性的 spec-fix runner，具有固定 pane 布局、逐阶段 commit 和有上限的 review 重试
 - `spec-fix-openspec-integration`：让 spec-fix workflow 与 OpenSpec runtime 状态树、change 校验和 archive 生命周期保持一致
+- `autonomous-spec-fix-orchestrator`：将 spec-fix 改为自然语言单入口、自动推进并按阶段自动提交的修复编排器

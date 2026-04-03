@@ -1,8 +1,5 @@
-# openspec-runtime-bridge Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change spec-fix-openspec-integration. Update Purpose after archive.
-## Requirements
 ### Requirement: GSD 必须通过 OpenSpec runtime 解析项目状态根
 GSD SHALL 在 `spec-fix` 运行期间按需通过 OpenSpec runtime 的既有定位规则解析项目级状态根，而不是把 OpenSpec change 作为启动前置条件。
 
@@ -32,4 +29,3 @@ GSD SHALL 通过 OpenSpec 的 JSON 命令面读取、创建、同步和归档 au
 - **AND** 当前 workflow 已存在内部 OpenSpec change
 - **THEN** GSD 自动调用 OpenSpec archive 命令归档该 change
 - **AND** 只有当该命令成功完成时，才允许 workflow 进入 `archived`
-

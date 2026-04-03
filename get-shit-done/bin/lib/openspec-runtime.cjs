@@ -1,8 +1,8 @@
 /**
  * OpenSpec Runtime Bridge
  *
- * Provides a thin CLI adapter for querying linked OpenSpec changes from GSD
- * without duplicating OpenSpec state-root resolution logic.
+ * Provides a thin CLI adapter for querying and mutating OpenSpec changes from
+ * GSD without duplicating the runtime's state-root resolution logic.
  */
 
 'use strict';
@@ -58,6 +58,47 @@ function runOpenSpecCommand(cwd, args) {
 }
 
 /**
+ * Detect whether the current repository exposes an OpenSpec state root.
+ *
+ * The runner only uses this as a lightweight preflight before attempting lazy
+ * change creation. Actual change metadata still comes from OpenSpec JSON
+ * commands so the runtime remains the source of truth.
+ *
+ * @param {string} cwd - Project root.
+ * @returns {{available: boolean, stateRoot: string|null}} Relative state root hint.
+ */
+function resolveOpenSpecStateRootHint(cwd) {
+  const locatorPath = path.join(cwd, '.openspec-root.json');
+  try {
+    if (require('fs').existsSync(locatorPath)) {
+      const locator = JSON.parse(require('fs').readFileSync(locatorPath, 'utf8'));
+      if (typeof locator.stateRoot === 'string' && locator.stateRoot.trim()) {
+        return {
+          available: true,
+          stateRoot: locator.stateRoot.trim().replace(/\\/g, '/'),
+        };
+      }
+    }
+  } catch {
+    // Fall through to well-known state roots when the locator is missing or malformed.
+  }
+
+  for (const candidate of ['.planning/openspec', 'openspec']) {
+    if (require('fs').existsSync(path.join(cwd, candidate, 'config.yaml'))) {
+      return {
+        available: true,
+        stateRoot: candidate,
+      };
+    }
+  }
+
+  return {
+    available: false,
+    stateRoot: null,
+  };
+}
+
+/**
  * Normalize OpenSpec artifact arrays into a stable object keyed by artifact id.
  *
  * @param {Array<object>} artifacts - Artifact records returned by OpenSpec.
@@ -72,10 +113,45 @@ function buildArtifactMap(artifacts) {
       output_path: artifact.outputPath || null,
       missing_dependencies: Array.isArray(artifact.missingDependencies)
         ? artifact.missingDependencies
+        : Array.isArray(artifact.missingDeps)
+          ? artifact.missingDeps
         : [],
     };
   }
   return artifactMap;
+}
+
+/**
+ * Create one OpenSpec change when the repository exposes a valid state root.
+ *
+ * @param {string} cwd - Project root.
+ * @param {string} changeName - Change identifier to create.
+ * @returns {{created: boolean, snapshot: object|null, stateRoot: string|null}} Creation result.
+ */
+function ensureOpenSpecChange(cwd, changeName) {
+  const stateRootHint = resolveOpenSpecStateRootHint(cwd);
+  if (!stateRootHint.available) {
+    return {
+      created: false,
+      snapshot: null,
+      stateRoot: null,
+    };
+  }
+
+  try {
+    return {
+      created: false,
+      snapshot: getOpenSpecChangeSnapshot(cwd, changeName),
+      stateRoot: stateRootHint.stateRoot,
+    };
+  } catch {
+    runOpenSpecCommand(cwd, ['new', 'change', changeName]);
+    return {
+      created: true,
+      snapshot: getOpenSpecChangeSnapshot(cwd, changeName),
+      stateRoot: stateRootHint.stateRoot,
+    };
+  }
 }
 
 /**
@@ -121,5 +197,7 @@ function archiveOpenSpecChange(cwd, changeName) {
 
 module.exports = {
   archiveOpenSpecChange,
+  ensureOpenSpecChange,
   getOpenSpecChangeSnapshot,
+  resolveOpenSpecStateRootHint,
 };

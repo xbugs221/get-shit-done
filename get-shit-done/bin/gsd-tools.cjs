@@ -136,6 +136,7 @@
  *   init progress                      All context for progress workflow
  *
  * Fixed Spec-Fix Runner:
+ *   spec-fix --problem P [--mux M]
  *   spec-fix start --mux M --problem P --change C
  *   spec-fix status [<id>]
  *   spec-fix complete-stage <id> --stage S [--review-outcome accepted|changes_requested]
@@ -924,11 +925,19 @@ async function runCommand(command, args, cwd, raw) {
 
     case 'spec-fix': {
       const subcommand = args[1];
-      if (subcommand === 'start') {
+      if (!subcommand || subcommand.startsWith('--')) {
+        const options = parseNamedArgs(args, ['mux', 'problem']);
+        specFix.cmdSpecFixAutonomous(cwd, options, raw);
+      } else if (subcommand === 'start') {
         const options = parseNamedArgs(args, ['mux', 'problem', 'change']);
         specFix.cmdSpecFixStart(cwd, options, raw);
       } else if (subcommand === 'status') {
         specFix.cmdSpecFixStatus(cwd, args[2] || null, raw);
+      } else if (subcommand === 'run-stage') {
+        const options = parseNamedArgs(args, ['stage']);
+        specFix.cmdSpecFixRunStage(cwd, args[2], {
+          stage: options.stage,
+        }, raw);
       } else if (subcommand === 'complete-stage') {
         const options = parseNamedArgs(args, ['stage', 'review-outcome', 'feedback-file']);
         specFix.cmdSpecFixCompleteStage(cwd, args[2], {
@@ -937,7 +946,7 @@ async function runCommand(command, args, cwd, raw) {
           feedbackFile: options['feedback-file'],
         }, raw);
       } else {
-        error('Unknown spec-fix subcommand. Available: start, status, complete-stage');
+        error('Unknown spec-fix subcommand. Available: start, status, run-stage, complete-stage');
       }
       break;
     }

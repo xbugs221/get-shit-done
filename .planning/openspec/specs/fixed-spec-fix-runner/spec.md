@@ -4,35 +4,29 @@
 定义一个确定性的 spec-fix runner，用固定六 pane mux 布局推进小型修复工作流，并强制阶段闸门、逐阶段提交、有限 review 回环和按角色配置 provider/runtime。
 ## Requirements
 ### Requirement: Runner 启动固定的 spec-fix 会话
-系统 MUST 提供 `spec-fix start` 入口，用于创建新的 fix 工作区、记录用户原始问题、校验并关联一个已存在的 OpenSpec change、写入持久化工作流状态，并创建固定的六 pane mux window。
+系统 MUST 提供以自然语言问题为核心输入的 `spec-fix` 入口，用于创建新的 fix 工作区、记录用户原始问题、写入持久化工作流状态，并在请求 mux 观察界面时创建固定的六 pane mux 会话；启动时不得要求用户预先创建 OpenSpec change。
 
-#### Scenario: 使用嵌套 OpenSpec 状态根启动新的 spec-fix run
-- **WHEN** 仓库根目录存在 `.openspec-root.json`
-- **AND** 其 `stateRoot` 为 `.planning/openspec`
-- **AND** OpenSpec change `callback-login-loop` 已存在
-- **AND** 用户运行 `gsd-tools spec-fix start --mux zellij --problem "Login loop on callback" --change callback-login-loop`
+#### Scenario: 在没有预建 OpenSpec change 的情况下启动自动 spec-fix run
+- **WHEN** 当前仓库中还没有与该 bug 对应的 OpenSpec change
+- **AND** 用户运行 `gsd-tools spec-fix --problem "Login loop on callback"`
 - **THEN** 系统创建 `.planning/fixes/<id>/`
 - **AND** 写入包含原始问题内容的 `PROBLEM.md`
-- **AND** 写入 `workflow.json`，其中阶段为 `problem-captured`、`change_name` 为 `callback-login-loop`
-- **AND** 在 workflow 中记录解析后的 OpenSpec 状态根 `.planning/openspec`
-- **AND** 按固定顺序创建六个 pane：`lazygit`、`analysis`、`proposal-review`、`coding`、`code-review`、`archive`
+- **AND** 写入 `workflow.json`，其中阶段为自动执行中的初始状态
+- **AND** 不会因为缺少预建 OpenSpec change 而拒绝启动
+
+#### Scenario: 请求 zellij 观察界面时创建固定六 pane 并直接执行阶段命令
+- **WHEN** 用户运行 `gsd-tools spec-fix --mux zellij --problem "Login loop on callback"`
+- **THEN** runner 按固定顺序创建六个 pane：`lazygit`、`analysis`、`proposal-review`、`coding`、`code-review`、`archive`
+- **AND** 非 `lazygit` pane 会直接执行各自阶段命令，而不是只打印 prompt 后停在 shell
 - **AND** 创建第一个 commit，subject 为 `问题：Login loop on callback`
 
-#### Scenario: 关联的 OpenSpec change 不存在时拒绝启动
-- **WHEN** 用户运行 `gsd-tools spec-fix start --mux tmux --problem "Login loop on callback" --change missing-change`
-- **AND** 当前仓库状态树中不存在名为 `missing-change` 的 OpenSpec change
-- **THEN** runner 在创建 `.planning/fixes/<id>/` 之前就终止启动
-- **AND** 输出中明确说明缺失的是关联 OpenSpec change
-- **AND** 不会留下半成品 fix workspace
-
 ### Requirement: Runner 强制执行线性阶段闸门
-系统 MUST 通过固定的线性状态机推进 spec-fix 工作流，且只有 runner 或其 hook 可以解锁下一阶段。
+系统 MUST 通过固定的线性状态机自动推进 spec-fix 工作流，且只有 runner 可以在阶段校验通过并成功提交后解锁下一阶段。
 
-#### Scenario: Analysis 完成后解锁 proposal review
-- **WHEN** analysis 阶段结束，且其 completion hook 校验通过必需产物
+#### Scenario: Analysis 完成后由 runner 自动进入 proposal review
+- **WHEN** analysis 阶段命令结束，且其产物校验通过
 - **THEN** runner 将 analysis 阶段的 commit hash 记录到 `workflow.json`
-- **AND** 将当前阶段更新为 `analysis-done`
-- **AND** 解锁 proposal-review
+- **AND** 自动将当前阶段推进到 proposal-review 的执行态
 - **AND** 在前置阶段未通过校验并完成 commit 前，后续阶段保持锁定
 
 ### Requirement: Coding 改进回环必须有上限且保持增量
@@ -62,26 +56,22 @@
 - **AND** 在创建 pane 命令时使用各自 agent 的 provider/runtime，而不是单一全局值
 
 ### Requirement: 成功阶段必须始终生成 commit
-系统 MUST 在每次成功阶段切换后生成独立 commit，并由 runner 统一控制 commit message 模式。
+系统 MUST 在每次自动完成的成功阶段后生成独立 commit，并由 runner 统一控制 commit message 模式。
 
-#### Scenario: Proposal review 生成阶段 commit
-- **WHEN** proposal review 通过校验
-- **THEN** runner 使用 proposal-review 阶段的固定 message 模式创建 commit
+#### Scenario: Coding 阶段自动生成阶段 commit
+- **WHEN** coding 阶段命令成功结束，且 `artifacts/coding/IMPLEMENTATION.md` 校验通过
+- **THEN** runner 使用 coding 阶段的固定 message 模式创建 commit
 - **AND** 将该 commit hash 记录到 `workflow.json`
-- **AND** 只有在 commit 成功后才推进到下一阶段
+- **AND** 只有在 commit 成功后才继续进入 code-review
 
 ### Requirement: 用户可以检查工作流状态和输出
-系统 MUST 提供 `spec-fix status <id>` 命令，用于输出当前阶段、review 轮次、第 3 次 review 自动通过状态、commit hash、mux 元数据、agent provider 解析结果、关联的 OpenSpec change 以及该 change 的 artifact 完成状态。
+系统 MUST 提供 `spec-fix status <id>` 命令，用于输出当前执行阶段、review 轮次、自动推进状态、阻塞原因、commit hash、mux 元数据、agent provider 解析结果，以及 OpenSpec 同步状态。
 
-#### Scenario: 用户检查一个在第 3 次 review 后自动通过的工作流
-- **WHEN** 用户对一个第 3 次 review 后自动通过的工作流运行 `gsd-tools spec-fix status <id>`
-- **AND** 该 workflow 关联的 OpenSpec change 位于 `.planning/openspec/changes/callback-login-loop`
-- **THEN** 输出中显示当前阶段已进入 archive 前后的通过态
-- **AND** 包含 `review_attempt: 3`
-- **AND** 包含 `accepted_after_round_3`
-- **AND** 列出每个已完成阶段最新的 commit hash
-- **AND** 显示 mux 类型、pane 元数据、agent provider 解析结果和关联的 OpenSpec change 名称
-- **AND** 显示解析后的 OpenSpec 状态根、change 目录、`applyRequires` 与 proposal/design/specs/tasks 的完成状态
+#### Scenario: 用户检查一个正在自动执行的 workflow
+- **WHEN** 用户对一个仍在自动执行中的 workflow 运行 `gsd-tools spec-fix status <id>`
+- **THEN** 输出中显示当前阶段、已完成阶段的 commit hash 和当前是否 blocked
+- **AND** 若 workflow 尚未创建内部 OpenSpec change，也会显示 OpenSpec 同步状态而不是直接报错
+- **AND** 若 workflow 已进入三审后自动通过路径，则输出中包含 `accepted_after_round_3`
 
 ### Requirement: Archive 阶段必须与关联 OpenSpec change 保持一致
 系统 MUST 在归档 workflow 之前先成功归档关联的 OpenSpec change；若 OpenSpec archive 失败，则 workflow 不得进入 `archived`。
@@ -101,4 +91,21 @@
 - **THEN** runner 终止当前 archive 完成流程
 - **AND** 保持 `workflow.json` 中的当前阶段为 archive 前状态
 - **AND** 不会创建 archive 阶段 commit
+
+### Requirement: Runner 必须自动执行完整 spec-fix 流程
+系统 MUST 在用户提供自然语言问题后，自动按 analysis、proposal-review、coding、code-review、archive 的固定顺序推进 workflow，而不是要求用户逐阶段调用 `complete-stage`。
+
+#### Scenario: 单命令自动完成一次通过的修复流程
+- **WHEN** 用户运行 `gsd-tools spec-fix --problem "Login loop on callback"`
+- **AND** 阶段执行器在 analysis、proposal-review、coding、code-review、archive 上都返回成功
+- **THEN** runner 在一次命令执行中完成整个 workflow
+- **AND** 最终将 `workflow.json` 的 `current_stage` 记录为 `archived`
+- **AND** 用户不需要手工调用 `spec-fix complete-stage`
+
+#### Scenario: Code review 要求修改时自动回到 coding
+- **WHEN** 用户运行 `gsd-tools spec-fix --problem "Callback loop still happens after token refresh"`
+- **AND** 第 1 次 code-review 返回 `changes_requested`
+- **THEN** runner 自动将 workflow 带回 coding 做增量修复
+- **AND** 将 `review_attempt` 增加到 `1`
+- **AND** 不要求用户手工重新触发下一个阶段
 
