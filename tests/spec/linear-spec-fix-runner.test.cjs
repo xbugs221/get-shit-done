@@ -13,7 +13,12 @@ const crypto = require('node:crypto');
 const { execSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
-const { createTempGitProject, cleanup, runGsdTools } = require('../helpers.cjs');
+const {
+  createTempGitProject,
+  cleanup,
+  runGsdTools,
+  scaffoldOpenSpecChange,
+} = require('../helpers.cjs');
 
 /**
  * Normalize line endings to keep commit-subject assertions stable.
@@ -100,6 +105,7 @@ const hasTmuxStack = hasCommand('tmux') && hasCommand('lazygit');
   let workflow = null;
 
   try {
+    scaffoldOpenSpecChange(cwd, 'callback-login-loop', { complete: true });
     fs.writeFileSync(path.join(cwd, '.planning', 'config.json'), JSON.stringify({
       workflow: {
         spec_fix_agent_providers: {
@@ -119,6 +125,8 @@ const hasTmuxStack = hasCommand('tmux') && hasCommand('lazygit');
       'zellij',
       '--problem',
       'Login loop on callback',
+      '--change',
+      'callback-login-loop',
     ], cwd, { HOME: cwd });
 
     assert.equal(result.success, true, normalizeOutput(result.error));
@@ -147,6 +155,8 @@ const hasTmuxStack = hasCommand('tmux') && hasCommand('lazygit');
     assert.equal(workflow.mux_metadata.launched, true);
     assert.ok(workflow.mux_metadata.session_name, 'expected zellij session name');
     assert.match(workflow.commits.problem || '', /^[0-9a-f]+$/i);
+    assert.equal(workflow.change_name, 'callback-login-loop');
+    assert.equal(workflow.openspec.state_root, '.planning/openspec');
     assert.deepEqual(workflow.agent_providers, {
       analysis: 'codex',
       proposal_review: 'claude',
@@ -181,13 +191,14 @@ test('spec-fix status reports third-round auto-acceptance and resolved provider 
   const cwd = createTempGitProject('gsd-spec-fix-status-');
 
   try {
+    scaffoldOpenSpecChange(cwd, 'callback-login-loop', { complete: true });
     const planningDir = path.join(cwd, '.planning', 'fixes', 'fix-001');
     fs.mkdirSync(planningDir, { recursive: true });
     fs.writeFileSync(path.join(planningDir, 'PROBLEM.md'), '# Problem\n\nLogin loop on callback\n', 'utf8');
     fs.writeFileSync(path.join(planningDir, 'workflow.json'), JSON.stringify({
       id: 'fix-001',
       mux: 'zellij',
-      change_name: 'linear-spec-fix-runner',
+      change_name: 'callback-login-loop',
       current_stage: 'archive-ready',
       review_attempt: 3,
       review_resolution: 'accepted_after_round_3',
@@ -214,18 +225,24 @@ test('spec-fix status reports third-round auto-acceptance and resolved provider 
         coding: 'd4e5f6a',
         code_review: 'e5f6a7b',
       },
+      openspec: {
+        change_name: 'callback-login-loop',
+        state_root: '.planning/openspec',
+        change_dir: '.planning/openspec/changes/callback-login-loop',
+      },
     }, null, 2), 'utf8');
 
     const result = runGsdTools(['spec-fix', 'status', 'fix-001'], cwd, { HOME: cwd });
+    const output = JSON.parse(result.output);
 
     assert.equal(result.success, true, normalizeOutput(result.error));
-    assert.match(result.output, /archive-ready/i);
-    assert.match(result.output, /review_attempt/i);
-    assert.match(result.output, /3/);
-    assert.match(result.output, /accepted_after_round_3/);
-    assert.match(result.output, /linear-spec-fix-runner/);
-    assert.match(result.output, /lazygit/);
-    assert.match(result.output, /gemini/);
+    assert.equal(output.current_stage, 'archive-ready');
+    assert.equal(output.review_attempt, 3);
+    assert.equal(output.review_resolution, 'accepted_after_round_3');
+    assert.equal(output.openspec.state_root, '.planning/openspec');
+    assert.equal(output.openspec.artifacts.tasks.status, 'done');
+    assert.equal(output.agent_providers.archive, 'gemini');
+    assert.equal(output.panes[0].role, 'lazygit');
   } finally {
     cleanup(cwd);
   }
@@ -236,6 +253,7 @@ test('spec-fix status reports third-round auto-acceptance and resolved provider 
   let workflow = null;
 
   try {
+    scaffoldOpenSpecChange(cwd, 'callback-loop-refresh', { complete: true });
     const start = runGsdTools([
       'spec-fix',
       'start',
@@ -243,6 +261,8 @@ test('spec-fix status reports third-round auto-acceptance and resolved provider 
       'tmux',
       '--problem',
       'Callback loop still happens after token refresh',
+      '--change',
+      'callback-loop-refresh',
     ], cwd, { HOME: cwd });
     assert.equal(start.success, true, normalizeOutput(start.error));
 
@@ -290,6 +310,8 @@ test('spec-fix status reports third-round auto-acceptance and resolved provider 
   let workflowB = null;
 
   try {
+    scaffoldOpenSpecChange(cwdA, 'repo-a-change', { complete: true });
+    scaffoldOpenSpecChange(cwdB, 'repo-b-change', { complete: true });
     fs.writeFileSync(path.join(cwdA, '.planning', 'config.json'), JSON.stringify({
       workflow: {
         spec_fix_agent_providers: {
@@ -309,6 +331,8 @@ test('spec-fix status reports third-round auto-acceptance and resolved provider 
       'tmux',
       '--problem',
       'Session name collision probe A',
+      '--change',
+      'repo-a-change',
     ], cwdA, { HOME: cwdA });
     const startB = runGsdTools([
       'spec-fix',
@@ -317,6 +341,8 @@ test('spec-fix status reports third-round auto-acceptance and resolved provider 
       'tmux',
       '--problem',
       'Session name collision probe B',
+      '--change',
+      'repo-b-change',
     ], cwdB, { HOME: cwdB });
 
     assert.equal(startA.success, true, normalizeOutput(startA.error));
@@ -359,6 +385,7 @@ test('spec-fix status reports third-round auto-acceptance and resolved provider 
   const sessionName = buildExpectedSessionName(cwd, 'fix-001');
 
   try {
+    scaffoldOpenSpecChange(cwd, 'rollback-change', { complete: true });
     execSync(`tmux new-session -d -s "${sessionName}" -c "${cwd}" 'sleep 30'`, { stdio: 'pipe' });
 
     const result = runGsdTools([
@@ -368,6 +395,8 @@ test('spec-fix status reports third-round auto-acceptance and resolved provider 
       'tmux',
       '--problem',
       'Rollback on failed tmux session creation',
+      '--change',
+      'rollback-change',
     ], cwd, { HOME: cwd });
 
     assert.equal(result.success, false, 'expected start failure when tmux session already exists');
@@ -427,6 +456,7 @@ test('spec-fix complete-stage rejects invalid code-review outcomes', () => {
   const cwd = createTempGitProject('gsd-spec-fix-invalid-review-');
 
   try {
+    scaffoldOpenSpecChange(cwd, 'callback-login-loop', { complete: true });
     const fixDir = path.join(cwd, '.planning', 'fixes', 'fix-001');
     const reviewDir = path.join(fixDir, 'artifacts', 'code-review');
     fs.mkdirSync(reviewDir, { recursive: true });
@@ -434,7 +464,7 @@ test('spec-fix complete-stage rejects invalid code-review outcomes', () => {
     fs.writeFileSync(path.join(fixDir, 'workflow.json'), JSON.stringify({
       id: 'fix-001',
       mux: 'tmux',
-      change_name: 'linear-spec-fix-runner',
+      change_name: 'callback-login-loop',
       current_stage: 'code-review-ready',
       review_attempt: 0,
       review_resolution: null,
@@ -447,6 +477,11 @@ test('spec-fix complete-stage rejects invalid code-review outcomes', () => {
       panes: [],
       agent_providers: {},
       provider_resolutions: {},
+      openspec: {
+        change_name: 'callback-login-loop',
+        state_root: '.planning/openspec',
+        change_dir: '.planning/openspec/changes/callback-login-loop',
+      },
       commits: {
         problem: 'abc1234',
         analysis: 'bcd2345',

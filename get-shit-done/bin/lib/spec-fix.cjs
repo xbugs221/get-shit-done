@@ -20,12 +20,15 @@ const {
   normalizeMd,
   planningRoot,
 } = require('./core.cjs');
+const {
+  archiveOpenSpecChange,
+  getOpenSpecChangeSnapshot,
+} = require('./openspec-runtime.cjs');
 
 const FIX_STAGE_SEQUENCE = ['analysis', 'proposal_review', 'coding', 'code_review', 'archive'];
 const FIX_AGENT_KEYS = ['analysis', 'proposal_review', 'coding', 'code_review', 'archive'];
 const FIX_PANE_ROLES = ['lazygit', 'analysis', 'proposal-review', 'coding', 'code-review', 'archive'];
 const SUPPORTED_MUX = new Set(['zellij', 'tmux']);
-const DEFAULT_CHANGE_NAME = 'linear-spec-fix-runner';
 
 /**
  * Ensure a directory exists before writing files into it.
@@ -194,6 +197,20 @@ function readJson(filePath, fallback) {
  */
 function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+}
+
+/**
+ * Persist the latest linked OpenSpec snapshot on the workflow document.
+ *
+ * @param {object} workflow - Workflow JSON object to enrich.
+ * @param {object} snapshot - Fresh OpenSpec snapshot from the runtime bridge.
+ */
+function syncWorkflowOpenSpec(workflow, snapshot) {
+  workflow.change_name = snapshot.change_name;
+  workflow.openspec = {
+    ...snapshot,
+    last_synced_at: new Date().toISOString(),
+  };
 }
 
 /**
@@ -895,7 +912,7 @@ function buildInitialWorkflow(options) {
     fixDir,
     problem,
     mux,
-    changeName,
+    openSpecSnapshot,
     agentProviders,
     providerResolutions,
   } = options;
@@ -905,7 +922,7 @@ function buildInitialWorkflow(options) {
 
   return {
     id: fixId,
-    change_name: changeName,
+    change_name: openSpecSnapshot.change_name,
     mux,
     current_stage: 'problem-captured',
     review_attempt: 0,
@@ -922,6 +939,10 @@ function buildInitialWorkflow(options) {
     mux_metadata: buildMuxMetadata(cwd, mux, fixId, panes),
     agent_providers: agentProviders,
     provider_resolutions: providerResolutions,
+    openspec: {
+      ...openSpecSnapshot,
+      last_synced_at: now,
+    },
     commits: {
       problem: null,
       analysis: null,
@@ -973,7 +994,7 @@ function findLatestFix(cwd) {
 function resolveFixWorkspace(cwd, fixId) {
   const target = fixId ? { id: fixId, dir: path.join(planningRoot(cwd), 'fixes', fixId) } : findLatestFix(cwd);
   if (!target) {
-    error('No spec-fix workspace found. Run `gsd-tools spec-fix start --mux <zellij|tmux> --problem "..."` first.');
+    error('No spec-fix workspace found. Run `gsd-tools spec-fix start --mux <zellij|tmux> --problem "..." --change <name>` first.');
   }
 
   const workflowPath = path.join(target.dir, 'workflow.json');
@@ -1144,16 +1165,27 @@ function commitFiles(cwd, files, message) {
 function cmdSpecFixStart(cwd, options, raw) {
   const mux = options.mux;
   const problem = String(options.problem || '').trim();
+  const changeName = String(options.change || '').trim();
   if (!SUPPORTED_MUX.has(mux)) {
-    error('Usage: gsd-tools spec-fix start --mux <zellij|tmux> --problem "..." [--change <name>]');
+    error('Usage: gsd-tools spec-fix start --mux <zellij|tmux> --problem "..." --change <name>');
   }
   if (!problem) {
-    error('Usage: gsd-tools spec-fix start --mux <zellij|tmux> --problem "..." [--change <name>]');
+    error('Usage: gsd-tools spec-fix start --mux <zellij|tmux> --problem "..." --change <name>');
+  }
+  if (!changeName) {
+    error('spec-fix start requires --change <name>');
   }
 
   const gitCheck = execGit(cwd, ['rev-parse', '--is-inside-work-tree']);
   if (gitCheck.exitCode !== 0) {
     error('spec-fix start requires a git repository');
+  }
+
+  let openSpecSnapshot;
+  try {
+    openSpecSnapshot = getOpenSpecChangeSnapshot(cwd, changeName);
+  } catch (err) {
+    error(`Failed to validate linked OpenSpec change "${changeName}": ${err.message}`);
   }
 
   const fixesRoot = path.join(planningRoot(cwd), 'fixes');
@@ -1174,7 +1206,7 @@ function cmdSpecFixStart(cwd, options, raw) {
     fixDir,
     problem,
     mux,
-    changeName: options.change || DEFAULT_CHANGE_NAME,
+    openSpecSnapshot,
     agentProviders,
     providerResolutions,
   });
@@ -1211,6 +1243,7 @@ function cmdSpecFixStart(cwd, options, raw) {
     current_stage: workflow.current_stage,
     review_attempt: workflow.review_attempt,
     change_name: workflow.change_name,
+    openspec: workflow.openspec,
     workspace: toRelativePosix(cwd, fixDir),
     problem_subject: workflow.problem_subject,
     agent_providers: workflow.agent_providers,
@@ -1267,6 +1300,15 @@ function cmdSpecFixCompleteStage(cwd, fixId, options, raw) {
 
   let commitHash;
   try {
+    if (stageArg === 'archive') {
+      if (!workflow.change_name) {
+        error('Archive stage requires a linked OpenSpec change in workflow.json');
+      }
+      const openSpecSnapshot = getOpenSpecChangeSnapshot(cwd, workflow.change_name);
+      syncWorkflowOpenSpec(workflow, openSpecSnapshot);
+      archiveOpenSpecChange(cwd, workflow.change_name);
+    }
+
     commitHash = commitFiles(cwd, filesToCommit, getStageCommitMessage(workflow.id, stageArg));
     workflow.commits[stageArg] = commitHash;
     advanceWorkflowState(workflow, stageArg, {
@@ -1298,7 +1340,29 @@ function cmdSpecFixCompleteStage(cwd, fixId, options, raw) {
  * @param {boolean} raw - Raw output mode.
  */
 function cmdSpecFixStatus(cwd, fixId, raw) {
-  const { fixDir, workflow } = resolveFixWorkspace(cwd, fixId);
+  const { fixDir, workflowPath, workflow } = resolveFixWorkspace(cwd, fixId);
+  let openSpecResult = workflow.openspec || null;
+
+  if (workflow.change_name) {
+    try {
+      const openSpecSnapshot = getOpenSpecChangeSnapshot(cwd, workflow.change_name);
+      syncWorkflowOpenSpec(workflow, openSpecSnapshot);
+      writeJson(workflowPath, workflow);
+      openSpecResult = workflow.openspec;
+    } catch (err) {
+      openSpecResult = {
+        ...(workflow.openspec || { change_name: workflow.change_name }),
+        error: err.message,
+      };
+    }
+  } else {
+    openSpecResult = {
+      ...(workflow.openspec || {}),
+      change_name: null,
+      error: 'No linked OpenSpec change recorded in workflow.json',
+    };
+  }
+
   const result = {
     id: workflow.id,
     change_name: workflow.change_name,
@@ -1314,6 +1378,7 @@ function cmdSpecFixStatus(cwd, fixId, raw) {
     agent_providers: workflow.agent_providers,
     provider_resolutions: workflow.provider_resolutions,
     commits: workflow.commits,
+    openspec: openSpecResult,
     workflow_path: toRelativePosix(cwd, path.join(fixDir, 'workflow.json')),
   };
   output(result, raw, workflow.current_stage);

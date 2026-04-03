@@ -3,5 +3,5 @@
 
 set -euo pipefail
 
-cd "$(dirname "$0")/../../.."
+cd "$(dirname "$0")/../../../../.."
 node --test tests/spec/linear-spec-fix-runner.test.cjs

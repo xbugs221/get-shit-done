@@ -556,7 +556,8 @@ pane 布局应当固定，不允许 agent 自行扩展：
 ```bash
 gsd-tools spec-fix start \
   --mux zellij \
-  --problem "用户原始问题原文"
+  --problem "用户原始问题原文" \
+  --change callback-login-loop
 ```
 
 slash command 如果存在，也应当只是这个命令的薄封装，而不是另一套独立实现。

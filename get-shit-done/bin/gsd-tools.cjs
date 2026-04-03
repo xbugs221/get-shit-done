@@ -136,7 +136,7 @@
  *   init progress                      All context for progress workflow
  *
  * Fixed Spec-Fix Runner:
- *   spec-fix start --mux M --problem P [--change C]
+ *   spec-fix start --mux M --problem P --change C
  *   spec-fix status [<id>]
  *   spec-fix complete-stage <id> --stage S [--review-outcome accepted|changes_requested]
  */

@@ -101,9 +101,15 @@ flowchart TD
 
 当问题不大，但又必须保留证据、提案审查、代码回看和归档记录时，走固定的 `spec-fix` runner。
 
+职责边界：
+- `.planning/fixes/<id>/` 保存这一次 fix run 的运行态、阶段工件和 mux 元数据
+- `.planning/openspec/` 保存对应 OpenSpec change 的 proposal、design、specs、tasks 与 archive 历史
+- `spec-fix` 负责推进 workflow，OpenSpec 负责声明态工件与 change 生命周期
+- archive 阶段只有在关联 OpenSpec change 先成功归档后才会把 workflow 标记为 `archived`
+
 ```mermaid
 flowchart TD
-    Start([有个小问题但不能直接改]) --> Capture[spec-fix start]
+    Start([有个小问题但不能直接改]) --> Capture[spec-fix start --change]
     Capture --> Analysis[analysis]
     Analysis --> Proposal[proposal-review]
     Proposal --> Coding[coding]
